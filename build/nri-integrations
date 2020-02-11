@@ -1,0 +1,25 @@
+#name,packaging,version,arch(optional, amd64 is the default)
+nri-docker,base,1.1.1
+nri-flex,base,0.9.3
+nri-apache,bundle,1.5.0
+nri-cassandra,bundle,2.4.0
+nri-consul,bundle,2.1.0
+nri-couchbase,bundle,2.3.5
+nri-elasticsearch,bundle,4.2.0
+nri-f5,bundle,2.1.0
+nri-haproxy,bundle,2.1.0
+nri-jmx,bundle,2.4.3
+nri-kafka,bundle,2.9.1
+nri-memcached,bundle,2.1.0
+nri-mongodb,bundle,2.4.0
+nri-mysql,bundle,1.4.0
+nri-nagios,bundle,2.6.0
+nri-nginx,bundle,2.0.0
+nri-oracledb,bundle,2.2.0
+nri-postgresql,bundle,2.3.1
+nri-rabbitmq,bundle,2.2.1
+nri-redis,bundle,1.4.0
+nri-snmp,bundle,1.1.0
+nri-varnish,bundle,2.1.0
+nrjmx,bundle,1.5.2,noarch
+nri-discovery-kubernetes,bundle,1.0.0,Linux_x86_64
