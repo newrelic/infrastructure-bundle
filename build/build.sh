@@ -14,6 +14,12 @@ if [ -z "$AGENT_VERSION" ]; then
 	exit 1
 fi
 
+# Ensure JRE_VERSION is set & non-empty
+if [ -z "$JRE_VERSION" ]; then
+	echo "JRE_VERSION is not set or empty"
+	exit 1
+fi
+
 # Ensure IMAGE_TAG is set & non-empty
 if [ -z "$IMAGE_TAG" ]; then
 	echo "IMAGE_TAG is not set or empty"
@@ -36,5 +42,6 @@ docker build \
 	--no-cache \
 	-t $IMAGE_TAG \
 	--build-arg agent_version=$AGENT_VERSION \
+	--build-arg jre_version=$JRE_VERSION \
 	-f ${WORKSPACE}/Dockerfile \
 	.

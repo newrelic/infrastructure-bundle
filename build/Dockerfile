@@ -1,4 +1,4 @@
-ARG agent_version=latest
+ARG agent_version
 ARG base_image=newrelic/infrastructure:${agent_version}
 
 # ephemeral building container
@@ -16,9 +16,11 @@ RUN chmod +x /tmp/install.sh \
 
 # infrastructure-bundle image
 FROM $base_image AS bundle
+ARG jre_version
 
 # required for nri-jmx
-RUN apk add --no-cache openjdk8-jre=8.242.08-r0
+RUN apk add --no-cache openjdk8-jre=${jre_version}
+
 # integrations
 COPY --from=builder /var/db/newrelic-infra /var/db/newrelic-infra/
 COPY --from=builder /etc/nri-* /etc/

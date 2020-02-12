@@ -4,6 +4,7 @@
 VERSION           ?= dev
 AGENT_VER         ?= latest
 # usually fixed
+JRE_VER           ?= 8.242.08-r0
 TAG               ?= newrelic/infrastructure-bundle:${VERSION}
 WORKSPACE_DIR     ?= ./workspace
 INTEGRATIONS_FILE ?= nri-integrations
@@ -20,8 +21,9 @@ build : workspace
 build : prepare-integrations
 build : prepare-labels
 build : export AGENT_VERSION = ${AGENT_VER}
-build : export IMAGE_TAG = ${TAG}
-build : export WORKSPACE = ${WORKSPACE_DIR}
+build : export JRE_VERSION   = ${JRE_VER}
+build : export IMAGE_TAG     = ${TAG}
+build : export WORKSPACE     = ${WORKSPACE_DIR}
 build :
 	@(./build.sh)
 
