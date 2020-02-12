@@ -1,0 +1,13 @@
+#language: minimal
+language: generic # bundles node required for Snyk
+
+services:
+  - docker
+
+deploy:
+  provider: releases
+  # travis env
+  script: (cd build; make) && docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD && (cd ci; make release)
+  on:
+    tags: true
+    branch: master
