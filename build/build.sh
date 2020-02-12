@@ -26,9 +26,15 @@ if [ -z "$WORKSPACE" ]; then
 	exit 1
 fi
 
+# Ensure Dockerfile with labels was generated
+if [ -z "$WORKSPACE/Dockerfile" ]; then
+	echo "WORKSPACE/Dockerfile was not generated"
+	exit 1
+fi
+
 docker build \
 	--no-cache \
 	-t $IMAGE_TAG \
 	--build-arg agent_version=$AGENT_VERSION \
-	-f Dockerfile \
+	-f ${WORKSPACE}/Dockerfile \
 	.
