@@ -1,13 +1,22 @@
-#language: minimal
-language: generic # bundles node required for Snyk
+language: minimal
 
 services:
-  - docker
+- docker
+
+script:
+- "(cd build; make)"
 
 deploy:
-  provider: releases
-  # travis env
-  script: (cd build; make) && docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD && (cd ci; make release)
+  provider: script
+  script: "(cd build; make) && docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+    && (cd ci; make release)"
   on:
     tags: true
     branch: master
+
+env:
+  global:
+  # DOCKER_USERNAME
+  - secure: dj/KLWE7A20mrCcXTu5eeZIfGC+BfnEpdqqHe0lcSXRTReTgZ3dj9GQ6EmK42zrouzej131mvAmvHM3xfyFAviCsfwGgAeTpCGmK8m8fs2txAsrahWxlvXW0pjCxoynnwew1+YqjeEOd3iGPnSkmncehU6zmVFypGroo+W6KQcOQMPj2b0Vpdgruh7zX8gS2DCdWdZsWJIZdIErva638F//5TwbhKdSaK7MnOwZMBVidmXaw6+bU+zp2ZbyxEnGv+9Jxbni1Nu0TM1II1UqhY3Xv/hVYBEWa0r5U1x/lLUOszG6wfzJ5EXKd1kF3NPZ2IMAw+f+++Qxq3lO9NRZOmDt+SGTnm7IBHMlFvcDlYa0qa1IeCmJQJYutqBUYl/EO4viaNSL7SWpaf8spGzAHWmdrhHLHLuuO4MT526MJF4C7UVNLiAvlfYEjMrdBepysojaFZgZolb5IRMsdEcY7w/uDE1s9cTlckGxLw9Wf9KNh+Wy1l90kRwrpUsDSikpGqqGbrHLyBVQQ59L3NB5SVPiXXUSLAjPS2H2BnrABwMM9vksqFuw9K7c8YoOBBlotD07fIxSc7s7oVUFmiGdUkvvFSo+29utPHCSVCaePBwgyafkbaRLlOfQwpXGoK5bg2wfoLJwtSxms0xoBFxlOMaRTt+lz+41PV/Oe4aaIgWc=
+  # DOCKER_PASSWORD
+  - secure: W9vPDPHxYHnqY4PeSv4WhuuvpeFeKrvIyvS9hv0fCq6EKPSZEsyoeC5fhR84uQ+O7rw2yLUGV6jWYFDYf/uA3nOdIkUYRRS1oSERq4WEik2sxRtmpS/RWiK/PkNrt8GSpe6LTajqB1cMCuO+vLIf/cBY5E1kUHd6KsLiRqZSe2g7T8irwAyljBMlMn11SHswaMCJU9L+jfzZcHpbB9HjlsjRQKw2oOBFnxOvfzfsWoi3P8THmIV36FCMAqIEI1J2/uQdwW6EkBmigzrZz67YN8m8UxVJ7L+YvT6V+zgOKnPmM5lZSco5BiqS6E9pOomFDQ+lBmOylzVVf59mGczjKS0VbkIae17NFoE3vThDnjueS+ArmuYGNdtCTtGAbJ+yJB150CJfztzJhKlBaeDPe9ueWn3C3cZFlLMqL+UMbAMc/5aUhQRNp0gfwSvayBWe8zSgz6tvi4oNDxdDCUB1EzRKAZDZLBJHUJSuli9Ctfd2OT5sPy7DuDYyh/VKlwkQr8OGTqYhj/vzgBhu5le7lNZmv+/R6efMz6t5yXqdcPQWwfL1Ksr7wgTi06iw2YHTcxwmnHRb8Q9hywTgW4fTVUX3qk6p+1JIJrz3k9ggXMxl5gOXlHmcwml6XBFFkcdTMDhG/xUTM3IHCy7sMJKV1E4xLfpQYZsSkKXR8Llpp7I=
