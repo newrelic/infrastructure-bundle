@@ -1,5 +1,6 @@
 #name,version,arch(optional, amd64 is the default)
 newrelic-infra,1.9.7
+jre,8.242.08-r0
 nri-apache,1.5.0
 nri-cassandra,2.4.0
 nri-consul,2.1.0

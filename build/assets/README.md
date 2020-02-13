@@ -7,9 +7,3 @@ This Docker image contains the [New Relic Infrastructure **Bundle**](https://new
 ### Pulling
 
 `docker pull newrelic/infrastructure-bundle:latest`
-
-
-### Setup
-
-TODO
-
