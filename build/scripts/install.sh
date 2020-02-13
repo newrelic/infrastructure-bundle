@@ -2,39 +2,47 @@
 
 set -euo pipefail
 
-input="/etc/nri-integrations"
-while IFS= read -r binary
-do
-    int_url="https://download.newrelic.com/infrastructure_agent/binaries/linux/amd64/${binary}"
-    echo "Getting ${int_url}"
-    curl --location --fail --silent "${int_url}" --output "/tmp/${binary}"
-    tar -xzf "/tmp/${binary}"
-done < $input
-# cleanup
-rm -rf /etc/newrelic-infra/integrations.d/*.sample
-# windows definition files
-rm -rf /var/db/newrelic-infra/newrelic-integrations/*-win-*.yml
-rm -rf /tmp/**
+ws="/tmp/workspace"
+mkdir -p ${ws}
+cd ${ws}
 
-input="/etc/nri-noarch"
-while IFS= read -r binary
+# File contains file names
+while IFS= read -r file
 do
-    int_url="https://download.newrelic.com/infrastructure_agent/binaries/linux/noarch/${binary}"
-    echo "Getting ${int_url}"
-    curl --location --fail --silent "${int_url}" --output "/tmp/${binary}"
-    tar -xzf "/tmp/${binary}"
-done < $input
-# cleanup
-rm -rf /etc/newrelic-infra/integrations.d/*.sample
-rm -rf /tmp/**
+    url="https://download.newrelic.com/infrastructure_agent/binaries/linux/amd64/${file}"
+    echo "Getting integration ${url}"
+    curl --location --fail --silent "${url}" --output "${ws}/${file}"
+    tar -xzf "${ws}/${file}"
+done < "/etc/nri-integrations"
 
-input="/etc/nri-discoveries"
-while IFS= read -r discovery
+# File contains file names
+while IFS= read -r file
 do
-    echo "Getting ${discovery}"
-    curl --location --fail --silent "${discovery}" --output "/tmp/dicovery.tar.gz"
-    mkdir -p /tmp/binary
-    tar -C /tmp/binary -xzf "/tmp/dicovery.tar.gz"
-    cp /tmp/binary/nri-* /var/db/newrelic-infra/
-    rm -rf /tmp/binary
-done < $input
+    url="https://download.newrelic.com/infrastructure_agent/binaries/linux/noarch/${file}"
+    echo "Getting noarch ${url}"
+    curl --location --fail --silent "${url}" --output "${ws}/${file}"
+    mkdir -p ${ws}/aux
+    tar -xzf "${ws}/${file}" -C ${ws}/aux
+    cp -r ${ws}/aux/* /
+    rm -rf ${ws}/aux
+done < "/etc/nri-noarch"
+
+# File contains URLs
+while IFS= read -r url
+do
+    echo "Getting discovery ${url}"
+    curl --location --fail --silent "${url}" --output "${ws}/dicovery.tar.gz"
+    mkdir -p ${ws}/aux
+    tar -xzf "${ws}/dicovery.tar.gz" -C ${ws}/aux
+    cp -r ${ws}/aux/* /var/db/newrelic-infra/
+    rm -rf ${ws}/aux
+done < "/etc/nri-discoveries"
+
+# cleanup tars, config sample files, windows definition files
+rm -rf ${ws}/*.tar.gz
+rm -rf ${ws}/etc/newrelic-infra/integrations.d/*.sample
+rm -rf ${ws}/var/db/newrelic-infra/newrelic-integrations/*-win-*.yml
+
+# copy to proper location
+# this could overwrite sys files in case of upstream bug, but just on the intermediate builder
+cp -r  ${ws}/* /

@@ -15,17 +15,17 @@ clean :
 	@(rm -rf ${WORKSPACE_DIR})
 
 .PHONY : build
-build : workspace
+build : prepare-workspace
 build : prepare-integrations
 build : prepare-labels
 build : export IMAGE_TAG     = ${TAG}
 build : export WORKSPACE     = ${WORKSPACE_DIR}
 build : export VERSIONS_FILE = ${VERSIONS_FILE_}
 build :
-	@(./build.sh)
+	@(./scripts/build.sh)
 
-.PHONY : workspace
-workspace :
+.PHONY : prepare-workspace
+prepare-workspace :
 	@(mkdir -p ${WORKSPACE_DIR})
 
 .PHONY : prepare-integrations
@@ -59,5 +59,6 @@ prepare-labels :
 # Helpers
 
 .PHONY : lint
+lint :
 	@(docker run --rm -i hadolint/hadolint < Dockerfile)
 

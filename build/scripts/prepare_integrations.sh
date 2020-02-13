@@ -13,4 +13,4 @@ if [ ! -d "$WORKSPACE" ]; then
 fi
 
 
-awk -F, '$1 ~ /^nri-$/ {printf "%s_linux_%s_amd64.tar.gz\n",$1,$2;}' ${VERSIONS_FILE}  > ${WORKSPACE}/nri-integrations
+awk -F, '{if (NF==2 && $1 ~ /^nri-.*/) {printf "%s_linux_%s_amd64.tar.gz\n",$1,$2;}}' ${VERSIONS_FILE}  > ${WORKSPACE}/nri-integrations
