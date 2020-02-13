@@ -8,8 +8,8 @@ script:
 
 deploy:
   provider: script
-  script: "(cd build; make) && docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
-    && (cd ci; make release)"
+  script: '[ -z "$TRAVIS_TAG" ] && (cd build; make VERSION="$TRAVIS_TAG" )
+    && docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD && (cd ci; make release)'
   on:
     tags: true
     branch: master

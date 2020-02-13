@@ -2,9 +2,7 @@
 
 # meant to be replaced by CI
 VERSION           ?= dev
-AGENT_VER         ?= latest
 # usually fixed
-JRE_VER           ?= 8.242.08-r0
 TAG               ?= newrelic/infrastructure-bundle:${VERSION}
 WORKSPACE_DIR     ?= ./workspace
 VERSIONS_FILE_    := versions
@@ -20,10 +18,9 @@ clean :
 build : workspace
 build : prepare-integrations
 build : prepare-labels
-build : export AGENT_VERSION = ${AGENT_VER}
-build : export JRE_VERSION   = ${JRE_VER}
 build : export IMAGE_TAG     = ${TAG}
 build : export WORKSPACE     = ${WORKSPACE_DIR}
+build : export VERSIONS_FILE = ${VERSIONS_FILE_}
 build :
 	@(./build.sh)
 
