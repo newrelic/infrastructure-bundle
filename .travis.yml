@@ -3,13 +3,11 @@ language: minimal
 services:
 - docker
 
-script:
-- "(cd build; make)"
+script: "(cd build; make)"
 
 deploy:
   provider: script
-  script: '[ -z "$TRAVIS_TAG" ] && (cd build; make VERSION="$TRAVIS_TAG" )
-    && docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD && (cd ci; make release)'
+  script: "(cd ci; ./release.sh)"
   on:
     tags: true
     branch: master
