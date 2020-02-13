@@ -19,6 +19,8 @@ Run the following command:
 
 ## Release
 
-`ci/release.sh` releases "newrelic/infrastructure-bundle" Docker images triggered *tags* on the *master* branch. Therefore "GH Release" is aimed to be used to publish into Docker-Hub.
+`ci/release.sh` publishes "newrelic/infrastructure-bundle" Docker images triggered *tags* on the *master* branch.
+
+Therefore "GH Release" is used to trigger TravisCI to deploy into Docker-Hub.
 
 https://hub.docker.com/repository/docker/newrelic/infrastructure-bundle/tags
