@@ -1,6 +1,6 @@
 # New Relic Infrastructure
 
-This Docker image contains the [New Relic Infrastructure **Bundle**](https://newrelic.com/infrastructure-bundle). This image contains usual NR Infrastructure agent + all available on-host integrations.
+This Docker image contains the [New Relic Infrastructure **Bundle**](https://newrelic.com/infrastructure). This image contains usual NR Infrastructure agent + all available on-host integrations.
 
 ## Usage
 
