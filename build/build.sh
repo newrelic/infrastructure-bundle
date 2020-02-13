@@ -9,12 +9,14 @@ set -e
 #      - WORKSPACE: Local workspace folder for the builder to fetch data from.
 
 # Ensure AGENT_VERSION is set & non-empty
+AGENT_VERSION=$(awk -F, '{if ($1 ~ /^newrelic-infra$/) {print $2}}' ${VERSIONS_FILE})
 if [ -z "$AGENT_VERSION" ]; then
 	echo "AGENT_VERSION is not set or empty"
 	exit 1
 fi
 
 # Ensure JRE_VERSION is set & non-empty
+JRE_VERSION=$(awk -F, '{if ($1 ~ /^jre$/) {print $2}}' ${VERSIONS_FILE})
 if [ -z "$JRE_VERSION" ]; then
 	echo "JRE_VERSION is not set or empty"
 	exit 1
