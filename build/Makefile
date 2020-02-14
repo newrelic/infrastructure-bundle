@@ -53,7 +53,7 @@ prepare-integrations/nri-discoveries :
 
 .PHONY : prepare-labels
 prepare-labels :
-	@(awk -F, '{if (NF==2 && $$1 ~ /^nri-.*/) {printf "com.newrelic.%s.version=%s ",$$1,$$2}}' ${VERSIONS_FILE_} | xargs -I{} sed "s/\# LABELS_PLACEHOLDER/LABEL {}/g" ./Dockerfile > ${WORKSPACE_DIR}/Dockerfile)
+	@(awk -F, '{if ($$1 ~ /^nr.*/) {printf "com.newrelic.%s.version=%s ",$$1,$$2}}' ${VERSIONS_FILE_} | xargs -I{} sed "s/\# LABELS_PLACEHOLDER/LABEL {}/g" ./Dockerfile > ${WORKSPACE_DIR}/Dockerfile)
 
 
 # Helpers
