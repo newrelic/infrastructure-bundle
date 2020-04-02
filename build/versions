@@ -14,7 +14,7 @@ nri-memcached,2.1.0
 nri-mongodb,2.5.0
 nri-mysql,1.4.0
 nri-nagios,2.6.0
-nri-nginx,2.0.0
+nri-nginx,2.0.1
 nri-oracledb,2.3.1
 nri-postgresql,2.3.1
 nri-rabbitmq,2.2.1
