@@ -26,5 +26,6 @@ COPY --from=builder /var/db/newrelic-infra /var/db/newrelic-infra
 COPY --from=builder /usr/bin/nrjmx* /usr/bin/
 COPY --from=builder /usr/bin/jmxterm.jar /usr/bin/
 
+ENV NRIA_PASSTHROUGH_ENVIRONMENT=ECS_CONTAINER_METADATA_URI,FARGATE
 
 # LABELS_PLACEHOLDER
