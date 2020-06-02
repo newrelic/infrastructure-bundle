@@ -19,7 +19,7 @@ nri-oracledb,2.3.1
 nri-postgresql,2.3.2
 nri-rabbitmq,2.2.2
 nri-redis,1.4.0
-nri-snmp,1.1.3
+nri-snmp,1.2.0
 nri-varnish,2.1.0
 nrjmx,1.5.2,noarch
 nri-discovery-kubernetes,1.1.0,Linux_x86_64
