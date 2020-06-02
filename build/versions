@@ -22,5 +22,5 @@ nri-redis,1.4.0
 nri-snmp,1.2.0
 nri-varnish,2.1.0
 nrjmx,1.5.2,noarch
-nri-discovery-kubernetes,1.1.0,Linux_x86_64
+nri-discovery-kubernetes,1.2.0,Linux_x86_64
 nri-ecs,0.2.1
