@@ -1,0 +1,25 @@
+---
+name: Container build
+on: [push, pull_request]
+
+jobs:
+  build:
+    name: Container build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Build
+        run: make -C ./build/
+      - name: Run Snyk via Docker
+        run: docker run -t -e "SNYK_TOKEN=${SNYK_TOKEN}" -v ${PWD}/workspace:/project -v "/var/run/docker.sock:/var/run/docker.sock" snyk/snyk-cli:docker test --docker "newrelic/infrastructure-bundle:dev" --severity-threshold=high --org=ohai  --project-name="newrelic/infrastructure-bundle"
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      # Fails without an error so looking into this to replace above step
+      - name: Run Snyk to check Docker image for vulnerabilities
+        continue-on-error: true
+        uses: snyk/actions/docker@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          image: newrelic/infrastructure-bundle:dev
+          args: --severity-threshold=high --file=build/workspace/Dockerfile --org=ohai --project-name='newrelic/infrastructure-bundle'
