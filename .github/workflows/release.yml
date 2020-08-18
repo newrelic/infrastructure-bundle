@@ -1,0 +1,27 @@
+---
+name: Container release
+on:
+  release:
+    types:
+      - published
+
+jobs:
+  build:
+    name: Container build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Publish
+        run: ./ci/release.sh
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+      - name: Run Snyk monitor for latest image
+        run: docker run -t -e "SNYK_TOKEN=${SNYK_TOKEN}" -v ${PWD}/workspace:/project -v "/var/run/docker.sock:/var/run/docker.sock" snyk/snyk-cli:docker monitor --docker "newrelic/infrastructure-bundle:latest" --severity-threshold=high --org=ohai  --project-name="newrelic/infrastructure-bundle"
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      - name: Run Snyk monitor for tagged image
+        run: docker run -t -e "SNYK_TOKEN=${SNYK_TOKEN}" -v ${PWD}/workspace:/project -v "/var/run/docker.sock:/var/run/docker.sock" snyk/snyk-cli:docker monitor --docker "newrelic/infrastructure-bundle:l${RELEASE_TAG}" --severity-threshold=high --org=ohai  --project-name="newrelic/infrastructure-bundle"
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+          RELEASE_TAG: ${{ github.ref }}
