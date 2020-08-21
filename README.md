@@ -4,6 +4,10 @@
 
 Build tooling to generate and release New Relic's containerised **bundle** for infrastructure monitoring, including the on-host agent, service integrations, and discovery tools.
 
+## Installation and usage
+
+For install instructions, see [Docker container for infrastructure monitoring](https://docs.newrelic.com/docs/infrastructure/install-infrastructure-agent/linux-installation/docker-container-infrastructure-monitoring)
+
 ## Configuration
 
 New Relic will keep latest stable agent and integrations versions in the [`versions` file](https://github.com/newrelic/infrastructure-bundle/blob/master/build/versions).
