@@ -6,7 +6,7 @@ Build tooling to generate and release New Relic's containerised **bundle** for i
 
 ## Installation and usage
 
-For install instructions, see [Docker container for infrastructure monitoring](https://docs.newrelic.com/docs/infrastructure/install-infrastructure-agent/linux-installation/docker-container-infrastructure-monitoring)
+For install instructions, see [Docker container for infrastructure monitoring](https://docs.newrelic.com/docs/infrastructure/install-infrastructure-agent/linux-installation/docker-container-infrastructure-monitoring).
 
 ## Configuration
 
