@@ -1,10 +1,12 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 set -euo pipefail
 
-echo "Building version $RELEASE_TAG ..."
+TAG=$(echo ${RELEASE_TAG} | sed 's/refs[/]tags[/]//g')
 
-(make -C ./build/ VERSION="$RELEASE_TAG" )
+echo "Building version $TAG ..."
+
+(make -C ./build/ VERSION="$TAG" )
 
 echo "Docker logging in ..."
 
@@ -13,6 +15,6 @@ docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
 echo "Releasing ..."
 
 IMAGE="newrelic/infrastructure-bundle"
-docker tag ${IMAGE}:${RELEASE_TAG} ${IMAGE}:latest
-docker push ${IMAGE}:${RELEASE_TAG}
+docker tag ${IMAGE}:${TAG} ${IMAGE}:latest
+docker push ${IMAGE}:${TAG}
 docker push ${IMAGE}:latest
