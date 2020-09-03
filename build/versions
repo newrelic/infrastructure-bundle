@@ -17,7 +17,7 @@ nri-nagios,2.6.0
 nri-nginx,2.0.1
 nri-oracledb,2.5.1
 nri-postgresql,2.4.2
-nri-rabbitmq,2.2.2
+nri-rabbitmq,2.2.3
 nri-redis,1.4.0
 nri-snmp,1.2.0
 nri-varnish,2.1.0
