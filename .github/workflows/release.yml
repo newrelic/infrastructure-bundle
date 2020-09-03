@@ -16,6 +16,7 @@ jobs:
         env:
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
           DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+          RELEASE_TAG: ${{ github.ref }}
       - name: Run Snyk monitor for latest image
         run: docker run -t -e "SNYK_TOKEN=${SNYK_TOKEN}" -v ${PWD}/workspace:/project -v "/var/run/docker.sock:/var/run/docker.sock" snyk/snyk-cli:docker monitor --docker "newrelic/infrastructure-bundle:latest" --severity-threshold=high --org=ohai  --project-name="newrelic/infrastructure-bundle"
         env:
