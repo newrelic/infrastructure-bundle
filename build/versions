@@ -4,7 +4,7 @@ jre,8.252.09-r0
 nri-apache,1.5.0
 nri-cassandra,2.4.2
 nri-consul,2.1.1
-nri-couchbase,2.3.6
+nri-couchbase,2.3.7
 nri-elasticsearch,4.2.0
 nri-f5,2.1.0
 nri-haproxy,2.1.0
