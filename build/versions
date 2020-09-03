@@ -10,7 +10,7 @@ nri-f5,2.1.0
 nri-haproxy,2.1.0
 nri-jmx,2.4.4
 nri-kafka,2.13.4
-nri-memcached,2.1.0
+nri-memcached,2.1.2
 nri-mongodb,2.5.0
 nri-mysql,1.4.0
 nri-nagios,2.6.0
