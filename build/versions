@@ -24,3 +24,4 @@ nri-varnish,2.1.0
 nrjmx,1.5.2,noarch
 nri-discovery-kubernetes,1.2.0,Linux_x86_64
 nri-ecs,1.1.0
+nri-prometheus,2.2.0
