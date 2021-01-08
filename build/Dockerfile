@@ -19,7 +19,7 @@ FROM $base_image AS bundle
 ARG jre_version
 
 # required for nri-jmx
-RUN apk add --no-cache openjdk11-jre-headless=${jre_version}
+RUN apk add --no-cache openjdk8-jre=${jre_version}
 
 # integrations
 COPY --from=builder /var/db/newrelic-infra /var/db/newrelic-infra
