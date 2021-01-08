@@ -6,7 +6,7 @@ Build tooling to generate and release New Relic's containerised **bundle** for i
 
 ## Requirements
 
-Shell scripts are aimed to run on Linux within.
+Shell scripts are aimed to run on Linux.
 
 ## Installation and usage
 
