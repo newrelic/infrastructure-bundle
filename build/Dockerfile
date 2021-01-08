@@ -23,10 +23,8 @@ RUN apk add --no-cache openjdk8-jre=${jre_version}
 
 # integrations
 COPY --from=builder /var/db/newrelic-infra /var/db/newrelic-infra
-COPY --from=builder /usr/lib/nrjmx /usr/lib/nrjmx
-COPY --from=builder /usr/share/doc/nrjmx /usr/share/doc/nrjmx
-COPY --from=builder /usr/bin/nrjmx /usr/bin/nrjmx
-COPY --from=builder /usr/bin/jmxterm /usr/bin/jmxterm
+COPY --from=builder /usr/bin/nrjmx* /usr/bin/
+COPY --from=builder /usr/bin/jmxterm.jar /usr/bin/
 
 ENV NRIA_PASSTHROUGH_ENVIRONMENT=ECS_CONTAINER_METADATA_URI,FARGATE
 
