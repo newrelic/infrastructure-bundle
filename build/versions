@@ -8,7 +8,7 @@ nri-couchbase,2.3.7
 nri-elasticsearch,4.3.3
 nri-f5,2.2.0
 nri-haproxy,2.1.1
-nri-jmx,2.4.4
+nri-jmx,2.4.5
 nri-kafka,2.13.8
 nri-memcached,2.1.2
 nri-mongodb,2.5.0
