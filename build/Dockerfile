@@ -1,31 +1,20 @@
-ARG agent_version
+ARG agent_version=latest
 ARG base_image=newrelic/infrastructure:${agent_version}
 
 # ephemeral building container
-FROM $base_image AS builder
+FROM $base_image
 
-RUN apk add --no-cache curl
-
-COPY workspace/nri-integrations /etc/
-COPY workspace/nri-discoveries /etc/
-COPY workspace/nri-noarch /etc/
-COPY scripts/install.sh /tmp/
-
-RUN chmod +x /tmp/install.sh \
-    && ./tmp/install.sh
-
-# infrastructure-bundle image
-FROM $base_image AS bundle
+# Set by recent docker versions automatically, or by older ones when defining DOCKER_BUILDKIT=1
+ARG TARGETOS
+ARG TARGETARCH
 ARG jre_version
 
+# Get security updates
+RUN apk --no-cache upgrade
 # required for nri-jmx
-RUN apk add --no-cache openjdk8-jre=${jre_version}
+RUN if [ -n "${jre_version}" ]; then apk add --no-cache openjdk8-jre=${jre_version}; else apk add --no-cache openjdk8-jre; fi
 
 # integrations
-COPY --from=builder /var/db/newrelic-infra /var/db/newrelic-infra
-COPY --from=builder /usr/bin/nrjmx* /usr/bin/
-COPY --from=builder /usr/bin/jmxterm.jar /usr/bin/
+COPY out/${TARGETARCH} /
 
 ENV NRIA_PASSTHROUGH_ENVIRONMENT=ECS_CONTAINER_METADATA_URI,FARGATE
-
-# LABELS_PLACEHOLDER
