@@ -1,0 +1,14 @@
+# Master URL template to get .tar.gz files from upstream repo
+url: https://download.newrelic.com/infrastructure_agent/binaries/linux/{{.Arch}}/{{.Name}}_linux_{{.Version}}_{{.Arch}}.tar.gz
+
+# List of integrations to download
+integrations:
+#  - name: nri-apache
+#    version: 1.5.0
+#    arch: null # Defaults to [ amd64, arm64, arm ]
+#    url: "" # Defaults to global `url`
+#    archReplacements: # replace keys with values for {{.Arch}}
+#      amd64: x86_64
+  - name: nri-apache
+    version: 1.5.0
+    arch: [ amd64 ]
