@@ -1,6 +1,11 @@
 ---
 name: Container build
-on: [push, pull_request]
+on:
+  push:
+    branches:
+      - master
+      - main
+  pull_request:
 
 jobs:
   build:
@@ -8,8 +13,39 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Build
-        run: make -C ./build/
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Get downloader from cache
+        id: cache
+        uses: actions/cache@v2
+        with:
+          path: build/downloader
+          key: ${{ runner.os }}-${{ hashFiles('build/downloader.go') }}
+      - uses: actions/setup-go@v2
+        if: ${{ ! steps.cache.outputs.cache-hit }}
+        with:
+          go-version: '1.16'
+      - name: Build downloader
+        if: ${{ ! steps.cache.outputs.cache-hit }}
+        working-directory: build
+        env:
+          GO111MODULE: auto # go get and go run using gopath
+          CGO_ENABLED: '0'
+        run: |
+          go get gopkg.in/yaml.v3
+          go build -o downloader downloader.go
+
+      - name: Run downloader
+        working-directory: build
+        run: ./downloader
+
+      - name: Build docker image
+        working-directory: build
+        run: docker buildx build --platform=linux/amd64 . -t newrelic/infrastructure-bundle:dev --load
+
       - name: Run Snyk via Docker
         run: docker run -t -e "SNYK_TOKEN=${SNYK_TOKEN}" -v ${PWD}/workspace:/project -v "/var/run/docker.sock:/var/run/docker.sock" snyk/snyk-cli:docker test --docker "newrelic/infrastructure-bundle:dev" --severity-threshold=high --org=ohai  --project-name="newrelic/infrastructure-bundle"
         env:

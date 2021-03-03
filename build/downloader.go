@@ -80,8 +80,8 @@ func main() {
 		}()
 	}
 
-	for _, i := range conf.Integrations {
-		ichan <- &i
+	for i := range conf.Integrations {
+		ichan <- &conf.Integrations[i]
 	}
 	close(ichan)
 	wg.Wait()
@@ -91,7 +91,7 @@ func main() {
 	if err := prepareTree(*outdir); err != nil {
 		log.Fatal(err)
 	}
-	log.Printf("All done, integrations installed to %s", *outdir)
+	log.Printf("All done, integrations installed to '%s'", *outdir)
 }
 
 // fetch Expands the URL template for integrations and invokes downloadAndExtract
