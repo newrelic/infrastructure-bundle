@@ -212,10 +212,11 @@ func prepareTree(outdir string) error {
 			return os.Remove(path)
 		}
 
-		if strings.Contains(info.Name(), "-win-") {
-			return os.Remove(path)
+		for _, pattern := range []string{"-win-", "README", "CHANGELOG", "LICENSE"} {
+			if strings.Contains(info.Name(), pattern) {
+				return os.Remove(path)
+			}
 		}
-
 		return nil
 	})
 }
