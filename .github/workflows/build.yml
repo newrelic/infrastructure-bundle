@@ -18,9 +18,6 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
 
-      - name: Load environment from buildsettings.env
-        run: grep -ve '^#' build/buildsettings.env >> $GITHUB_ENV
-
       # This block attempts to get the integrations from the GHA repo cache. This might help speeding up builds
       - name: Get integrations from cache
         id: cache
@@ -49,8 +46,10 @@ jobs:
         env:
           DOCKER_PLATFORMS: linux/amd64 # TODO: REMOVE THIS, FOR TESTING ONLY
         run: |
-          docker buildx build . --platform=${DOCKER_PLATFORMS}
-          docker buildx build . --platform=linux/amd64 --load -t "${DOCKER_IMAGE}":dev
+          # Test build, but not load, for all archs
+          ./docker-build.sh .
+          # Build and load for amd64 only (for snyk)
+          DOCKER_PLATFORMS=linux/amd64 ./docker-build.sh . --load
 
       - name: Run Snyk via Docker
         run: docker run -t -e "SNYK_TOKEN=${SNYK_TOKEN}" -v ${PWD}/workspace:/project -v "/var/run/docker.sock:/var/run/docker.sock" snyk/snyk-cli:docker test --docker "newrelic/infrastructure-bundle:dev" --severity-threshold=high --org=ohai  --project-name="newrelic/infrastructure-bundle"
