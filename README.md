@@ -14,25 +14,50 @@ For install instructions, see [Docker container for infrastructure monitoring](h
 
 ## Configuration
 
-New Relic will keep latest stable agent and integrations versions in the [`versions` file](https://github.com/newrelic/infrastructure-bundle/blob/master/build/versions).
+New Relic will keep latest stable agent and integrations versions in the [`bundle.yml` file](https://github.com/newrelic/infrastructure-bundle/blob/master/build/bundle.yml).
+
+Versions of the base image, jdk, and other dependencies can be found in the [`docker-build.sh`](https://github.com/newrelic/infrastructure-bundle/blob/master/build/docker-build.sh) wrapper
 
 > You can edit the file and set your desired versions, at your own risk.
 
 ## Building
 
-Run the following command:
+Building multiarch images requires a working setup of [docker buildx](https://docs.docker.com/buildx/working-with-buildx/).
+A working installation of Go is also needed for running the downloader program.
 
-   ```bash
-   (cd build && make VERSION="<bundle version>")
-   ```
+```bash
+cd build
+DOCKER_PLATFORMS=linux/amd64 ./run-ci-locally.sh
+```
+
+### Without `docker buildx`
+
+A single-arch image can also be built without `buildx`. However, setting `DOCKER_BUILDKIT=1` might be required for older versions of docker, otherwise the `TARGETOS` and `TARGETARCH` variables won't be populated and docker will fail to copy the integrations from the host.
+
+```bash
+cd build
+
+# Run downloader script
+export GO111MODULE=auto
+go get gopkg.in/yaml.v3
+go run downloader.go
+
+# Build image
+DOCKER_BUILDKIT=1 docker build . -t newrelic/infrastructure-bundle:dev
+```
 
 ## Release
 
-`ci/release.sh` publishes "newrelic/infrastructure-bundle" Docker images triggered *tags* on the *master* branch.
-
-Therefore, **[GH Release](https://github.com/newrelic/infrastructure-bundle/releases)** is used to trigger TravisCI to deploy into Docker-Hub.
+CI workflow pushes the multiarch image by running `docker buildx` with `--push`.
 
 https://hub.docker.com/repository/docker/newrelic/infrastructure-bundle/tags
+
+Locally, this can be also be done with the `./run-ci-locally.sh` script:
+
+```bash
+cd build
+DOCKER_IMAGE_TAG=0.0.1-rc ./run-ci-locally.sh release
+```
 
 ## Support
 
