@@ -46,6 +46,8 @@ jobs:
       # Therefore, to test vulnerabilities, we also re-build (fast with cache) for amd64 only and load it
       - name: Build docker image for all platforms
         working-directory: build
+        env:
+          DOCKER_PLATFORMS: linux/amd64 # TODO: REMOVE THIS, FOR TESTING ONLY
         run: |
           docker buildx build . --platform=${DOCKER_PLATFORMS}
           docker buildx build . --platform=linux/amd64 --load -t "${DOCKER_IMAGE}":dev
