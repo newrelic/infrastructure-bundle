@@ -1,26 +1,24 @@
-# Master URL template to get .tar.gz files from upstream repo
+# used as defaults for all integrations below, can be overridden
 url: https://download.newrelic.com/infrastructure_agent/binaries/linux/{{.Arch}}/{{.Name}}_linux_{{.Version}}_{{.Arch}}.tar.gz
+archs: [ amd64 ]
 
 # List of integrations to download
 integrations:
 #  - name: nri-apache
 #    version: 1.5.0
-#    arch: null # Defaults to [ amd64, arm64, arm ]
+#    archs: null # Defaults to global `archs`
 #    url: "" # Defaults to global `url`
-#    archReplacements: # replace keys with values for {{.Arch}}
+#    archReplacements: # replace keys with values for {{.Arch}}. Useful for sketchy naming schemes.
 #      amd64: x86_64
+
   - name: nri-apache
     version: 1.5.0
-    arch: [ amd64 ]
 
   - name: nri-cassandra
     version: 2.6.0
-    arch: [ amd64 ]
 
   - name: nri-consul
     version: 2.1.2
-    arch: [ amd64 ]
 
   - name: nri-couchbase
     version: 2.3.7
-    arch: [ amd64 ]

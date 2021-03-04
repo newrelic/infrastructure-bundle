@@ -19,21 +19,21 @@ import (
 
 type config struct {
 	URL          string        `yaml:"url"`
+	Archs        []string      `yaml:"archs"`
 	Integrations []integration `yaml:"integrations"`
 }
 
 type integration struct {
 	Name    string   `yaml:"name"`
 	Version string   `yaml:"version"`
-	Archs   []string `yaml:"arch"`
+	Archs   []string `yaml:"archs"`
 	URL     string   `yaml:"url"`
 
-	Arch string `yaml:"-"` // Internal only
-
 	ArchReplacements map[string]string `yaml:"archReplacements"`
-}
 
-var defaultArchs = []string{"amd64", "arm64", "arm"}
+	Arch        string `yaml:"-"` // Used for convenience evaluating the template
+	urlTemplate *template.Template
+}
 
 func main() {
 	bfname := flag.String("bundle", "bundle.yml", "path to bundle.yml")
@@ -52,9 +52,8 @@ func main() {
 		log.Fatal(err)
 	}
 
-	// Build template for default URL
-	urlTemplate, err := template.New("url").Parse(conf.URL)
-	if err != nil {
+	// Validate and expand config
+	if err := expandConfig(&conf); err != nil {
 		log.Fatal(err)
 	}
 
@@ -66,66 +65,94 @@ func main() {
 
 	// Concurrently fetch and extract integrations in the yaml file
 	ichan := make(chan *integration, len(conf.Integrations))
+	errchan := make(chan error, len(conf.Integrations))
 	wg := &sync.WaitGroup{}
 	for i := 0; i < *workers; i++ {
 		wg.Add(1)
 		go func() {
 			for i := range ichan {
-				err := fetch(i, urlTemplate, *outdir)
-				if err != nil {
-					log.Printf("error fetching integration: %v")
-				}
+				errchan <- fetch(i, *outdir)
 			}
 			wg.Done()
 		}()
 	}
 
+	// Send integration specs to the workers
 	for i := range conf.Integrations {
 		ichan <- &conf.Integrations[i]
 	}
 	close(ichan)
 	wg.Wait()
-	log.Printf("Integrations downloaded")
 
-	log.Printf("Preparing tree for install")
+	// Gather errors, if any
+errloop:
+	for {
+		select {
+		case err := <-errchan:
+			if err != nil {
+				log.Fatalf("error fetching integrations: %v", err)
+			}
+		default:
+			log.Printf("Integrations downloaded")
+			break errloop
+		}
+	}
+
+	log.Printf("Preparing tree for install...")
 	if err := prepareTree(*outdir); err != nil {
 		log.Fatal(err)
 	}
+
 	log.Printf("All done, integrations installed to '%s'", *outdir)
 }
 
-// fetch Expands the URL template for integrations and invokes downloadAndExtract
-func fetch(i *integration, urltmpl *template.Template, outdir string) error {
-	if i.Name == "" {
-		return fmt.Errorf("cannot fetch integration with an empty name")
-	}
-	if i.Version == "" {
-		return fmt.Errorf("cannot fetch '%s' with an empty version", i.Name)
+// expandConfig extends defaults to integrations and performs basic validation
+func expandConfig(conf *config) error {
+	// Build template for default URL
+	globalTemplate, err := template.New("url").Parse(conf.URL)
+	if err != nil {
+		return fmt.Errorf("error evaluating global URL template: %v", err)
 	}
 
-	if i.URL != "" {
-		overrideTmpl, err := template.New("url").Parse(i.URL)
-		if err != nil {
-			return fmt.Errorf("error building custom template: %v", err)
+	for i := range conf.Integrations {
+		integration := &conf.Integrations[i]
+
+		if integration.Name == "" {
+			return fmt.Errorf("cannot fetch integrations[%d] with an empty name", i)
 		}
-		urltmpl = overrideTmpl
+		if integration.Version == "" {
+			return fmt.Errorf("cannot fetch '%s' with an empty version", integration.Name)
+		}
+
+		if integration.URL != "" {
+			integration.urlTemplate, err = template.New("url").Parse(integration.URL)
+			if err != nil {
+				return fmt.Errorf("error building custom template: %v", err)
+			}
+		} else {
+			integration.urlTemplate = globalTemplate
+		}
+
+		if len(integration.Archs) == 0 {
+			integration.Archs = conf.Archs
+		}
 	}
 
-	if len(i.Archs) == 0 {
-		i.Archs = defaultArchs
-	}
+	return nil
+}
 
+// fetch Expands the URL template for integrations and invokes downloadAndExtract
+func fetch(i *integration, outdir string) error {
 	for _, arch := range i.Archs {
 		urlbuf := &bytes.Buffer{}
 
-		i.Arch = arch
-
-		// Apply arch replacement
-		if newArch, found := i.ArchReplacements[i.Arch]; found {
-			i.Arch = newArch
+		if replArch, hasReplacement := i.ArchReplacements[arch]; hasReplacement {
+			i.Arch = replArch
+		} else {
+			i.Arch = arch
 		}
 
-		err := urltmpl.Execute(urlbuf, i)
+		err := i.urlTemplate.Execute(urlbuf, i)
 		if err != nil {
 			return fmt.Errorf("error evaluating template: %v", err)
 		}
@@ -153,7 +180,13 @@ func downloadAndExtract(url string, outdir string) error {
 		return fmt.Errorf("got status %d when fetching %s", response.StatusCode, url)
 	}
 
-	if ct := response.Header.Get("content-type"); ct != "application/x-tar" {
+	ct := response.Header.Get("content-type")
+	switch ct {
+	case "application/x-tar":
+		fallthrough
+	case "application/octet-stream":
+		break
+	default:
 		return fmt.Errorf("unexpected contenty type '%s' for %s", ct, url)
 	}
 
