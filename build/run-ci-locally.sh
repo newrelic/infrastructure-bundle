@@ -6,6 +6,7 @@ set -e
 # If $1 is set to release, it will run the release job with the docker account currently logged in
 
 echo "Downloading integrations..."
+rm -r out/ 2> /dev/null || true
 export GO111MODULE=auto
 go get gopkg.in/yaml.v3
 go run downloader.go
