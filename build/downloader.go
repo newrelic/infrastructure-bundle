@@ -29,6 +29,7 @@ type integration struct {
 	Version string   `yaml:"version"`
 	Archs   []string `yaml:"archs"`
 	URL     string   `yaml:"url"`
+	Subpath string   `yaml:"subpath"` // Extract to this subfolder, rather than the virtual root
 
 	ArchReplacements map[string]string `yaml:"archReplacements"`
 
@@ -144,63 +145,57 @@ func expandConfig(conf *config) error {
 // fetch Expands the URL template for integrations and invokes downloadAndExtract
 func fetch(i *integration, outdir string) error {
 	for _, arch := range i.Archs {
-		urlbuf := &bytes.Buffer{}
-
 		if replArch, hasReplacement := i.ArchReplacements[arch]; hasReplacement {
 			i.Arch = replArch
 		} else {
 			i.Arch = arch
 		}
 
+		urlbuf := &bytes.Buffer{}
 		err := i.urlTemplate.Execute(urlbuf, i)
 		if err != nil {
 			return fmt.Errorf("error evaluating template: %v", err)
 		}
+		url := urlbuf.String()
 
-		err = downloadAndExtract(urlbuf.String(), path.Join(outdir, arch))
+		log.Printf("Hitting %s", url)
+		response, err := http.Get(url)
 		if err != nil {
-			return fmt.Errorf("error downloading integration: %v", err)
+			return err
 		}
-	}
 
-	return nil
-}
+		defer response.Body.Close()
 
-// downloadAndExtract Hits the supplied URL and extracts the contents of the tar archive to the supplied directory
-func downloadAndExtract(url string, outdir string) error {
-	log.Printf("Hitting %s", url)
-	response, err := http.Get(url)
-	if err != nil {
-		return err
-	}
+		if response.StatusCode >= 300 {
+			return fmt.Errorf("got status %d when fetching %s", response.StatusCode, url)
+		}
 
-	defer response.Body.Close()
+		ct := response.Header.Get("content-type")
+		switch ct {
+		case "application/x-tar":
+			fallthrough
+		case "application/octet-stream":
+			break
+		default:
+			return fmt.Errorf("unexpected contenty type '%s' for %s", ct, url)
+		}
 
-	if response.StatusCode >= 300 {
-		return fmt.Errorf("got status %d when fetching %s", response.StatusCode, url)
-	}
+		destination := path.Join(outdir, arch)
+		if i.Subpath != "" {
+			destination = path.Join(destination, i.Subpath)
+		}
+		iname := url[strings.LastIndex(url, "/"):]
+		log.Printf("Downloading and extracting %s", iname)
+		// Iterating over archive/tar is too long to write, going the hacky way...
+		cmd := exec.Command("tar", "-xz")
+		cmd.Dir = destination
+		cmd.Stdin = response.Body
+		cmd.Stdout = os.Stderr
+		cmd.Stderr = os.Stderr
 
-	ct := response.Header.Get("content-type")
-	switch ct {
-	case "application/x-tar":
-		fallthrough
-	case "application/octet-stream":
-		break
-	default:
-		return fmt.Errorf("unexpected contenty type '%s' for %s", ct, url)
-	}
-
-	iname := url[strings.LastIndex(url, "/"):]
-	log.Printf("Downloading and extracting %s", iname)
-	// Iterating over archive/tar is too long to write, going the hacky way...
-	cmd := exec.Command("tar", "-xz")
-	cmd.Dir = outdir
-	cmd.Stdin = response.Body
-	cmd.Stdout = os.Stderr
-	cmd.Stderr = os.Stderr
-
-	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("error running tar: %v", err)
+		if err := cmd.Run(); err != nil {
+			return fmt.Errorf("error running tar: %v", err)
+		}
 	}
 
 	return nil
@@ -227,14 +222,17 @@ func prepareTree(outdir string) error {
 
 // mkdirArchs scans all archs present in the integrations list and creates subfolders for them
 func mkdirArchs(outdir string, integrations []integration) error {
-	archs := map[string]struct{}{}
+	paths := map[string]struct{}{}
 	for _, i := range integrations {
 		for _, a := range i.Archs {
-			archs[a] = struct{}{}
+			paths[a] = struct{}{}
+			if i.Subpath != "" {
+				paths[path.Join(a, i.Subpath)] = struct{}{}
+			}
 		}
 	}
 
-	for arch := range archs {
+	for arch := range paths {
 		if err := os.MkdirAll(path.Join(outdir, arch), 0755); err != nil {
 			return fmt.Errorf("cannot create %s/%s: %v", outdir, arch, err)
 		}

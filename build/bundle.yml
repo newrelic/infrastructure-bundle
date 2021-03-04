@@ -8,6 +8,7 @@ integrations:
 #    version: 1.5.0
 #    archs: null # Defaults to global `archs`
 #    url: "" # Defaults to global `url`
+#    subpath: "" # Custom path to extract archive into
 #    archReplacements: # replace keys with values for {{.Arch}}. Useful for sketchy naming schemes.
 #      amd64: x86_64
   - name: nri-apache
@@ -51,10 +52,12 @@ integrations:
   - name: nri-varnish
     version: 2.1.0
   - name: nrjmx
-    version: 1.5.3
+    version: 1.6.2
   - name: nri-ecs
     version: 1.1.0
   - name: nri-discovery-kubernetes
     version: 1.3.0
-    url: https://github.com/newrelic/{{.Name}}/releases/download/v{{.Version}}/{{.Name}}_{{.Version}}_Linux_x86_64.tar.gz
-    archs: [ amd64 ]
+    url: https://github.com/newrelic/{{.Name}}/releases/download/v{{.Version}}/{{.Name}}_{{.Version}}_Linux_{{.Arch}}.tar.gz
+    subpath: usr/bin
+    archReplacements:
+      amd64: x86_64
