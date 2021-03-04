@@ -3,22 +3,64 @@ name: Container release
 on:
   release:
     types:
-      - published
+      - released
 
 jobs:
   build:
-    name: Container build
+    name: Build and push image
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Publish
-        run: ./ci/release.sh
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Load environment from buildsettings.env
+        run: grep -ve '^#' build/buildsettings.env >> $GITHUB_ENV
+
+      # The DOCKER_IMAGE_TAG var is generated here from the release tag, after some validation
+      - name: Generate docker image version from git tag
+        run: |
+          echo "${{ github.event.release.tag_name }}" | grep -E '^v[0-9.]*[0-9]$'
+          DOCKER_IMAGE_TAG=$(echo "${{ github.event.release.tag_name }}" | sed 's/^v//')
+          echo "DOCKER_IMAGE_TAG=$DOCKER_IMAGE_TAG" >> $GITHUB_ENV
+      # On prereleases, "-rc" is appended to DOCKER_IMAGE_TAG
+      - if: ${{ github.event.release.prerelease }}
+        run: |
+          echo "DOCKER_IMAGE_TAG=${DOCKER_IMAGE_TAG}-rc" >> $GITHUB_ENV
+          echo "S3_PATH=$S3_PATH/test" >> $GITHUB_ENV
+
+      # This block attempts to get the integrations from the GHA repo cache. This might help speeding up builds
+      - name: Get integrations from cache
+        id: cache
+        uses: actions/cache@v2
+        with:
+          path: build/out # Path where integrations are downloaded
+          key: ${{ hashFiles('build/bundle.yml', 'build/downloader.go') }} # Key from downloader spec
+      - uses: actions/setup-go@v2
+        if: ${{ ! steps.cache.outputs.cache-hit }}
+        with:
+          go-version: '1.16'
+      - name: Download integrations
+        if: ${{ ! steps.cache.outputs.cache-hit }}
+        working-directory: build
         env:
-          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-          RELEASE_TAG: ${{ github.ref }}
-      - name: Run Snyk monitor docker image
-        run: ./ci/snyk-scan.sh
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-          RELEASE_TAG: ${{ github.ref }}
+          GO111MODULE: auto # go get and go run using gopath
+          CGO_ENABLED: '0'
+        run: |
+          go get gopkg.in/yaml.v3
+          go run downloader.go
+
+      - uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.FSI_DOCKERHUB_USERNAME }}
+          password: TODO # TODO ${{ secrets.FSI_DOCKERHUB_TOKEN }}
+      - name: Build and push docker image
+        working-directory: build
+        run: >
+          docker buildx build . --platform="${DOCKER_PLATFORMS}"
+            --build-arg agent_version="$AGENT_VERSION"
+            --build-arg jre_version="$JRE_VERSION"
+            -t "${DOCKER_IMAGE}:${DOCKER_IMAGE_TAG}"
+            --push
