@@ -17,6 +17,7 @@ import (
 	"text/template"
 )
 
+// config is the in-memory representation of the bundle.yml file
 type config struct {
 	URL          string        `yaml:"url"`
 	Archs        []string      `yaml:"archs"`
@@ -51,7 +52,6 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-
 	// Validate and expand config
 	if err := expandConfig(&conf); err != nil {
 		log.Fatal(err)
