@@ -58,6 +58,6 @@ integrations:
   - name: nri-discovery-kubernetes
     version: 1.3.0
     url: https://github.com/newrelic/{{.Name}}/releases/download/v{{.Version}}/{{.Name}}_{{.Version}}_Linux_{{.Arch}}.tar.gz
-    subpath: usr/bin
+    subpath: var/db/newrelic-infra
     archReplacements:
       amd64: x86_64
