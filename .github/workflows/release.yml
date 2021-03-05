@@ -3,7 +3,7 @@ name: Container release
 on:
   release:
     types:
-      - released
+      - published
 
 jobs:
   build:
