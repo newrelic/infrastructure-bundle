@@ -6,7 +6,9 @@ Build tooling to generate and release New Relic's containerised **bundle** for i
 
 ## Requirements
 
-Shell scripts are aimed to run on Linux.
+- Docker (with buildx set up if multiarch building is desired)
+- Go (for the downloader)
+- *nix compatible shell (verified to work on Linux and OSX)
 
 ## Installation and usage
 
@@ -48,9 +50,7 @@ DOCKER_BUILDKIT=1 docker build . -t newrelic/infrastructure-bundle:dev
 
 ## Release
 
-CI workflow pushes the multiarch image by running `docker buildx` with `--push`.
-
-https://hub.docker.com/repository/docker/newrelic/infrastructure-bundle/tags
+CI workflow pushes the multiarch image to [dockerhub](https://hub.docker.com/repository/docker/newrelic/infrastructure-bundle/tags) by running `docker buildx` with `--push` whenever a release or prerelease is published in Github. The tag is generated from the release tag (after stripping the leading `v`). Additionally, prereleases will have an `-rc` suffix automatically appended to the tag.
 
 Locally, this can be also be done with the `./run-ci-locally.sh` script:
 
@@ -58,6 +58,12 @@ Locally, this can be also be done with the `./run-ci-locally.sh` script:
 cd build
 DOCKER_IMAGE_TAG=0.0.1-rc ./run-ci-locally.sh release
 ```
+
+## Bumping versions
+
+Versions, urls, and architectures of the bundled integrations are defined in `build/bundle.yml`.
+
+The version of the [base agent image](https://hub.docker.com/repository/docker/newrelic/infrastructure/tags) is defined in the `build/docker-build.sh` file, to ensure consistency across the different pipelines and local build script
 
 ## Support
 
