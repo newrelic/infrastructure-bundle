@@ -18,8 +18,6 @@ For install instructions, see [Docker container for infrastructure monitoring](h
 
 New Relic will keep latest stable agent and integrations versions in the [`bundle.yml` file](https://github.com/newrelic/infrastructure-bundle/blob/master/build/bundle.yml).
 
-Versions of the base image, jdk, and other dependencies can be found in the [`docker-build.sh`](https://github.com/newrelic/infrastructure-bundle/blob/master/build/docker-build.sh) wrapper
-
 > You can edit the file and set your desired versions, at your own risk.
 
 ## Building
@@ -40,8 +38,6 @@ A single-arch image can also be built without `buildx`. However, setting `DOCKER
 cd build
 
 # Run downloader script
-export GO111MODULE=auto
-go get gopkg.in/yaml.v3
 go run downloader.go
 
 # Build image
@@ -63,7 +59,7 @@ DOCKER_IMAGE_TAG=0.0.1-rc ./run-ci-locally.sh release
 
 Versions, urls, and architectures of the bundled integrations are defined in `build/bundle.yml`.
 
-The version of the [base agent image](https://hub.docker.com/repository/docker/newrelic/infrastructure/tags) is defined in the `build/docker-build.sh` file, to ensure consistency across the different pipelines and local build script
+The version of the [base agent image](https://hub.docker.com/repository/docker/newrelic/infrastructure/tags) is also defined in `build/bundle.yml`, and is collected by the `docker-build.sh` wrapper script.
 
 ## Support
 

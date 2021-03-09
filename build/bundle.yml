@@ -1,4 +1,5 @@
-# Agent version to bundle. This is used by `docker-build.sh` if AGENT_VERSION is not set
+# Version of the base agent image to use (`newrelic/infrastructure).
+# This is used by the `docker-build.sh` whapper if AGENT_VERSION is not set
 agentVersion: 1.15.2
 
 # used as defaults for all integrations below, can be overridden
