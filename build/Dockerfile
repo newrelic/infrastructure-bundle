@@ -9,8 +9,6 @@ ARG TARGETOS
 ARG TARGETARCH
 ARG jre_version
 
-# Get security updates
-RUN apk --no-cache upgrade
 # required for nri-jmx
 RUN if [ -n "${jre_version}" ]; then apk add --no-cache openjdk8-jre=${jre_version}; else apk add --no-cache openjdk8-jre; fi
 
