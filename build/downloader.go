@@ -19,6 +19,7 @@ import (
 
 // config is the in-memory representation of the bundle.yml file
 type config struct {
+	AgentVersion string        `yaml:"agentVersion"`
 	URL          string        `yaml:"url"`
 	Archs        []string      `yaml:"archs"`
 	Integrations []integration `yaml:"integrations"`
@@ -41,6 +42,7 @@ func main() {
 	bfname := flag.String("bundle", "bundle.yml", "path to bundle.yml")
 	outdir := flag.String("outdir", "out", "path to output directory")
 	workers := flag.Int("workers", 4, "number of download threads")
+	agentonly := flag.Bool("agent-version", false, "print agent version and exit")
 	flag.Parse()
 
 	bundleFile, err := os.Open(*bfname)
@@ -53,6 +55,13 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	// Print agent version and exit
+	if *agentonly {
+		fmt.Print(conf.AgentVersion)
+		return
+	}
+
 	// Validate and expand config
 	if err := expandConfig(&conf); err != nil {
 		log.Fatal(err)

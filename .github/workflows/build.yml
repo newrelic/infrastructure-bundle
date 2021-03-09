@@ -17,27 +17,13 @@ jobs:
         uses: docker/setup-qemu-action@v1
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
-
-      # This block attempts to get the integrations from the GHA repo cache. This might help speeding up builds
-      - name: Get integrations from cache
-        id: cache
-        uses: actions/cache@v2
-        with:
-          path: build/out # Path where integrations are downloaded
-          key: ${{ hashFiles('build/bundle.yml', 'build/downloader.go') }} # Key from downloader spec
       - uses: actions/setup-go@v2
-        if: ${{ ! steps.cache.outputs.cache-hit }}
         with:
           go-version: '1.16'
+
       - name: Download integrations
-        if: ${{ ! steps.cache.outputs.cache-hit }}
         working-directory: build
-        env:
-          GO111MODULE: auto # go get and go run using gopath
-          CGO_ENABLED: '0'
-        run: |
-          go get gopkg.in/yaml.v3
-          go run downloader.go
+        run: go run downloader.go
 
       # Due to a limitation of buildx, multiarch images cannot be `--load`ed to the host
       # Therefore, to test vulnerabilities, we also re-build (fast with cache) for amd64 only and load it
