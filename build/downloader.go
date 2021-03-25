@@ -179,15 +179,15 @@ func fetch(i *integration, outdir string) error {
 			return fmt.Errorf("got status %d when fetching %s", response.StatusCode, url)
 		}
 
-		ct := response.Header.Get("content-type")
-		switch ct {
-		case "application/x-tar":
-			fallthrough
-		case "application/octet-stream":
-			break
-		default:
-			return fmt.Errorf("unexpected contenty type '%s' for %s", ct, url)
-		}
+		//ct := response.Header.Get("content-type")
+		//switch ct {
+		//case "application/x-tar":
+		//	fallthrough
+		//case "application/octet-stream":
+		//	break
+		//default:
+		//	return fmt.Errorf("unexpected contenty type '%s' for %s", ct, url)
+		//}
 
 		destination := path.Join(outdir, arch)
 		if i.Subpath != "" {
