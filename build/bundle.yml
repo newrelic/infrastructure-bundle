@@ -16,7 +16,7 @@ integrations:
 #      amd64: x86_64
   - name: nri-apache
     version: 1.5.2
-    archs: [amd64, arm64]
+    archs: [amd64, arm64, arm]
   - name: nri-cassandra
     version: 2.6.0
   - name: nri-consul
