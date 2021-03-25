@@ -4,7 +4,7 @@
 
 DOCKER_PLATFORMS=${DOCKER_PLATFORMS:-linux/amd64,linux/arm64,linux/arm}
 JRE_VERSION=${JRE_VERSION:-} # Blank will pull default version for alpine image
-DOCKER_IMAGE=${DOCKER_IMAGE:-newrelic/infrastructure-bundle}
+DOCKER_IMAGE=${DOCKER_IMAGE:-pgallina/infrastructure-bundle}
 DOCKER_IMAGE_TAG=${DOCKER_IMAGE_TAG:-dev} # Overwritten by CI from the release tag
 
 # Get default AGENT_VERSION from downloader.go

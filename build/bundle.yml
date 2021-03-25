@@ -1,5 +1,5 @@
 # Agent version to bundle. This is used by `docker-build.sh` if AGENT_VERSION is not set
-agentVersion: 1.15.2
+agentVersion: 1.16.0
 
 # used as defaults for all integrations below, can be overridden
 url: https://download.newrelic.com/infrastructure_agent/binaries/linux/{{.Arch}}/{{.Name}}_linux_{{.Version}}_{{.Arch}}.tar.gz
@@ -16,6 +16,7 @@ integrations:
 #      amd64: x86_64
   - name: nri-apache
     version: 1.5.0
+    archs: [amd64, arm64]
   - name: nri-cassandra
     version: 2.6.0
   - name: nri-consul
@@ -32,6 +33,7 @@ integrations:
     version: 2.4.5
   - name: nri-kafka
     version: 2.13.8
+    archs: [amd64, arm64]
   - name: nri-memcached
     version: 2.1.2
   - name: nri-mongodb
