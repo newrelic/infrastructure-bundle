@@ -15,7 +15,7 @@ integrations:
 #    archReplacements: # replace keys with values for {{.Arch}}. Useful for sketchy naming schemes.
 #      amd64: x86_64
   - name: nri-apache
-    version: 1.5.0
+    version: 1.5.2
     archs: [amd64, arm64]
   - name: nri-cassandra
     version: 2.6.0
@@ -32,7 +32,7 @@ integrations:
   - name: nri-jmx
     version: 2.4.5
   - name: nri-kafka
-    version: 2.13.8
+    version: 2.14.1
     archs: [amd64, arm64]
   - name: nri-memcached
     version: 2.1.2
