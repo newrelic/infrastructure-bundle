@@ -32,7 +32,6 @@ jobs:
 
       # Download integrations
       - name: Download integrations
-        working-directory: build
         run: go run downloader.go
 
       - uses: docker/login-action@v1
@@ -40,5 +39,4 @@ jobs:
           username: ${{ secrets.FSI_DOCKERHUB_USERNAME }}
           password: TODO # TODO ${{ secrets.FSI_DOCKERHUB_TOKEN }}
       - name: Build and push docker image
-        working-directory: build
         run: ./docker-build.sh . --push

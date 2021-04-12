@@ -7,8 +7,6 @@ set -e
 
 echo "Downloading integrations..."
 rm -rf out/ 2> /dev/null || true
-export GO111MODULE=auto
-go get gopkg.in/yaml.v3
 go run downloader.go
 
 echo "Building image..."
