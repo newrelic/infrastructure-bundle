@@ -16,7 +16,7 @@ For install instructions, see [Docker container for infrastructure monitoring](h
 
 ## Configuration
 
-New Relic will keep latest stable agent and integrations versions in the [`bundle.yml` file](https://github.com/newrelic/infrastructure-bundle/blob/master/build/bundle.yml).
+New Relic will keep latest stable agent and integrations versions in the [`bundle.yml` file](https://github.com/newrelic/infrastructure-bundle/blob/master/bundle.yml).
 
 > You can edit the file and set your desired versions, at your own risk.
 
@@ -26,7 +26,6 @@ Building multiarch images requires a working setup of [docker buildx](https://do
 A working installation of Go is also needed for running the downloader program.
 
 ```bash
-cd build
 DOCKER_PLATFORMS=linux/amd64 ./run-ci-locally.sh
 ```
 
@@ -35,8 +34,6 @@ DOCKER_PLATFORMS=linux/amd64 ./run-ci-locally.sh
 A single-arch image can also be built without `buildx`. However, setting `DOCKER_BUILDKIT=1` might be required for older versions of docker, otherwise the `TARGETOS` and `TARGETARCH` variables won't be populated and docker will fail to copy the integrations from the host.
 
 ```bash
-cd build
-
 # Run downloader script
 go run downloader.go
 
@@ -51,15 +48,14 @@ CI workflow pushes the multiarch image to [dockerhub](https://hub.docker.com/rep
 Locally, this can be also be done with the `./run-ci-locally.sh` script:
 
 ```bash
-cd build
 DOCKER_IMAGE_TAG=0.0.1-rc ./run-ci-locally.sh release
 ```
 
 ## Bumping versions
 
-Versions, urls, and architectures of the bundled integrations are defined in `build/bundle.yml`.
+Versions, urls, and architectures of the bundled integrations are defined in `bundle.yml`.
 
-The version of the [base agent image](https://hub.docker.com/repository/docker/newrelic/infrastructure/tags) is also defined in `build/bundle.yml`, and is collected by the `docker-build.sh` wrapper script.
+The version of the [base agent image](https://hub.docker.com/repository/docker/newrelic/infrastructure/tags) is also defined in `bundle.yml`, and is collected by the `docker-build.sh` wrapper script.
 
 ## Support
 
