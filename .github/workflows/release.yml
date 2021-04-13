@@ -36,7 +36,10 @@ jobs:
 
       - uses: docker/login-action@v1
         with:
-          username: ${{ secrets.FSI_DOCKERHUB_USERNAME }}
-          password: TODO # TODO ${{ secrets.FSI_DOCKERHUB_TOKEN }}
+          username: roobre # TODO: Testing only
+          password: ${{ secrets.ROOBRE_TEST_TOKEN }} # TODO ${{ secrets.FSI_DOCKERHUB_TOKEN }}
       - name: Build and push docker image
+        env:
+          DOCKER_PLATFORMS: linux/amd64 # TODO: REMOVE THIS, FOR TESTING ONLY
+          DOCKER_IMAGE: roobre/infrastructure-bundle # TODO: REMOVE THIS, FOR TESTING ONLY
         run: ./docker-build.sh . --push
