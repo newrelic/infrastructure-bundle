@@ -1,15 +1,40 @@
 ---
 name: Container build
-on: [push, pull_request]
+on:
+  push:
+    branches:
+      - master
+      - main
+  pull_request:
 
 jobs:
   build:
-    name: Container build
+    name: Build and scan image
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Build
-        run: make -C ./build/
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+      - uses: actions/setup-go@v2
+        with:
+          go-version: '1.16'
+
+      - name: Download integrations
+        run: go run downloader.go
+
+      # Due to a limitation of buildx, multiarch images cannot be `--load`ed to the host
+      # Therefore, to test vulnerabilities, we also re-build (fast with cache) for amd64 only and load it
+      - name: Build docker image for all platforms
+        env:
+          DOCKER_PLATFORMS: linux/amd64 # TODO: Remove for multiarch
+        run: |
+          # Test build, but not load, for all archs
+          ./docker-build.sh .
+          # Build and load for amd64 only (for snyk)
+          DOCKER_PLATFORMS=linux/amd64 ./docker-build.sh . --load
+
       - name: Run Snyk via Docker
         run: docker run -t -e "SNYK_TOKEN=${SNYK_TOKEN}" -v ${PWD}/workspace:/project -v "/var/run/docker.sock:/var/run/docker.sock" snyk/snyk-cli:docker test --docker "newrelic/infrastructure-bundle:dev" --severity-threshold=high --org=ohai  --project-name="newrelic/infrastructure-bundle"
         env:

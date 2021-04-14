@@ -7,18 +7,38 @@ on:
 
 jobs:
   build:
-    name: Container build
+    name: Build and push image
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Publish
-        run: ./ci/release.sh
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+      - uses: actions/setup-go@v2
+        with:
+          go-version: '1.16'
+
+      # The DOCKER_IMAGE_TAG var is generated here from the release tag, after some validation
+      - name: Generate docker image version from git tag
+        run: |
+          echo "${{ github.event.release.tag_name }}" | grep -E '^[0-9.]*[0-9]$'
+          DOCKER_IMAGE_TAG=$(echo "${{ github.event.release.tag_name }}" | sed 's/^v//')
+          echo "DOCKER_IMAGE_TAG=$DOCKER_IMAGE_TAG" >> $GITHUB_ENV
+      # On prereleases, "-rc" is appended to DOCKER_IMAGE_TAG
+      - if: ${{ github.event.release.prerelease }}
+        run: |
+          echo "DOCKER_IMAGE_TAG=${DOCKER_IMAGE_TAG}-rc" >> $GITHUB_ENV
+
+      # Download integrations
+      - name: Download integrations
+        run: go run downloader.go
+
+      - uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+      - name: Build and push docker image
         env:
-          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-          RELEASE_TAG: ${{ github.ref }}
-      - name: Run Snyk monitor docker image
-        run: ./ci/snyk-scan.sh
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-          RELEASE_TAG: ${{ github.ref }}
+          DOCKER_PLATFORMS: linux/amd64 # TODO: Remove for multiarch
+        run: ./docker-build.sh . --push

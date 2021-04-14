@@ -6,7 +6,9 @@ Build tooling to generate and release New Relic's containerised **bundle** for i
 
 ## Requirements
 
-Shell scripts are aimed to run on Linux.
+- Docker (with buildx set up if multiarch building is desired)
+- Go (for the downloader)
+- *nix compatible shell (verified to work on Linux and OSX)
 
 ## Installation and usage
 
@@ -14,25 +16,46 @@ For install instructions, see [Docker container for infrastructure monitoring](h
 
 ## Configuration
 
-New Relic will keep latest stable agent and integrations versions in the [`versions` file](https://github.com/newrelic/infrastructure-bundle/blob/master/build/versions).
+New Relic will keep latest stable agent and integrations versions in the [`bundle.yml` file](https://github.com/newrelic/infrastructure-bundle/blob/master/bundle.yml).
 
 > You can edit the file and set your desired versions, at your own risk.
 
 ## Building
 
-Run the following command:
+Building multiarch images requires a working setup of [docker buildx](https://docs.docker.com/buildx/working-with-buildx/).
+A working installation of Go is also needed for running the downloader program.
 
-   ```bash
-   (cd build && make VERSION="<bundle version>")
-   ```
+```bash
+DOCKER_PLATFORMS=linux/amd64 ./run-ci-locally.sh
+```
+
+### Without `docker buildx`
+
+A single-arch image can also be built without `buildx`. However, setting `DOCKER_BUILDKIT=1` might be required for older versions of docker, otherwise the `TARGETOS` and `TARGETARCH` variables won't be populated and docker will fail to copy the integrations from the host.
+
+```bash
+# Run downloader script
+go run downloader.go
+
+# Build image
+DOCKER_BUILDKIT=1 docker build . -t newrelic/infrastructure-bundle:dev
+```
 
 ## Release
 
-`ci/release.sh` publishes "newrelic/infrastructure-bundle" Docker images triggered *tags* on the *master* branch.
+CI workflow pushes the multiarch image to [dockerhub](https://hub.docker.com/repository/docker/newrelic/infrastructure-bundle/tags) by running `docker buildx` with `--push` whenever a release or prerelease is published in Github. The tag is generated from the release tag (after stripping the leading `v`). Additionally, prereleases will have an `-rc` suffix automatically appended to the tag.
 
-Therefore, **[GH Release](https://github.com/newrelic/infrastructure-bundle/releases)** is used to trigger TravisCI to deploy into Docker-Hub.
+Locally, this can be also be done with the `./run-ci-locally.sh` script:
 
-https://hub.docker.com/repository/docker/newrelic/infrastructure-bundle/tags
+```bash
+DOCKER_IMAGE_TAG=0.0.1-rc ./run-ci-locally.sh release
+```
+
+## Bumping versions
+
+Versions, urls, and architectures of the bundled integrations are defined in `bundle.yml`.
+
+The version of the [base agent image](https://hub.docker.com/repository/docker/newrelic/infrastructure/tags) is also defined in `bundle.yml`, and is collected by the `docker-build.sh` wrapper script.
 
 ## Support
 
