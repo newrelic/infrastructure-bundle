@@ -20,8 +20,7 @@ integrations:
   - name: nri-cassandra
     version: 2.7.0
   - name: nri-consul
-    version: 2.1.2
-    archs: [ amd64 ] # TODO
+    version: 2.2.0
   - name: nri-couchbase
     version: 2.3.8
   - name: nri-ecs
