@@ -27,8 +27,6 @@ jobs:
       # Due to a limitation of buildx, multiarch images cannot be `--load`ed to the host
       # Therefore, to test vulnerabilities, we also re-build (fast with cache) for amd64 only and load it
       - name: Build docker image for all platforms
-        env:
-          DOCKER_PLATFORMS: linux/amd64 # TODO: Remove for multiarch
         run: |
           # Test build, but not load, for all archs
           ./docker-build.sh .
