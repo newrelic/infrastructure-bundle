@@ -54,7 +54,7 @@ integrations:
   - name: nri-rabbitmq
     version: 2.2.4
   - name: nri-redis
-    version: 1.6.1
+    version: 1.6.2
   - name: nri-snmp
     version: 1.2.0
     archs: [ amd64 ]
