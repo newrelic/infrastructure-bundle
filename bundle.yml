@@ -4,7 +4,10 @@ agentVersion: 1.18.0
 
 # used as defaults for all integrations below, can be overridden
 url: https://download.newrelic.com/infrastructure_agent/binaries/linux/{{.Arch}}/{{.Name}}_linux_{{.Version}}_{{.Arch}}.tar.gz
+stagingUrl: http://nr-downloads-ohai-staging.s3-website-us-east-1.amazonaws.com/infrastructure_agent/binaries/linux/{{.Arch}}/{{.Name}}_linux_{{.Version}}_{{.Arch}}.tar.gz
 archs: [ amd64, arm, arm64 ]
+
+repo: newrelic/{{.Name}}
 
 # List of integrations to download
 integrations:
@@ -59,9 +62,11 @@ integrations:
   - name: nrjmx
     version: 1.5.3
     url: https://download.newrelic.com/infrastructure_agent/binaries/linux/noarch/nrjmx_linux_{{.Version}}_noarch.tar.gz
+    stagingUrl: http://nr-downloads-ohai-staging.s3-website-us-east-1.amazonaws.com/infrastructure_agent/binaries/linux/noarch/nrjmx_linux_{{.Version}}_noarch.tar.gz
   - name: nri-discovery-kubernetes
     version: 1.4.0
     url: https://github.com/newrelic/{{.Name}}/releases/download/v{{.Version}}/{{.Name}}_{{.Version}}_Linux_{{.Arch}}.tar.gz
+    stagingUrl: https://github.com/newrelic/{{.Name}}/releases/download/v{{.Version}}/{{.Name}}_{{.Version}}_Linux_{{.Arch}}.tar.gz
     subpath: var/db/newrelic-infra
     archReplacements:
       amd64: x86_64
