@@ -6,6 +6,7 @@ import (
 	"flag"
 	"fmt"
 	"github.com/google/go-github/v35/github"
+	"golang.org/x/oauth2"
 	"gopkg.in/yaml.v3"
 	"io/fs"
 	"log"
@@ -254,7 +255,6 @@ func (i *integration) download(outdir string) error {
 
 func (i *integration) overrideVersion(includePrereleases bool) error {
 	repobuf := bytes.Buffer{}
-
 	if err := i.repoTemplate.Execute(&repobuf, i); err != nil {
 		return fmt.Errorf("could not evaluate repo template: %w", err)
 	}
@@ -264,8 +264,8 @@ func (i *integration) overrideVersion(includePrereleases bool) error {
 		return fmt.Errorf("bad format for org/repo: %s", i.Repo)
 	}
 
-	log.Printf("getting latest version for %s...", i.Name)
-	gh := github.NewClient(http.DefaultClient)
+	gh := github.NewClient(clientFromEnv())
+	log.Printf("Fetching latest version for %s...", i.Name)
 	releases, _, err := gh.Repositories.ListReleases(context.Background(), orgRepo[0], orgRepo[1], nil)
 	if err != nil {
 		return fmt.Errorf("could not get releases for %s: %w", i.Repo, err)
@@ -295,10 +295,25 @@ func (i *integration) overrideVersion(includePrereleases bool) error {
 		return fmt.Errorf("tagName for latest release of %s is nil", i.Repo)
 	}
 
-	log.Printf("Found %s %s...", i.Name, *namePtr)
-	i.Version = *namePtr
+	newVersion := strings.TrimPrefix(*namePtr, "v")
+	if i.Version != newVersion {
+		log.Printf("%s %s -> %s", i.Name, i.Version, newVersion)
+		i.Version = newVersion
+	}
 
 	return nil
+}
+
+func clientFromEnv() *http.Client {
+	ghtoken := os.Getenv("GITHUB_TOKEN")
+	if ghtoken == "" {
+		return http.DefaultClient
+	}
+
+	ts := oauth2.StaticTokenSource(
+		&oauth2.Token{AccessToken: ghtoken},
+	)
+	return oauth2.NewClient(context.Background(), ts)
 }
 
 // prepareTree cleans up *.sample and windows-related files
