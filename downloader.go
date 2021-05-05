@@ -57,6 +57,7 @@ func main() {
 	agentonly := flag.Bool("agent-version", false, "print agent version and exit")
 	staging := flag.Bool("staging", false, "use stagingUrl")
 	overrideLatest := flag.Bool("latest", false, "ignore version and download latest from GitHub")
+	checkLatest := flag.Bool("check-latest", false, "check for new versions and exit")
 	flag.Parse()
 
 	bundleFile, err := os.Open(*bfname)
@@ -77,8 +78,12 @@ func main() {
 	}
 
 	// Validate and expand config
-	if err := conf.expand(*staging, *overrideLatest); err != nil {
+	if err := conf.expand(*staging, *overrideLatest || *checkLatest); err != nil {
 		log.Fatal(err)
+	}
+
+	if *checkLatest {
+		return
 	}
 
 	// Scan all archs defined in the integration list and create subfolders for them
