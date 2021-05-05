@@ -1,23 +1,31 @@
 # Version of the base agent image to use (`newrelic/infrastructure).
-# This is used by the `docker-build.sh` wrapper if AGENT_VERSION is not set
+# This is used by the `docker-build.sh` wrapper if AGENT_VERSION is not set.
 agentVersion: 1.18.0
 
-# used as defaults for all integrations below, can be overridden
+# Used as defaults for all integrations below, can be overridden. Template.
 url: https://download.newrelic.com/infrastructure_agent/binaries/linux/{{.Arch}}/{{.Name}}_linux_{{.Version}}_{{.Arch}}.tar.gz
+# stagingUrl will be used if the download is invoked with -staging. Template.
 stagingUrl: http://nr-downloads-ohai-staging.s3-website-us-east-1.amazonaws.com/infrastructure_agent/binaries/linux/{{.Arch}}/{{.Name}}_linux_{{.Version}}_{{.Arch}}.tar.gz
+# List of architectures to fetch.
 archs: [ amd64, arm, arm64 ]
-
+# Github repo hosting the integration. Used to fetch the latest available version when using -latest. Template.
 repo: newrelic/{{.Name}}
 
-# List of integrations to download
+# List of integrations to download.
+# Individual entries may override any of the values defined above.
 integrations:
 #  - name: nri-apache
 #    version: 1.5.0
-#    archs: null # Defaults to global `archs`
-#    url: "" # Defaults to global `url`
-#    subpath: "" # Custom path to extract archive into
-#    archReplacements: # replace keys with values for {{.Arch}}. Useful for sketchy naming schemes.
+#
+#    subpath: "" # Custom path to extract archive into. By default, it is assumed that the integration tarball is structured to be extracted in `/`.
+#    archReplacements: # Used as a key->value replacement when making the current arch from []archs available in {{.Arch}}. Useful for sketchy naming schemes.
 #      amd64: x86_64
+#
+#    # Overrides:
+#    archs: [] # Bundle this integration only in the specified architectures.
+#    url: "" # Defaults to global `url`, useful if tarballs have odd naming schemes.
+#    stagingUrl: "" # Defaults to global `stagingUrl`.
+#    repo: "" # Defaults to global `repo`.
   - name: nri-apache
     version: 1.6.1
   - name: nri-cassandra
