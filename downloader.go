@@ -134,7 +134,7 @@ errloop:
 	log.Printf("All done, integrations installed to '%s'", *outdir)
 }
 
-// expand extends defaults to integrations and performs basic validation
+// expand compiles templates, extends defaults to integrations and performs basic validation
 func (conf *config) expand(useStaging, overrideLatest bool) error {
 	if useStaging {
 		conf.URL = conf.StagingUrl
@@ -153,18 +153,22 @@ func (conf *config) expand(useStaging, overrideLatest bool) error {
 		return fmt.Errorf("error evaluating global URL template: %v", err)
 	}
 
+	// Iterate over integrations expanding their configs as well
 	for i := range conf.Integrations {
+		integr := &conf.Integrations[i]
 		var err error
-		err = conf.Integrations[i].expand(&conf.integrationConfig)
+		err = integr.expand(&conf.integrationConfig)
 		if err != nil {
 			return fmt.Errorf("error expanding config for %s: %w", conf.Integrations[i].Name, err)
 		}
 
+		// Skip version override if flag is not present
 		if !overrideLatest {
 			continue
 		}
 
-		err = conf.Integrations[i].overrideVersion(useStaging)
+		// Fetch latest version from github and override the one present in the yaml
+		err = integr.overrideVersion(useStaging)
 		if err != nil {
 			return fmt.Errorf("error expanding config for %s: %w", conf.Integrations[i].Name, err)
 		}
@@ -173,6 +177,7 @@ func (conf *config) expand(useStaging, overrideLatest bool) error {
 	return nil
 }
 
+// expand perfoms validation and fills empty values with those defined in the yaml
 func (i *integration) expand(defaults *integrationConfig) error {
 	if i.Name == "" {
 		return fmt.Errorf("cannot process integration with an empty name")
@@ -182,6 +187,7 @@ func (i *integration) expand(defaults *integrationConfig) error {
 		return fmt.Errorf("cannot download '%s' with an empty version", i.Name)
 	}
 
+	// Build URL template if overridden
 	if i.URL != "" {
 		var err error
 		i.urlTemplate, err = template.New("url").Parse(i.URL)
@@ -192,6 +198,7 @@ func (i *integration) expand(defaults *integrationConfig) error {
 		i.urlTemplate = defaults.urlTemplate
 	}
 
+	// Build repo template if overridden
 	if i.Repo != "" {
 		var err error
 		i.repoTemplate, err = template.New("repo").Parse(i.Repo)
@@ -202,6 +209,7 @@ func (i *integration) expand(defaults *integrationConfig) error {
 		i.repoTemplate = defaults.repoTemplate
 	}
 
+	// Copy global arch list if not defined
 	if len(i.Archs) == 0 {
 		i.Archs = defaults.Archs
 	}
@@ -209,9 +217,11 @@ func (i *integration) expand(defaults *integrationConfig) error {
 	return nil
 }
 
-// download Expands the URL template for each integration arch and extracts it to outdir.
+// download expands the URL template for each integration arch and extracts it to outdir
 func (i *integration) download(outdir string) error {
+	// Different archs for the same integration are processed sequentially
 	for _, arch := range i.Archs {
+		// Process arch replacements in URL
 		if replArch, hasReplacement := i.ArchReplacements[arch]; hasReplacement {
 			i.Arch = replArch
 		} else {
@@ -237,13 +247,15 @@ func (i *integration) download(outdir string) error {
 			return fmt.Errorf("got status %d when fetching %s", response.StatusCode, url)
 		}
 
+		// Prepare path to extract, outdir/$arch
 		destination := path.Join(outdir, arch)
+		// Append subpath if defined. Usually not required since tarballs are structured to be extracted in /.
 		if i.Subpath != "" {
 			destination = path.Join(destination, i.Subpath)
 		}
-		iname := url[strings.LastIndex(url, "/"):]
-		log.Printf("Downloading and extracting %s", iname)
-		// Iterating over archive/tar is too long to write, going the hacky way...
+
+		log.Printf("Downloading and extracting %s", i.Name)
+		// Invoke tar externally with pipe (simplifies code).
 		cmd := exec.Command("tar", "-xz")
 		cmd.Dir = destination
 		cmd.Stdin = response.Body
@@ -258,17 +270,22 @@ func (i *integration) download(outdir string) error {
 	return nil
 }
 
+// overrideVersion fetches the tag name of the latest release (or prerelease) from Github
 func (i *integration) overrideVersion(includePrereleases bool) error {
-	repobuf := bytes.Buffer{}
-	if err := i.repoTemplate.Execute(&repobuf, i); err != nil {
+	// Evaluate repo template
+	repobuf := &bytes.Buffer{}
+	if err := i.repoTemplate.Execute(repobuf, i); err != nil {
 		return fmt.Errorf("could not evaluate repo template: %w", err)
 	}
 
+	// Split in user/repo
 	orgRepo := strings.Split(repobuf.String(), "/")
 	if len(orgRepo) != 2 {
 		return fmt.Errorf("bad format for org/repo: %s", i.Repo)
 	}
 
+	// Build GithubClient and fetch releases
+	// clientFromEnv will return an authenticated client if `$GITHUB_TOKEN` is present, or the default otherwise
 	gh := github.NewClient(clientFromEnv())
 	log.Printf("Fetching latest version for %s...", i.Name)
 	releases, _, err := gh.Repositories.ListReleases(context.Background(), orgRepo[0], orgRepo[1], nil)
@@ -276,6 +293,7 @@ func (i *integration) overrideVersion(includePrereleases bool) error {
 		return fmt.Errorf("could not get releases for %s: %w", i.Repo, err)
 	}
 
+	// If we dont want prereleases, filter them out
 	if !includePrereleases {
 		stableReleases := make([]*github.RepositoryRelease, 0, len(releases))
 		for _, r := range releases {
@@ -300,6 +318,7 @@ func (i *integration) overrideVersion(includePrereleases bool) error {
 		return fmt.Errorf("tagName for latest release of %s is nil", i.Repo)
 	}
 
+	// Leading `v` is trimmed for uniformity
 	newVersion := strings.TrimPrefix(*namePtr, "v")
 	if i.Version != newVersion {
 		log.Printf("%s %s -> %s", i.Name, i.Version, newVersion)
@@ -309,6 +328,7 @@ func (i *integration) overrideVersion(includePrereleases bool) error {
 	return nil
 }
 
+// clientFromEnv returns an OAuth client using the GITHUB_TOKEN env var if it's present, or http.DefaultClient otherwise
 func clientFromEnv() *http.Client {
 	ghtoken := os.Getenv("GITHUB_TOKEN")
 	if ghtoken == "" {
@@ -343,12 +363,14 @@ func prepareTree(outdir string) error {
 
 // mkdirArchs scans all archs present in the integrations list and creates subfolders for them
 func mkdirArchs(outdir string, integrations []integration) error {
+	// Collect all archs defined in all integrations
 	paths := map[string]struct{}{}
 	for _, i := range integrations {
-		for _, a := range i.Archs {
-			paths[a] = struct{}{}
+		for _, arch := range i.Archs {
+			paths[arch] = struct{}{}
+			// If a subpath is defined, we neeed to create it as well
 			if i.Subpath != "" {
-				paths[path.Join(a, i.Subpath)] = struct{}{}
+				paths[path.Join(arch, i.Subpath)] = struct{}{}
 			}
 		}
 	}
