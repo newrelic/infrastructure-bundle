@@ -56,6 +56,7 @@ integrations:
     version: 1.6.2
   - name: nri-snmp
     version: 1.3.0
+    archs: [ amd64 ]
   - name: nri-varnish
     version: 2.2.0
   - name: nrjmx
