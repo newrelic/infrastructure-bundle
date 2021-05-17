@@ -45,9 +45,6 @@ integrations:
     version: 2.7.1
   - name: nri-nginx
     version: 3.1.0
-  - name: nri-oracledb
-    version: 2.5.1
-    archs: [ amd64 ]
   - name: nri-postgresql
     version: 2.7.0
   - name: nri-rabbitmq
