@@ -2,9 +2,7 @@
 name: Container release
 on:
   release:
-    types:
-      - published
-
+    types: [ prereleased, released ]
 jobs:
   build:
     name: Build and push image
