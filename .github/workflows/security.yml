@@ -1,4 +1,4 @@
-name: Build container and scan for vulnerabilities
+name: Security scan
 on:
   push:
     branches:
