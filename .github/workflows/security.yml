@@ -30,7 +30,6 @@ jobs:
 
       - name: Build and load docker image for linux/amd64
         run: |
-          # Test build, but not load, for all archs
           DOCKER_PLATFORMS=linux/amd64 ./docker-build.sh . --load
 
       - name: Run Trivy vulnerability scanner
