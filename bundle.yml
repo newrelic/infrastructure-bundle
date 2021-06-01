@@ -57,7 +57,7 @@ integrations:
   - name: nri-varnish
     version: 2.2.0
   - name: nrjmx
-    version: 1.5.2
+    version: 1.5.3
     url: https://download.newrelic.com/infrastructure_agent/binaries/linux/noarch/nrjmx_linux_{{.Version}}_noarch.tar.gz
   - name: nri-discovery-kubernetes
     version: 1.3.1
