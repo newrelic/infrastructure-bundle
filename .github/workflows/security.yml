@@ -1,0 +1,50 @@
+name: Security scan
+on:
+  push:
+    branches:
+      - master
+      - main
+  pull_request:
+  schedule:
+    - cron: "0 3 * * MON" # Every monday at 3 AM
+
+jobs:
+  build:
+    name: Build and scan image
+    runs-on: ubuntu-latest
+    env:  # Variables as understood by docker-build.sh
+      DOCKER_IMAGE: newrelic/infrastructure-bundle
+      DOCKER_IMAGE_TAG: ci
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+      - uses: actions/setup-go@v2
+        with:
+          go-version: '1.16'
+
+      - name: Download integrations
+        run: go run downloader.go
+
+      - name: Build and load docker image for linux/amd64
+        run: |
+          DOCKER_PLATFORMS=linux/amd64 ./docker-build.sh . --load
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@0.0.18
+        with:
+          image-ref: ${{ env.DOCKER_IMAGE }}:${{ env.DOCKER_IMAGE_TAG }}
+          format: table
+          exit-code: 1
+          ignore-unfixed: true
+          severity: CRITICAL,HIGH
+
+      - name: Run Snyk to check Docker image for vulnerabilities
+        uses: snyk/actions/docker@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          image: ${{ env.DOCKER_IMAGE }}:${{ env.DOCKER_IMAGE_TAG }}
+          args: --file=Dockerfile
