@@ -36,5 +36,11 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
-      - name: Build and push docker image
+
+      - name: Build and push versioned docker image
+        run: ./docker-build.sh . --push
+      - name: Build and push :latest docker image
+        if: ${{ ! github.event.release.prerelease }}
+        env:
+          DOCKER_IMAGE_TAG: latest
         run: ./docker-build.sh . --push
