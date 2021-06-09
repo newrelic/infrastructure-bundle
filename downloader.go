@@ -111,18 +111,12 @@ func main() {
 	}
 	close(ichan)
 	wg.Wait()
+	close(errchan)
 
 	// Gather errors, if any
-errloop:
-	for {
-		select {
-		case err := <-errchan:
-			if err != nil {
-				log.Fatalf("error fetching integrations: %v", err)
-			}
-		default:
-			log.Printf("Integrations downloaded")
-			break errloop
+	for err := range errchan {
+		if err != nil {
+			log.Fatalf("error fetching integrations: %v", err)
 		}
 	}
 
