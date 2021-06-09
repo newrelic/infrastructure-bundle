@@ -253,6 +253,10 @@ func (i *integration) download(outdir string) error {
 		}
 		url := urlbuf.String()
 
+		if !strings.HasPrefix(url, "https://") {
+			return fmt.Errorf("refusing to download using insecure non-https url: %s", url)
+		}
+
 		log.Printf("Downloading %s", url)
 		response, err := http.Get(url)
 		if err != nil {
