@@ -16,6 +16,7 @@ import (
 	"strings"
 	"sync"
 	"text/template"
+	"time"
 
 	"github.com/google/go-github/v35/github"
 	"golang.org/x/oauth2"
@@ -308,38 +309,44 @@ func (i *integration) overrideVersion(gh *github.Client, includePrereleases bool
 	}
 
 	log.Printf("Fetching latest version for %s...", i.Name)
-	releases, _, err := gh.Repositories.ListReleases(context.Background(), orgRepo[0], orgRepo[1], nil)
+	allReleases, _, err := gh.Repositories.ListReleases(context.Background(), orgRepo[0], orgRepo[1], nil)
 	if err != nil {
 		return fmt.Errorf("could not get releases for %s: %w", i.Repo, err)
 	}
 
-	// If we dont want prereleases, filter them out
-	if !includePrereleases {
-		stableReleases := make([]*github.RepositoryRelease, 0, len(releases))
-		for _, r := range releases {
-			if r.Prerelease != nil && !*r.Prerelease {
-				stableReleases = append(stableReleases, r)
-			}
+	releases := make([]*github.RepositoryRelease, 0, len(allReleases))
+	for _, r := range allReleases {
+		// Filter out pre-releases if `includePrereleases` is not set.
+		if !includePrereleases && r.GetPrerelease() {
+			log.Printf("skipping pre-release %s %s", i.Name, r.GetTagName())
+			continue
 		}
-		releases = stableReleases
+
+		// Filter releases published less than one hour ago, since it is likely that their pipeline is still running
+		// and packages are not in the staging repo yet.
+		age := time.Since(r.GetPublishedAt().Time)
+		if age < 1*time.Hour {
+			log.Printf("skipping %s %s as it's too young (%v)", i.Name, r.GetTagName(), age)
+			continue
+		}
+
+		releases = append(releases, r)
 	}
 
 	if len(releases) == 0 {
-		return fmt.Errorf("repo %s does not have any release", i.Repo)
+		return fmt.Errorf("repo %s does not have any acceptable release", i.Repo)
 	}
 
 	// Sort most recent first
 	sort.Slice(releases, func(i, j int) bool {
-		return releases[i].CreatedAt.After(releases[j].CreatedAt.Time)
+		return releases[i].GetPublishedAt().After(releases[j].GetPublishedAt().Time)
 	})
 
-	namePtr := releases[0].TagName
-	if namePtr == nil {
-		return fmt.Errorf("tagName for latest release of %s is nil", i.Repo)
+	newVersion := strings.TrimPrefix(releases[0].GetTagName(), "v")
+	if newVersion == "" {
+		return fmt.Errorf("tagName for latest release of %s is empty", i.Repo)
 	}
 
-	// Leading `v` is trimmed for uniformity
-	newVersion := strings.TrimPrefix(*namePtr, "v")
 	if i.Version != newVersion {
 		log.Printf("%s %s -> %s", i.Name, i.Version, newVersion)
 		i.oldVersion = i.Version
