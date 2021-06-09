@@ -96,13 +96,15 @@ func main() {
 
 	// Concurrently download and extract integrations in the yaml file
 	ichan := make(chan *integration, len(conf.Integrations))
-	errchan := make(chan error, len(conf.Integrations))
 	wg := &sync.WaitGroup{}
 	for i := 0; i < *workers; i++ {
 		wg.Add(1)
 		go func() {
 			for i := range ichan {
-				errchan <- i.download(*outdir)
+				err := i.download(*outdir)
+				if err != nil {
+					log.Fatalf("Error downloading integration: %v", err)
+				}
 			}
 			wg.Done()
 		}()
@@ -114,14 +116,6 @@ func main() {
 	}
 	close(ichan)
 	wg.Wait()
-	close(errchan)
-
-	// Gather errors, if any
-	for err := range errchan {
-		if err != nil {
-			log.Fatalf("error fetching integrations: %v", err)
-		}
-	}
 
 	log.Printf("Preparing tree for install...")
 	if err := prepareTree(*outdir); err != nil {
@@ -258,10 +252,10 @@ func (i *integration) download(outdir string) error {
 		}
 		url := urlbuf.String()
 
-		log.Printf("Hitting %s", url)
+		log.Printf("Downloading %s", url)
 		response, err := http.Get(url)
 		if err != nil {
-			return err
+			return fmt.Errorf("downloading %s (%s): %w", i.Name, arch, err)
 		}
 
 		defer response.Body.Close()
