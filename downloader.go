@@ -33,6 +33,7 @@ type config struct {
 type integration struct {
 	Name              string            `yaml:"name"`
 	Version           string            `yaml:"version"`
+	oldVersion        string            // Will be set to the old version if a new one is found
 	integrationConfig `yaml:",inline"`  // Per-integration overrides
 	Arch              string            `yaml:"-"` // Used for convenience evaluating the template
 	ArchReplacements  map[string]string `yaml:"archReplacements"`
@@ -82,7 +83,10 @@ func main() {
 		log.Fatal(err)
 	}
 
+	// Print new versions and exit.
 	if *checkLatest {
+		conf.printUpdates()
+
 		return
 	}
 
@@ -167,6 +171,17 @@ func (conf *config) expand(useStaging, overrideLatest bool) error {
 	}
 
 	return nil
+}
+
+// printUpdates prints the integrations that have an update available.
+func (conf *config) printUpdates() {
+	for _, i := range conf.Integrations {
+		if i.oldVersion == "" {
+			continue
+		}
+
+		fmt.Printf("  - name: %s\n    version: %s\n\n", i.Name, i.Version)
+	}
 }
 
 // expand performs validation and fills empty values with those defined in the integration config.
@@ -314,6 +329,7 @@ func (i *integration) overrideVersion(gh *github.Client, includePrereleases bool
 	newVersion := strings.TrimPrefix(*namePtr, "v")
 	if i.Version != newVersion {
 		log.Printf("%s %s -> %s", i.Name, i.Version, newVersion)
+		i.oldVersion = i.Version
 		i.Version = newVersion
 	}
 
