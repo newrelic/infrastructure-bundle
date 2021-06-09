@@ -307,8 +307,8 @@ func (i *integration) overrideVersion(includePrereleases bool) error {
 	}
 
 	// Build GithubClient and fetch releases
-	// clientFromEnv will return an authenticated client if `$GITHUB_TOKEN` is present, or the default otherwise
-	gh := github.NewClient(clientFromEnv())
+	// oauthClientFromEnv will return an authenticated client if `$GITHUB_TOKEN` is present, or the default otherwise
+	gh := github.NewClient(oauthClientFromEnv())
 	log.Printf("Fetching latest version for %s...", i.Name)
 	allReleases, _, err := gh.Repositories.ListReleases(context.Background(), orgRepo[0], orgRepo[1], nil)
 	if err != nil {
@@ -357,8 +357,8 @@ func (i *integration) overrideVersion(includePrereleases bool) error {
 	return nil
 }
 
-// clientFromEnv returns an OAuth client using the GITHUB_TOKEN env var if it's present, or http.DefaultClient otherwise
-func clientFromEnv() *http.Client {
+// oauthClientFromEnv returns an OAuth client using the GITHUB_TOKEN env var if it's present, or http.DefaultClient otherwise
+func oauthClientFromEnv() *http.Client {
 	ghtoken := os.Getenv("GITHUB_TOKEN")
 	if ghtoken == "" {
 		return http.DefaultClient
