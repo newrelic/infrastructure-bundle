@@ -8,6 +8,7 @@ import (
 	"github.com/google/go-github/v35/github"
 	"golang.org/x/oauth2"
 	"gopkg.in/yaml.v3"
+	"io"
 	"io/fs"
 	"log"
 	"net/http"
@@ -32,6 +33,7 @@ type config struct {
 type integration struct {
 	Name              string            `yaml:"name"`
 	Version           string            `yaml:"version"`
+	oldVersion        string            // Will be set to the old version if a new one is found
 	integrationConfig `yaml:",inline"`  // Per-integration overrides
 	Arch              string            `yaml:"-"` // Used for convenience evaluating the template
 	ArchReplacements  map[string]string `yaml:"archReplacements"`
@@ -82,6 +84,7 @@ func main() {
 	}
 
 	if *checkLatest {
+		_ = conf.printUpdates(os.Stdout)
 		return
 	}
 
@@ -165,6 +168,21 @@ func (conf *config) expand(useStaging, overrideLatest bool) error {
 		err = integr.overrideVersion(useStaging)
 		if err != nil {
 			return fmt.Errorf("error expanding config for %s: %w", conf.Integrations[i].Name, err)
+		}
+	}
+
+	return nil
+}
+
+func (conf *config) printUpdates(w io.Writer) error {
+	for _, i := range conf.Integrations {
+		if i.oldVersion == "" {
+			continue
+		}
+
+		_, err := fmt.Fprintf(w, "  - name: %s\n    version: %s\n\n", i.Name, i.Version)
+		if err != nil {
+			return fmt.Errorf("printing version change: %w", err)
 		}
 	}
 
@@ -316,6 +334,7 @@ func (i *integration) overrideVersion(includePrereleases bool) error {
 	newVersion := strings.TrimPrefix(*namePtr, "v")
 	if i.Version != newVersion {
 		log.Printf("%s %s -> %s", i.Name, i.Version, newVersion)
+		i.oldVersion = i.Version
 		i.Version = newVersion
 	}
 
