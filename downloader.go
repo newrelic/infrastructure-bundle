@@ -133,6 +133,14 @@ func (conf *config) expand(useStaging, overrideLatest bool) error {
 		conf.URL = conf.StagingUrl
 	}
 
+	if conf.URL == "" {
+		return fmt.Errorf("global download URL template is empty")
+	}
+
+	if conf.Repo == "" {
+		return fmt.Errorf("global repo name template is empty")
+	}
+
 	urlTemplate, err := template.New("url").Parse(conf.URL)
 	if err != nil {
 		return fmt.Errorf("evaluating global URL template: %v", err)
@@ -190,10 +198,6 @@ func (i *integration) expand(defaults *integrationConfig) error {
 		return fmt.Errorf("cannot process integration with an empty name")
 	}
 
-	if i.Version == "" {
-		return fmt.Errorf("cannot download '%s' with an empty version", i.Name)
-	}
-
 	var err error
 
 	urlTemplate := defaults.urlTemplate
@@ -228,6 +232,11 @@ func (i *integration) expand(defaults *integrationConfig) error {
 
 // download expands the URL template for each integration arch and extracts it to outdir
 func (i *integration) download(outdir string) error {
+	// Check for empty version here rather than when expanding config since version may also come from Github
+	if i.Version == "" {
+		return fmt.Errorf("cannot download '%s' with an empty version", i.Name)
+	}
+
 	// Different archs for the same integration are processed sequentially
 	for _, arch := range i.Archs {
 		// Process arch replacements in URL
