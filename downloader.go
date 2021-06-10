@@ -84,6 +84,7 @@ func main() {
 		log.Fatal(err)
 	}
 
+	// Print new versions and exit
 	if *checkLatest {
 		_ = conf.printUpdates(os.Stdout)
 		return
@@ -177,6 +178,7 @@ func (conf *config) expand(useStaging, overrideLatest bool) error {
 	return nil
 }
 
+// printUpdates prints to the specified writer the integrations that have an update available
 func (conf *config) printUpdates(w io.Writer) error {
 	for _, i := range conf.Integrations {
 		if i.oldVersion == "" {
