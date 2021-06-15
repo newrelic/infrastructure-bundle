@@ -58,7 +58,7 @@ func main() {
 	workers := flag.Int("workers", 4, "number of download threads")
 	agentonly := flag.Bool("agent-version", false, "print agent version and exit")
 	staging := flag.Bool("staging", false, "use stagingUrl")
-	overrideLatest := flag.Bool("latest", false, "ignore version and download latest from github")
+	overrideLatest := flag.Bool("override-latest", false, "ignore version and download latest from github")
 	checkLatest := flag.Bool("check-latest", false, "check for new versions and exit")
 	flag.Parse()
 
@@ -200,7 +200,7 @@ func (i *integration) expand(defaults *integrationConfig) error {
 		return fmt.Errorf("cannot process integration with an empty name")
 	}
 
-	// Skip checking if version is empty since we want to allow that when `-latest` is passed
+	// Skip checking if version is empty since we want to allow that when `-override-latest` is passed
 
 	// Build URL template if overridden
 	if i.URL != "" {
