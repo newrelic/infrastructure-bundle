@@ -2,9 +2,10 @@ name: Nightly build
 on:
   schedule:
     - cron: "0 3 * * *"
-  release:
-    types:
-      - prereleased
+  push:
+    branches:
+      - master
+      - main
 
 jobs:
   build:
