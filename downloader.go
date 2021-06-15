@@ -58,7 +58,7 @@ func main() {
 	workers := flag.Int("workers", 4, "number of download threads")
 	agentonly := flag.Bool("agent-version", false, "print agent version and exit")
 	staging := flag.Bool("staging", false, "use stagingUrl")
-	overrideLatest := flag.Bool("latest", false, "ignore version and download latest from GitHub")
+	overrideLatest := flag.Bool("override-latest", false, "ignore version and download latest from GitHub")
 	checkLatest := flag.Bool("check-latest", false, "check for new versions and exit")
 	flag.Parse()
 
