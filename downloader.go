@@ -308,10 +308,19 @@ func (i *integration) overrideVersion(gh *github.Client, includePrereleases bool
 		return fmt.Errorf("bad format for org/repo: %s", i.Repo)
 	}
 
-	log.Printf("Fetching latest version for %s...", i.Name)
-	allReleases, _, err := gh.Repositories.ListReleases(context.Background(), orgRepo[0], orgRepo[1], nil)
-	if err != nil {
-		return fmt.Errorf("could not get releases for %s: %w", i.Repo, err)
+	log.Printf("Fetching releases for %s...", i.Name)
+
+	allReleases := make([]*github.RepositoryRelease, 0, 30) // GH returns max 30 releases per page
+	for page := 1; page != 0; {
+		releases, response, err := gh.Repositories.ListReleases(context.Background(), orgRepo[0], orgRepo[1], &github.ListOptions{
+			Page: page,
+		})
+		if err != nil {
+			return fmt.Errorf("could not get releases for %s: %w", i.Repo, err)
+		}
+
+		allReleases = append(allReleases, releases...)
+		page = response.NextPage
 	}
 
 	releases := make([]*github.RepositoryRelease, 0, len(allReleases))
