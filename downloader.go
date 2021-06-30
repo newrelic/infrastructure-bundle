@@ -180,7 +180,7 @@ func (conf *config) printUpdates() {
 			continue
 		}
 
-		fmt.Printf("  - name: %s\n    version: %s\n\n", i.Name, i.Version)
+		fmt.Printf("  - name: %s\n    version: %s\n", i.Name, i.Version)
 	}
 }
 
