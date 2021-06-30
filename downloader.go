@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"flag"
 	"fmt"
-	"gopkg.in/yaml.v3"
 	"io/fs"
 	"log"
 	"net/http"
@@ -15,6 +14,8 @@ import (
 	"strings"
 	"sync"
 	"text/template"
+
+	"gopkg.in/yaml.v3"
 )
 
 // config is the in-memory representation of the bundle.yml file
@@ -233,7 +234,7 @@ func mkdirArchs(outdir string, integrations []integration) error {
 	}
 
 	for arch := range paths {
-		if err := os.MkdirAll(path.Join(outdir, arch), 0755); err != nil {
+		if err := os.MkdirAll(path.Join(outdir, arch), 0o755); err != nil {
 			return fmt.Errorf("cannot create %s/%s: %v", outdir, arch, err)
 		}
 	}
