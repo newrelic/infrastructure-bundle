@@ -277,7 +277,7 @@ func (i *integration) download(outdir string) error {
 			destination = path.Join(destination, i.Subpath)
 		}
 
-		log.Printf("Downloading and extracting %s", i.Name)
+		log.Printf("Downloading and extracting %s (%s)", i.Name, arch)
 		// Invoke tar externally with pipe (simplifies code).
 		cmd := exec.Command("tar", "-xz")
 		cmd.Dir = destination
