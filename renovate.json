@@ -30,6 +30,12 @@
         "github-releases"
       ],
       "groupName": "integrations"
+    },
+    {
+      "matchPackageNames": [
+        "newrelic/nrjmx"
+      ],
+      "allowedVersions": "<=1.5"
     }
   ]
 }
