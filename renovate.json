@@ -29,7 +29,13 @@
       "matchDatasources": [
         "github-releases"
       ],
-      "groupName": "integrations"
+      "groupName": "Integrations"
+    },
+    {
+      "matchManagers": [
+        "github-actions"
+      ],
+      "groupName": "Github Actions"
     },
     {
       "matchPackageNames": [

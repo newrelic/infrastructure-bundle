@@ -14,4 +14,4 @@ The second `regexManager` is slightly more complex and captures both the name (p
 
 ## Other configuration
 
-Two `packageRules` are defined, one to group integration bumps into a single PR, and a second one to pin the `nrjmx` version to the 1.5.x branch.
+Several `packageRules` are defined, two to group integration and actions upgrades into one PR for each, and a third one to pin the `nrjmx` version to the 1.5.x branch.
