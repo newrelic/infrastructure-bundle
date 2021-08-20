@@ -1,5 +1,15 @@
 {
   "extends": [
     "config:base"
+  ],
+  "regexManagers": [
+    {
+      "fileMatch": ["^bundle.yml$"],
+      "depNameTemplate": "newrelic/infrastructure",
+      "datasourceTemplate": "docker",
+      "matchStrings": [
+        "agentVersion: ?(?<currentValue>[0-9.]+)"
+      ]
+    }
   ]
 }
