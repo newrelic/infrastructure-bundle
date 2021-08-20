@@ -23,5 +23,13 @@
         " *- name: (?<integrationName>[a-z-]+)\n *version: (?<currentValue>[0-9.]+)"
       ]
     }
+  ],
+  "packageRules": [
+    {
+      "matchDatasources": [
+        "github-releases"
+      ],
+      "groupName": "integrations"
+    }
   ]
 }
