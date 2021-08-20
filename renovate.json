@@ -4,11 +4,23 @@
   ],
   "regexManagers": [
     {
-      "fileMatch": ["^bundle.yml$"],
+      "fileMatch": [
+        "^bundle.yml$"
+      ],
       "depNameTemplate": "newrelic/infrastructure",
       "datasourceTemplate": "docker",
       "matchStrings": [
-        "agentVersion: ?(?<currentValue>[0-9.]+)"
+        "agentVersion: (?<currentValue>[0-9.]+)"
+      ]
+    },
+    {
+      "fileMatch": [
+        "^bundle.yml$"
+      ],
+      "depNameTemplate": "newrelic/{{integrationName}}",
+      "datasourceTemplate": "github-releases",
+      "matchStrings": [
+        " *- name: (?<integrationName>[a-z-]+)\n *version: (?<currentValue>[0-9.]+)"
       ]
     }
   ]
