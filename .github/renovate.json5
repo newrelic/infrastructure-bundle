@@ -2,42 +2,50 @@
   "extends": [
     "config:base"
   ],
+  // RegexManagers will match patterns and extract dependencies from bundle.yaml.
   "regexManagers": [
     {
+      // Extract base agent image from bundle.yml.
       "fileMatch": [
         "^bundle.yml$"
       ],
-      "depNameTemplate": "newrelic/infrastructure",
+      "depNameTemplate": "newrelic/infrastructure", // Defined directly since we only capture the version in the regex.
       "datasourceTemplate": "docker",
       "matchStrings": [
         "agentVersion: (?<currentValue>[0-9.]+)"
       ]
     },
     {
+      // Extract dependency name and version for integrations.
       "fileMatch": [
         "^bundle.yml$"
       ],
+      // Dependency name (org/repo format) is created from the `integrationName` named capture group in the regex below.
       "depNameTemplate": "newrelic/{{integrationName}}",
-      "datasourceTemplate": "github-releases",
+      "datasourceTemplate": "github-releases", // Version info is fetched from GitHub.
       "matchStrings": [
+        // Capture integration name (without `newrelic/`) and version from bundle.yaml.
         " *- name: (?<integrationName>[a-z-]+)\n *version: (?<currentValue>[0-9.]+)"
       ]
     }
   ],
   "packageRules": [
     {
+      // Group all integration bumps together in a single PR.
       "matchDatasources": [
         "github-releases"
       ],
       "groupName": "Integrations"
     },
     {
+      // Group all GHA bumps together in a single PR.
       "matchManagers": [
         "github-actions"
       ],
       "groupName": "Github Actions"
     },
     {
+      // NRJMX 1.6.x is known to be broken, so we pin 1.5.x.
       "matchPackageNames": [
         "newrelic/nrjmx"
       ],
