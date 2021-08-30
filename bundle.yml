@@ -1,6 +1,6 @@
 # Version of the base agent image to use (`newrelic/infrastructure).
 # This is used by the `docker-build.sh` wrapper if AGENT_VERSION is not set
-agentVersion: 1.19.4
+agentVersion: 1.20.2
 
 # Used as defaults for all integrations below, can be overridden. Template.
 url: https://download.newrelic.com/infrastructure_agent/binaries/linux/{{.Arch}}/{{.Name}}_linux_{{.Version}}_{{.Arch}}.tar.gz
