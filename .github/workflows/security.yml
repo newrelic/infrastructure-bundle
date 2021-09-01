@@ -5,8 +5,6 @@ on:
       - master
       - main
   pull_request:
-  schedule:
-    - cron: "0 3 * * MON" # Every monday at 3 AM
 
 jobs:
   build:
@@ -40,6 +38,67 @@ jobs:
           exit-code: 1
           ignore-unfixed: true
           severity: CRITICAL,HIGH
+
+      - name: Run Snyk to check Docker image for vulnerabilities
+        uses: snyk/actions/docker@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          image: ${{ env.DOCKER_IMAGE }}:${{ env.DOCKER_IMAGE_TAG }}
+          args: --file=Dockerfile
+---
+name: Security scan
+on:
+  schedule:
+    - cron: "0 3 * * MON" # Every monday at 3 AM
+
+jobs:
+  build:
+    name: Periodically build and scan images
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        staging: [ false, true ]
+    env:  # Variables as understood by docker-build.sh
+      DOCKER_IMAGE: newrelic/infrastructure-bundle
+      DOCKER_IMAGE_TAG: ci
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+      - uses: actions/setup-go@v2
+        with:
+          go-version: '1.16'
+
+      - name: Configure flags for staging environment
+        if: ${{ matrix.staging }}
+        run: |
+          echo "DOCKER_IMAGE_TAG=${DOCKER_IMAGE_TAG}-staging" >> $GITHUB_ENV
+          echo "DOWNLOADER_ARGS=-staging -override-latest" >> $GITHUB_ENV
+
+      - name: Download integrations
+        run: go run downloader.go $DOWNLOADER_ARGS
+
+      - name: Build and load docker image for linux/amd64
+        run: |
+          DOCKER_PLATFORMS=linux/amd64 ./docker-build.sh . --load
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@0.0.20
+        with:
+          image-ref: ${{ env.DOCKER_IMAGE }}:${{ env.DOCKER_IMAGE_TAG }}
+          ignore-unfixed: true
+          severity: CRITICAL,HIGH
+          format: template
+          template: @/contrib/sarif.tpl
+          output: trivy-results.sarif
+
+      - name: Upload Trivy scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v1
+        with:
+          sarif_file: trivy-results.sarif
 
       - name: Run Snyk to check Docker image for vulnerabilities
         uses: snyk/actions/docker@master
