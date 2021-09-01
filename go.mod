@@ -4,7 +4,7 @@ go 1.16
 
 require (
 	github.com/golang/protobuf v1.5.2 // indirect
-	github.com/google/go-github/v35 v35.3.0
+	github.com/google/go-github/v38 v38.1.0
 	github.com/google/go-querystring v1.1.0 // indirect
 	golang.org/x/crypto v0.0.0-20210616213533-5ff15b29337e // indirect
 	golang.org/x/net v0.0.0-20210614182718-04defd469f4e // indirect
