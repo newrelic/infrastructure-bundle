@@ -48,8 +48,8 @@ type integrationConfig struct {
 	Repo       string   `yaml:"repo"`
 	Archs      []string `yaml:"archs"`
 
-	urlTemplate  *template.Template // used to store the URL template
-	repoTemplate *template.Template // used to store the URL template
+	urlTemplate  *template.Template // used to store the compiled URL template
+	repoTemplate *template.Template // used to store the compiled Repo template
 }
 
 func main() {
@@ -142,14 +142,14 @@ func (conf *config) expand(useStaging, overrideLatest bool) error {
 		return fmt.Errorf("global repo name template is empty")
 	}
 
-	urlTemplate, err := template.New("url").Parse(conf.URL)
+	urlTemplate, err := newTemplate("url").Parse(conf.URL)
 	if err != nil {
 		return fmt.Errorf("evaluating global URL template: %v", err)
 	}
 
 	conf.urlTemplate = urlTemplate
 
-	repoTemplate, err := template.New("repo").Parse(conf.Repo)
+	repoTemplate, err := newTemplate("repo").Parse(conf.Repo)
 	if err != nil {
 		return fmt.Errorf("evaluating global URL template: %v", err)
 	}
@@ -205,7 +205,7 @@ func (i *integration) expand(defaults *integrationConfig) error {
 
 	// Build URL template if overridden
 	if i.URL != "" {
-		if urlTemplate, err = template.New("url").Parse(i.URL); err != nil {
+		if urlTemplate, err = newTemplate("url").Parse(i.URL); err != nil {
 			return fmt.Errorf("building custom url template: %v", err)
 		}
 	}
@@ -216,7 +216,7 @@ func (i *integration) expand(defaults *integrationConfig) error {
 
 	// Build repo template if overridden
 	if i.Repo != "" {
-		if repoTemplate, err = template.New("repo").Parse(i.Repo); err != nil {
+		if repoTemplate, err = newTemplate("repo").Parse(i.Repo); err != nil {
 			return fmt.Errorf("building custom repo template: %v", err)
 		}
 	}
@@ -347,11 +347,12 @@ func (i *integration) overrideVersion(gh *github.Client, includePrereleases bool
 	}
 
 	// Sort most recent first
+	// TODO: Implement semver comparison instead of sorting by release date
 	sort.Slice(releases, func(i, j int) bool {
 		return releases[i].GetPublishedAt().After(releases[j].GetPublishedAt().Time)
 	})
 
-	newVersion := strings.TrimPrefix(releases[0].GetTagName(), "v")
+	newVersion := releases[0].GetTagName()
 	if newVersion == "" {
 		return fmt.Errorf("tagName for latest release of %s is empty", i.Repo)
 	}
@@ -419,4 +420,16 @@ func mkdirArchs(outdir string, integrations []integration) error {
 	}
 
 	return nil
+}
+
+// newTemplate creates a new template and adds the helper trimv function
+func newTemplate(name string) *template.Template {
+	return template.New(name).Funcs(
+		template.FuncMap{
+			// trimv is a helper template function that removes leading v from the input string, typically a version
+			"trimv": func(str string) string {
+				return strings.TrimPrefix(str, "v")
+			},
+		},
+	)
 }
