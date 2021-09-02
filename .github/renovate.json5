@@ -26,7 +26,10 @@
       "matchStrings": [
         // Capture integration name (without `newrelic/`) and version from bundle.yaml.
         " *- name: (?<integrationName>[a-z-]+)\n *version: (?<currentValue>[0-9.]+)"
-      ]
+      ],
+      // Recursive match prevents double matching of dependencies, as next search will begin when the previos match ends.
+      // Ref: https://docs.renovatebot.com/configuration-options/#regexmanagers
+      "matchStringsStrategy": "recursive"
     }
   ],
   "packageRules": [
