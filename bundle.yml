@@ -41,13 +41,13 @@ integrations:
   - name: nri-ecs
     version: v1.3.1
   - name: nri-elasticsearch
-    version: v4.3.6
+    version: v4.4.0
   - name: nri-f5
     version: v2.3.1
   - name: nri-haproxy
     version: v2.2.2
   - name: nri-jmx
-    version: v2.4.8
+    version: v2.4.12
   - name: nri-kafka
     version: v2.16.2
   - name: nri-memcached
@@ -61,11 +61,11 @@ integrations:
   - name: nri-nginx
     version: v3.1.2
   - name: nri-postgresql
-    version: v2.7.2
+    version: v2.7.3
   - name: nri-rabbitmq
     version: v2.3.1
   - name: nri-redis
-    version: v1.6.3
+    version: v1.7.1
   - name: nri-snmp
     version: v1.4.0
     archs: [ amd64 ]
