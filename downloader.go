@@ -16,7 +16,6 @@ import (
 	"strings"
 	"sync"
 	"text/template"
-	"time"
 
 	"github.com/google/go-github/v38/github"
 	"golang.org/x/oauth2"
@@ -328,14 +327,6 @@ func (i *integration) overrideVersion(gh *github.Client, includePrereleases bool
 		// Filter out pre-releases if `includePrereleases` is not set.
 		if !includePrereleases && r.GetPrerelease() {
 			log.Printf("skipping pre-release %s %s", i.Name, r.GetTagName())
-			continue
-		}
-
-		// Filter releases published less than one hour ago, since it is likely that their pipeline is still running
-		// and packages are not in the staging repo yet.
-		age := time.Since(r.GetPublishedAt().Time)
-		if age < 1*time.Hour {
-			log.Printf("skipping %s %s as it's too young (%v)", i.Name, r.GetTagName(), age)
 			continue
 		}
 
