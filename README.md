@@ -1,4 +1,4 @@
-[![New Relic Community Plus header](https://raw.githubusercontent.com/newrelic/open-source-office/master/examples/categories/images/Community_Plus.png)](https://opensource.newrelic.com/oss-category/#community-plus)
+[![Community Plus header](https://raw.githubusercontent.com/newrelic/opensource-website/master/src/images/categories/Community_Plus.png)](https://opensource.newrelic.com/oss-category/#community-plus)``
 
 # New Relic infrastructure monitoring bundle
 
