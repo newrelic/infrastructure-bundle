@@ -163,7 +163,7 @@ func (conf *config) expand(useStaging, overrideLatest bool) error {
 	for i := range conf.Integrations {
 		integration := &conf.Integrations[i]
 
-		if err := integration.expand(&conf.integrationConfig); err != nil {
+		if err := integration.expand(useStaging, &conf.integrationConfig); err != nil {
 			return fmt.Errorf("expanding config for %q: %w", integration.Name, err)
 		}
 
@@ -193,9 +193,13 @@ func (conf *config) printUpdates() {
 }
 
 // expand performs validation and fills empty values with those defined in the integration config.
-func (i *integration) expand(defaults *integrationConfig) error {
+func (i *integration) expand(useStaging bool, defaults *integrationConfig) error {
 	if i.Name == "" {
 		return fmt.Errorf("cannot process integration with an empty name")
+	}
+
+	if useStaging && i.StagingUrl!="" {
+		i.URL = i.StagingUrl
 	}
 
 	var err error
@@ -203,7 +207,7 @@ func (i *integration) expand(defaults *integrationConfig) error {
 	urlTemplate := defaults.urlTemplate
 
 	// Build URL template if overridden
-	if i.URL != "" {
+	if i.URL != "" || i.StagingUrl != ""{
 		if urlTemplate, err = newTemplate("url").Parse(i.URL); err != nil {
 			return fmt.Errorf("building custom url template: %v", err)
 		}
