@@ -153,7 +153,7 @@ func (conf *config) expand(useStaging, overrideLatest bool) error {
 	for i := range conf.Integrations {
 		integration := &conf.Integrations[i]
 
-		if err := integration.expand(&conf.integrationConfig); err != nil {
+		if err := integration.expand(useStaging, &conf.integrationConfig); err != nil {
 			return fmt.Errorf("expanding config for %q: %w", integration.Name, err)
 		}
 
@@ -201,7 +201,7 @@ func (ic *integrationConfig) compileTemplates() error {
 }
 
 // expand performs validation and fills empty values with those defined in the integration config.
-func (i *integration) expand(defaults *integrationConfig) error {
+func (i *integration) expand(useStaging bool, defaults *integrationConfig) error {
 	if i.Name == "" {
 		return fmt.Errorf("cannot process integration with an empty name")
 	}
@@ -209,6 +209,10 @@ func (i *integration) expand(defaults *integrationConfig) error {
 	// Copy global arch list if not defined
 	if len(i.Archs) == 0 {
 		i.Archs = defaults.Archs
+	}
+
+	if i.StagingUrl != "" && useStaging {
+		i.URL = i.StagingUrl
 	}
 
 	// Compile local templates
