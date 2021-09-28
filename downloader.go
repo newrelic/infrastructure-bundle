@@ -141,19 +141,9 @@ func (conf *config) expand(useStaging, overrideLatest bool) error {
 		return fmt.Errorf("global repo name template is empty")
 	}
 
-	urlTemplate, err := newTemplate("url").Parse(conf.URL)
-	if err != nil {
-		return fmt.Errorf("evaluating global URL template: %v", err)
+	if err := conf.compileTemplates(); err != nil {
+		return fmt.Errorf("compiling global templates: %w", err)
 	}
-
-	conf.urlTemplate = urlTemplate
-
-	repoTemplate, err := newTemplate("repo").Parse(conf.Repo)
-	if err != nil {
-		return fmt.Errorf("evaluating global URL template: %v", err)
-	}
-
-	conf.repoTemplate = repoTemplate
 
 	// Build GithubClient and fetch releases
 	// oauthClientFromEnv will return an authenticated client if `$GITHUB_TOKEN` is present, or the default otherwise
@@ -163,7 +153,7 @@ func (conf *config) expand(useStaging, overrideLatest bool) error {
 	for i := range conf.Integrations {
 		integration := &conf.Integrations[i]
 
-		if err := integration.expand(&conf.integrationConfig); err != nil {
+		if err := integration.expand(useStaging, &conf.integrationConfig); err != nil {
 			return fmt.Errorf("expanding config for %q: %w", integration.Name, err)
 		}
 
@@ -192,39 +182,51 @@ func (conf *config) printUpdates() {
 	}
 }
 
+func (ic *integrationConfig) compileTemplates() error {
+	// URL template
+	urlTemplate, err := newTemplate("url").Parse(ic.URL)
+	if err != nil {
+		return fmt.Errorf("evaluating global URL template: %v", err)
+	}
+	ic.urlTemplate = urlTemplate
+
+	// Repo templates
+	repoTemplate, err := newTemplate("repo").Parse(ic.Repo)
+	if err != nil {
+		return fmt.Errorf("evaluating global URL template: %v", err)
+	}
+	ic.repoTemplate = repoTemplate
+
+	return nil
+}
+
 // expand performs validation and fills empty values with those defined in the integration config.
-func (i *integration) expand(defaults *integrationConfig) error {
+func (i *integration) expand(useStaging bool, defaults *integrationConfig) error {
 	if i.Name == "" {
 		return fmt.Errorf("cannot process integration with an empty name")
 	}
 
-	var err error
-
-	urlTemplate := defaults.urlTemplate
-
-	// Build URL template if overridden
-	if i.URL != "" {
-		if urlTemplate, err = newTemplate("url").Parse(i.URL); err != nil {
-			return fmt.Errorf("building custom url template: %v", err)
-		}
-	}
-
-	i.urlTemplate = urlTemplate
-
-	repoTemplate := defaults.repoTemplate
-
-	// Build repo template if overridden
-	if i.Repo != "" {
-		if repoTemplate, err = newTemplate("repo").Parse(i.Repo); err != nil {
-			return fmt.Errorf("building custom repo template: %v", err)
-		}
-	}
-
-	i.repoTemplate = repoTemplate
-
 	// Copy global arch list if not defined
 	if len(i.Archs) == 0 {
 		i.Archs = defaults.Archs
+	}
+
+	if i.StagingUrl != "" && useStaging {
+		i.URL = i.StagingUrl
+	}
+
+	// Compile local templates
+	if err := i.compileTemplates(); err != nil {
+		return fmt.Errorf("compiling templates for integration %q: %w", i.Name, err)
+	}
+
+	// Inherit global templates if local are empty
+	if i.URL == "" {
+		i.urlTemplate = defaults.urlTemplate
+	}
+
+	if i.Repo == "" {
+		i.repoTemplate = defaults.repoTemplate
 	}
 
 	return nil
