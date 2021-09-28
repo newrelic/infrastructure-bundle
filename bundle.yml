@@ -15,6 +15,11 @@ archs: [ amd64, arm, arm64 ]
 # GitHub repo hosting the integration. Used to fetch the latest available version when using -latest. Template.
 repo: newrelic/{{.Name}}
 
+# List of files to check for existence after integration has been unpacked. Template.
+testFiles:
+  # Test for existence of the main integation binary
+  - /var/db/newrelic-infra/newrelic-integrations/bin/{{.Name}}
+
 # List of integrations to download.
 # Individual entries may override any of the values defined above.
 integrations:
@@ -74,6 +79,8 @@ integrations:
     version: v1.5.3
     url: https://download.newrelic.com/infrastructure_agent/binaries/linux/noarch/nrjmx_linux_{{.Version | trimv}}_noarch.tar.gz
     stagingUrl: https://github.com/newrelic/{{.Name}}/releases/download/{{.Version}}/nrjmx_linux_{{.Version | trimv}}_noarch.tar.gz
+    testFiles:
+      - /usr/bin/nrjmx
   - name: nri-discovery-kubernetes
     version: v1.4.0
     url: https://github.com/newrelic/{{.Name}}/releases/download/{{.Version}}/{{.Name}}_{{.Version | trimv}}_Linux_{{.Arch}}.tar.gz
@@ -81,3 +88,5 @@ integrations:
     subpath: var/db/newrelic-infra
     archReplacements:
       amd64: x86_64
+    testFiles:
+      - /var/db/newrelic-infra/nri-discovery-kubernetes
