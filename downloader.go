@@ -46,9 +46,11 @@ type integrationConfig struct {
 	StagingUrl string   `yaml:"stagingUrl"`
 	Repo       string   `yaml:"repo"`
 	Archs      []string `yaml:"archs"`
+	TestFiles  []string `yaml:"testFiles"`
 
-	urlTemplate  *template.Template // used to store the compiled URL template
-	repoTemplate *template.Template // used to store the compiled Repo template
+	urlTemplate       *template.Template   // used to store the compiled URL template
+	repoTemplate      *template.Template   // used to store the compiled Repo template
+	testFilesTemplate []*template.Template // used to store the compiled TestFiles templates
 }
 
 func main() {
@@ -124,6 +126,11 @@ func main() {
 		log.Fatal(err)
 	}
 
+	log.Printf("Checking files for existence...")
+	if err := conf.testFiles(*outdir); err != nil {
+		log.Fatal(err)
+	}
+
 	log.Printf("All done, integrations installed to '%s'", *outdir)
 }
 
@@ -182,6 +189,27 @@ func (conf *config) printUpdates() {
 	}
 }
 
+// testFiles checks for existence of all the testFiles defined in the config.
+func (conf *config) testFiles(outdir string) error {
+	for _, i := range conf.Integrations {
+		for tn, tmpl := range i.testFilesTemplate {
+			for _, arch := range i.Archs {
+				pathBuf := &bytes.Buffer{}
+				if err := tmpl.Execute(pathBuf, &i); err != nil {
+					return fmt.Errorf("evaluating testFiles[%d] for integration %q: %w", tn, i.Name, err)
+				}
+
+				_, err := os.Stat(filepath.Join(outdir, arch, pathBuf.String()))
+				if err != nil {
+					return fmt.Errorf("existence chech for %q for integration %q failed: %w", pathBuf.String(), i.Name, err)
+				}
+			}
+		}
+	}
+
+	return nil
+}
+
 func (ic *integrationConfig) compileTemplates() error {
 	// URL template
 	urlTemplate, err := newTemplate("url").Parse(ic.URL)
@@ -196,6 +224,18 @@ func (ic *integrationConfig) compileTemplates() error {
 		return fmt.Errorf("evaluating global URL template: %v", err)
 	}
 	ic.repoTemplate = repoTemplate
+
+	// TestFiles templates
+	testFilesTemplates := make([]*template.Template, len(ic.TestFiles))
+	for i, templateText := range ic.TestFiles {
+		testFilesTemplate, err := newTemplate("testFiles").Parse(templateText)
+		if err != nil {
+			return fmt.Errorf("evaluating global URL template: %v", err)
+		}
+
+		testFilesTemplates[i] = testFilesTemplate
+	}
+	ic.testFilesTemplate = testFilesTemplates
 
 	return nil
 }
@@ -227,6 +267,10 @@ func (i *integration) expand(useStaging bool, defaults *integrationConfig) error
 
 	if i.Repo == "" {
 		i.repoTemplate = defaults.repoTemplate
+	}
+
+	if len(i.testFilesTemplate) == 0 {
+		i.testFilesTemplate = defaults.testFilesTemplate
 	}
 
 	return nil
