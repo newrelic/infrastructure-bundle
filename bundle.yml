@@ -31,45 +31,45 @@ integrations:
 #    stagingUrl: "" # Defaults to global `stagingUrl`.
 #    repo: "" # Defaults to global `repo`.
   - name: nri-apache
-    version: v1.6.1
+    version: v1.7.0
   - name: nri-cassandra
-    version: v2.8.1
+    version: v2.9.0
   - name: nri-consul
-    version: v2.3.1
+    version: v2.4.0
   - name: nri-couchbase
-    version: v2.4.1
+    version: v2.5.0
   - name: nri-ecs
     version: v1.3.1
   - name: nri-elasticsearch
-    version: v4.4.0
+    version: v4.5.0
   - name: nri-f5
-    version: v2.3.1
+    version: v2.4.0
   - name: nri-haproxy
-    version: v2.2.2
-  - name: nri-jmx
-    version: v2.4.12
-  - name: nri-kafka
-    version: v2.16.2
-  - name: nri-memcached
-    version: v2.2.1
-  - name: nri-mongodb
-    version: v2.6.1
-  - name: nri-mysql
-    version: v1.6.1
-  - name: nri-nagios
-    version: v2.7.2
-  - name: nri-nginx
-    version: v3.1.2
-  - name: nri-postgresql
-    version: v2.7.3
-  - name: nri-rabbitmq
     version: v2.3.1
+  - name: nri-jmx
+    version: v2.5.0
+  - name: nri-kafka
+    version: v2.17.1
+  - name: nri-memcached
+    version: v2.3.1
+  - name: nri-mongodb
+    version: v2.7.0
+  - name: nri-mysql
+    version: v1.7.0
+  - name: nri-nagios
+    version: v2.8.1
+  - name: nri-nginx
+    version: v3.2.1
+  - name: nri-postgresql
+    version: v2.9.0
+  - name: nri-rabbitmq
+    version: v2.4.0
   - name: nri-redis
-    version: v1.7.1
+    version: v1.8.1
   - name: nri-snmp
-    version: v1.4.0
+    version: v1.5.0
   - name: nri-varnish
-    version: v2.2.1
+    version: v2.4.0
   - name: nrjmx
     version: v1.5.3
     url: https://download.newrelic.com/infrastructure_agent/binaries/linux/noarch/nrjmx_linux_{{.Version | trimv}}_noarch.tar.gz
