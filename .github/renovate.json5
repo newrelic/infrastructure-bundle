@@ -45,11 +45,11 @@
       "groupName": "Github Actions"
     },
     {
-      // NRJMX 1.6.x is known to be broken, so we pin 1.5.x.
+      // NRJMX 1.6.x is known to be broken, so we skip 1.6.x.
       "matchPackageNames": [
         "newrelic/nrjmx"
       ],
-      "allowedVersions": "<=1.5"
+      "allowedVersions": ">=1.7"
     }
   ]
 }
