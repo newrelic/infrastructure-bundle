@@ -14,5 +14,3 @@ RUN if [ -n "${jre_version}" ]; then apk add --no-cache openjdk8-jre=${jre_versi
 
 # integrations
 COPY out/${TARGETARCH} /
-
-ENV NRIA_PASSTHROUGH_ENVIRONMENT=ECS_CONTAINER_METADATA_URI,FARGATE
