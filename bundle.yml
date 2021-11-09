@@ -52,7 +52,7 @@ integrations:
   - name: nri-haproxy
     version: v2.3.2
   - name: nri-jmx
-    version: v2.5.0
+    version: v2.6.0
   - name: nri-kafka
     version: v2.17.1
   - name: nri-memcached
