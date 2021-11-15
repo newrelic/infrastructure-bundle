@@ -44,7 +44,7 @@ integrations:
   - name: nri-couchbase
     version: v2.5.1
   - name: nri-ecs
-    version: v1.3.1
+    version: v1.4.1
     # This integration no longer produce packages on new releases. This is a workaround to prevent nightly to fail.
     stagingUrl: https://github.com/newrelic/nri-ecs/releases/download/v1.3.1/nri-ecs_linux_1.3.1_{{.Arch}}.tar.gz
   - name: nri-elasticsearch
