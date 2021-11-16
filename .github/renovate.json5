@@ -50,6 +50,13 @@
         "newrelic/nrjmx"
       ],
       "allowedVersions": ">=1.7"
+    },
+    {
+      // nri-ecs moved to newrelic/nri-ecs image since 1.4.0.
+      "matchPackageNames": [
+        "newrelic/nri-ecs"
+      ],
+      "allowedVersions": "<=1.3.1"
     }
   ]
 }
