@@ -76,7 +76,7 @@ integrations:
   - name: nri-snmp
     version: v1.5.0
   - name: nri-varnish
-    version: v2.4.0
+    version: v2.5.0
   - name: nrjmx
     version: v1.7.3
     url: https://download.newrelic.com/infrastructure_agent/binaries/linux/noarch/nrjmx_linux_{{.Version | trimv}}_noarch.tar.gz
