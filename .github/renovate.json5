@@ -1,6 +1,9 @@
 {
   "extends": [
-    "config:base"
+    "config:base",
+    // Disable the creation of this issue that renovate updates with the pending issue we follow with Zenhub
+    // https://github.com/newrelic/infrastructure-bundle/issues/97
+    ":disableDependencyDashboard"
   ],
   // RegexManagers will match patterns and extract dependencies from bundle.yaml.
   "regexManagers": [
