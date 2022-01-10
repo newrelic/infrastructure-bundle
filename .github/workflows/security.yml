@@ -33,7 +33,7 @@ jobs:
           DOCKER_PLATFORMS=linux/amd64 ./docker-build.sh . --load
 
       - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@0.2.0
+        uses: aquasecurity/trivy-action@0.2.1
         with:
           image-ref: ${{ env.DOCKER_IMAGE }}:${{ env.DOCKER_IMAGE_TAG }}
           format: table
