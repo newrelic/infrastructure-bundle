@@ -46,7 +46,7 @@ integrations:
   - name: nri-elasticsearch
     version: v4.5.1
   - name: nri-f5
-    version: v2.4.1
+    version: v2.5.2
   - name: nri-haproxy
     version: v2.3.2
   - name: nri-jmx
@@ -58,17 +58,17 @@ integrations:
   - name: nri-mongodb
     version: v2.7.1
   - name: nri-mysql
-    version: v1.7.1
+    version: v1.8.0
   - name: nri-nagios
     version: v2.8.1
   - name: nri-nginx
     version: v3.2.2
   - name: nri-postgresql
-    version: v2.10.1
+    version: v2.10.2
   - name: nri-rabbitmq
-    version: v2.4.1
+    version: v2.4.2
   - name: nri-redis
-    version: v1.8.2
+    version: v1.9.0
   - name: nri-snmp
     version: v1.5.0
   - name: nri-varnish
