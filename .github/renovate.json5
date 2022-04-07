@@ -5,6 +5,9 @@
     // https://github.com/newrelic/infrastructure-bundle/issues/97
     ":disableDependencyDashboard"
   ],
+  // By default, assign the coreint team as reviewers.
+  // PRs related to the infra agent will be assigned to CAOS as per a packageRule below. 
+  "reviewers": "team:coreint",
   // RegexManagers will match patterns and extract dependencies from bundle.yaml.
   "regexManagers": [
     {
@@ -38,7 +41,14 @@
       "matchDatasources": [
         "github-releases"
       ],
-      "groupName": "Integrations"
+      "groupName": "Integrations",
+    },
+    {
+      // Assign PRs related to the agent to the caos team.
+      "matchPackageNames": [
+        "newrelic/infrastructure"
+      ],
+      "reviewers": "team:caos",
     },
     {
       // Group all GHA bumps together in a single PR.
