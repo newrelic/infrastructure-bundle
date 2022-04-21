@@ -7,7 +7,7 @@
   ],
   // By default, assign the coreint team as reviewers.
   // PRs related to the infra agent will be assigned to CAOS as per a packageRule below. 
-  "reviewers": "team:coreint",
+  "reviewers": ["team:coreint"],
   // RegexManagers will match patterns and extract dependencies from bundle.yaml.
   "regexManagers": [
     {
@@ -48,7 +48,7 @@
       "matchPackageNames": [
         "newrelic/infrastructure"
       ],
-      "reviewers": "team:caos",
+      "reviewers": ["team:caos"],
     },
     {
       // Group all GHA bumps together in a single PR.
