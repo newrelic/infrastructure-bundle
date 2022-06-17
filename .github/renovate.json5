@@ -5,6 +5,8 @@
     // https://github.com/newrelic/infrastructure-bundle/issues/97
     ":disableDependencyDashboard"
   ],
+  // Label PRs with `dependencies`.
+  "labels": ["dependencies"],
   // By default, assign the coreint team as reviewers.
   // PRs related to the infra agent will be assigned to CAOS as per a packageRule below. 
   "reviewers": ["team:coreint"],
