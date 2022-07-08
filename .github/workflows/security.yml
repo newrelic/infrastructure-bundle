@@ -47,4 +47,4 @@ jobs:
           SNYK_TOKEN: ${{ secrets.CAOS_SNYK_TOKEN }}
         with:
           image: ${{ env.DOCKER_IMAGE }}:${{ env.DOCKER_IMAGE_TAG }}
-          args: --file=Dockerfile
+          args: --file=Dockerfile --severity-threshold=critical
