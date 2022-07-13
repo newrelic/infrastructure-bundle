@@ -36,43 +36,43 @@ integrations:
 #    stagingUrl: "" # Defaults to global `stagingUrl`.
 #    repo: "" # Defaults to global `repo`.
   - name: nri-apache
-    version: v1.9.0
+    version: v1.9.1
   - name: nri-cassandra
-    version: v2.10.1
+    version: v2.10.2
   - name: nri-consul
-    version: v2.5.0
-  - name: nri-couchbase
     version: v2.5.1
-  - name: nri-elasticsearch
-    version: v4.5.2
-  - name: nri-f5
+  - name: nri-couchbase
     version: v2.5.2
+  - name: nri-elasticsearch
+    version: v4.5.3
+  - name: nri-f5
+    version: v2.5.3
   - name: nri-haproxy
-    version: v2.3.2
+    version: v2.3.3
   - name: nri-jmx
-    version: v3.0.2
+    version: v3.0.3
   - name: nri-kafka
     version: v2.19.1
   - name: nri-memcached
-    version: v2.4.0
+    version: v2.4.1
   - name: nri-mongodb
-    version: v2.7.1
+    version: v2.7.2
   - name: nri-mysql
-    version: v1.8.0
+    version: v1.8.1
   - name: nri-nagios
-    version: v2.8.1
+    version: v2.8.3
   - name: nri-nginx
-    version: v3.2.3
+    version: v3.2.4
   - name: nri-postgresql
-    version: v2.10.3
+    version: v2.10.4
   - name: nri-rabbitmq
-    version: v2.5.0
+    version: v2.5.1
   - name: nri-redis
-    version: v1.9.0
+    version: v1.9.1
   - name: nri-snmp
     version: v1.5.0
   - name: nrjmx
-    version: v2.0.2
+    version: v2.1.0
     url: https://download.newrelic.com/infrastructure_agent/binaries/linux/noarch/nrjmx_linux_{{.Version | trimv}}_noarch.tar.gz
     stagingUrl: https://github.com/newrelic/{{.Name}}/releases/download/{{.Version}}/nrjmx_linux_{{.Version | trimv}}_noarch.tar.gz
     testFiles:
