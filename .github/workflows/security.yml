@@ -39,7 +39,7 @@ jobs:
           format: table
           exit-code: 1
           ignore-unfixed: true
-          severity: CRITICAL,HIGH
+          severity: CRITICAL
 
       - name: Run Snyk to check Docker image for vulnerabilities
         uses: snyk/actions/docker@master
@@ -47,4 +47,4 @@ jobs:
           SNYK_TOKEN: ${{ secrets.CAOS_SNYK_TOKEN }}
         with:
           image: ${{ env.DOCKER_IMAGE }}:${{ env.DOCKER_IMAGE_TAG }}
-          args: --file=Dockerfile
+          args: --file=Dockerfile --severity-threshold=critical
