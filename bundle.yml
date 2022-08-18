@@ -46,13 +46,13 @@ integrations:
   - name: nri-elasticsearch
     version: v4.5.3
   - name: nri-f5
-    version: v2.5.3
+    version: v2.6.0
   - name: nri-haproxy
     version: v2.3.3
   - name: nri-jmx
-    version: v3.0.3
+    version: v3.1.0
   - name: nri-kafka
-    version: v3.0.0
+    version: v3.1.0
   - name: nri-memcached
     version: v2.4.1
   - name: nri-mongodb
@@ -72,13 +72,13 @@ integrations:
   - name: nri-snmp
     version: v1.5.0
   - name: nrjmx
-    version: v2.1.0
+    version: v2.1.1
     url: https://download.newrelic.com/infrastructure_agent/binaries/linux/noarch/nrjmx_linux_{{.Version | trimv}}_noarch.tar.gz
     stagingUrl: https://github.com/newrelic/{{.Name}}/releases/download/{{.Version}}/nrjmx_linux_{{.Version | trimv}}_noarch.tar.gz
     testFiles:
       - /usr/bin/nrjmx
   - name: nri-discovery-kubernetes
-    version: v1.4.0
+    version: v1.4.1
     url: https://github.com/newrelic/{{.Name}}/releases/download/{{.Version}}/{{.Name}}_{{.Version | trimv}}_Linux_{{.Arch}}.tar.gz
     stagingUrl: https://github.com/newrelic/{{.Name}}/releases/download/{{.Version}}/{{.Name}}_{{.Version | trimv}}_Linux_{{.Arch}}.tar.gz
     subpath: var/db/newrelic-infra
