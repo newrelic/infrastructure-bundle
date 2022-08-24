@@ -52,7 +52,7 @@ integrations:
   - name: nri-jmx
     version: v3.1.0
   - name: nri-kafka
-    version: v3.1.0
+    version: v3.2.0
   - name: nri-memcached
     version: v2.4.1
   - name: nri-mongodb
