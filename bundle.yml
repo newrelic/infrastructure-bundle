@@ -1,6 +1,6 @@
 # Version of the base agent image to use (`newrelic/infrastructure).
 # This is used by the `docker-build.sh` wrapper if AGENT_VERSION is not set
-agentVersion: 1.28.3
+agentVersion: 1.28.4
 
 # url, stagingUrl, and repo fields are compiled as templates. The `trimv` helper function can be used to remove the leading v
 # from a version string.
