@@ -1,12 +1,8 @@
 name: Security scan
 on:
-  push:
-    branches:
-      - master
-      - main
   pull_request:
   schedule:
-    - cron: "0 3 * * MON" # Every monday at 3 AM
+    - cron: "14 3 * * *" # Daily at 3:14 AM
 
 jobs:
   build:
@@ -32,14 +28,35 @@ jobs:
         run: |
           DOCKER_PLATFORMS=linux/amd64 ./docker-build.sh . --load
 
-      - name: Run Trivy vulnerability scanner
+      - name: Run Trivy in table mode
+        # Table output is only useful when running on a pull request.
+        if: ${{ github.event_name == 'pull_request' }}
         uses: aquasecurity/trivy-action@0.7.1
         with:
           image-ref: ${{ env.DOCKER_IMAGE }}:${{ env.DOCKER_IMAGE_TAG }}
           format: table
           exit-code: 1
           ignore-unfixed: true
-          severity: CRITICAL
+          severity: 'CRITICAL,HIGH'
+
+      - name: Run Trivy in report mode
+        # Only generate sarif when running nightly on the main branch.
+        if: ${{ github.event_name == 'schedule' }}
+        uses: aquasecurity/trivy-action@0.7.1
+        with:
+          image-ref: ${{ env.DOCKER_IMAGE }}:${{ env.DOCKER_IMAGE_TAG }}
+          format: 'template'
+          template: '@/contrib/sarif.tpl'
+          output: 'trivy-results.sarif'
+          ignore-unfixed: false  # Get full report when running nightly.
+          severity: 'CRITICAL,HIGH'
+
+      - name: Upload Trivy scan results to GitHub Security tab
+        # Only upload sarif when running nightly on the main branch.
+        if: ${{ github.event_name == 'schedule' }}
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: 'trivy-results.sarif'
 
       - name: Run Snyk to check Docker image for vulnerabilities
         uses: snyk/actions/docker@master
