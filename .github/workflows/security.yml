@@ -2,7 +2,7 @@ name: Security scan
 on:
   pull_request:
   schedule:
-    - cron: "0 3 * * MON" # Every monday at 3 AM
+    - cron: "14 3 * * *" # Daily at 3:14 AM
 
 jobs:
   build:
