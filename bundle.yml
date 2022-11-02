@@ -52,19 +52,19 @@ integrations:
   - name: nri-jmx
     version: v3.2.0
   - name: nri-kafka
-    version: v3.2.0
+    version: v3.2.1
   - name: nri-memcached
     version: v2.4.1
   - name: nri-mongodb
     version: v2.7.2
   - name: nri-mysql
-    version: v1.8.1
+    version: v1.8.2
   - name: nri-nagios
     version: v2.8.3
   - name: nri-nginx
-    version: v3.2.4
+    version: v3.2.5
   - name: nri-postgresql
-    version: v2.10.4
+    version: v2.10.5
   - name: nri-rabbitmq
     version: v2.7.0
   - name: nri-redis
@@ -78,7 +78,7 @@ integrations:
     testFiles:
       - /usr/bin/nrjmx
   - name: nri-discovery-kubernetes
-    version: v1.4.2
+    version: v1.5.0
     url: https://github.com/newrelic/{{.Name}}/releases/download/{{.Version}}/{{.Name}}_{{.Version | trimv}}_Linux_{{.Arch}}.tar.gz
     stagingUrl: https://github.com/newrelic/{{.Name}}/releases/download/{{.Version}}/{{.Name}}_{{.Version | trimv}}_Linux_{{.Arch}}.tar.gz
     subpath: var/db/newrelic-infra
