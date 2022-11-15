@@ -50,9 +50,9 @@ integrations:
   - name: nri-haproxy
     version: v2.3.3
   - name: nri-jmx
-    version: v3.2.0
-  - name: nri-kafka
     version: v3.2.1
+  - name: nri-kafka
+    version: v3.2.2
   - name: nri-memcached
     version: v2.4.1
   - name: nri-mongodb
@@ -72,7 +72,7 @@ integrations:
   - name: nri-snmp
     version: v1.5.0
   - name: nrjmx
-    version: v2.2.2
+    version: v2.3.2
     url: https://download.newrelic.com/infrastructure_agent/binaries/linux/noarch/nrjmx_linux_{{.Version | trimv}}_noarch.tar.gz
     stagingUrl: https://github.com/newrelic/{{.Name}}/releases/download/{{.Version}}/nrjmx_linux_{{.Version | trimv}}_noarch.tar.gz
     testFiles:
