@@ -1,5 +1,9 @@
 name: Security scan
 on:
+  push:
+    branches:
+      - master
+      - main
   pull_request:
   schedule:
     - cron: "14 3 * * *" # Daily at 3:14 AM
@@ -57,11 +61,3 @@ jobs:
         uses: github/codeql-action/upload-sarif@v2
         with:
           sarif_file: 'trivy-results.sarif'
-
-      - name: Run Snyk to check Docker image for vulnerabilities
-        uses: snyk/actions/docker@master
-        env:
-          SNYK_TOKEN: ${{ secrets.CAOS_SNYK_TOKEN }}
-        with:
-          image: ${{ env.DOCKER_IMAGE }}:${{ env.DOCKER_IMAGE_TAG }}
-          args: --file=Dockerfile --severity-threshold=critical
