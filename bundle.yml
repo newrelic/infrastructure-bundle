@@ -69,8 +69,6 @@ integrations:
     version: v2.7.0
   - name: nri-redis
     version: v1.9.1
-  - name: nri-snmp
-    version: v1.5.0
   - name: nrjmx
     version: v2.3.2
     url: https://download.newrelic.com/infrastructure_agent/binaries/linux/noarch/nrjmx_linux_{{.Version | trimv}}_noarch.tar.gz
