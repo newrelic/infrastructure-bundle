@@ -86,3 +86,5 @@ integrations:
       amd64: x86_64
     testFiles:
       - /var/db/newrelic-infra/nri-discovery-kubernetes
+  - name: nri-mssql
+    version: v2.8.7
