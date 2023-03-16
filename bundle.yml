@@ -36,9 +36,9 @@ integrations:
 #    stagingUrl: "" # Defaults to global `stagingUrl`.
 #    repo: "" # Defaults to global `repo`.
   - name: nri-apache
-    version: v1.9.1
+    version: v1.10.0
   - name: nri-cassandra
-    version: v2.11.0
+    version: v2.12.0
   - name: nri-consul
     version: v2.5.1
   - name: nri-couchbase
@@ -48,11 +48,11 @@ integrations:
   - name: nri-f5
     version: v2.6.0
   - name: nri-haproxy
-    version: v2.3.3
+    version: v2.4.0
   - name: nri-jmx
     version: v3.2.1
   - name: nri-kafka
-    version: v3.3.0
+    version: v3.4.0
   - name: nri-memcached
     version: v2.4.1
   - name: nri-mongodb
@@ -66,7 +66,7 @@ integrations:
   - name: nri-postgresql
     version: v2.10.5
   - name: nri-rabbitmq
-    version: v2.8.0
+    version: v2.10.0
   - name: nri-redis
     version: v1.9.1
   - name: nrjmx
@@ -76,7 +76,7 @@ integrations:
     testFiles:
       - /usr/bin/nrjmx
   - name: nri-discovery-kubernetes
-    version: v1.5.0
+    version: v1.6.0
     url: https://github.com/newrelic/{{.Name}}/releases/download/{{.Version}}/{{.Name}}_{{.Version | trimv}}_Linux_{{.Arch}}.tar.gz
     stagingUrl: https://github.com/newrelic/{{.Name}}/releases/download/{{.Version}}/{{.Name}}_{{.Version | trimv}}_Linux_{{.Arch}}.tar.gz
     subpath: var/db/newrelic-infra
