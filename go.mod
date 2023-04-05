@@ -4,7 +4,7 @@ go 1.19
 
 require (
 	github.com/google/go-github/v39 v39.2.0
-	github.com/google/go-github/v50 v50.2.0
+	github.com/google/go-github/v51 v51.0.0
 	golang.org/x/oauth2 v0.6.0
 	gopkg.in/yaml.v3 v3.0.1
 )
