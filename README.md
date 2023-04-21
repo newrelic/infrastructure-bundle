@@ -51,6 +51,16 @@ Locally, this can be also be done with the `./run-ci-locally.sh` script:
 DOCKER_IMAGE_TAG=0.0.1-rc ./run-ci-locally.sh release
 ```
 
+## Release Creation
+
+Releases are created automatically according to the `CHANGELOG.md`
+
+You can check locally the correctness of the configuration running:
+```bash
+curl "https://raw.githubusercontent.com/newrelic/release-toolkit/v1/contrib/ohi-release-notes/run.sh" | bash -s -- $(filter-out $@,$(MAKECMDGOALS))
+```
+
+
 ## Bumping versions
 
 Versions, urls, and architectures of the bundled integrations are defined in `bundle.yml`.
