@@ -21,8 +21,7 @@ jobs:
         uses: docker/setup-buildx-action@v2
       - uses: actions/setup-go@v4
         with:
-          go-version: '1.19'
-
+          go-version-file: go.mod
       - name: Download integrations
         env:
           # GITHUB_TOKEN is needed when -override-latest is used so we don't reach GH API rate limit
