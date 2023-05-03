@@ -70,7 +70,7 @@ integrations:
   - name: nri-redis
     version: v1.9.1
   - name: nrjmx
-    version: v2.3.2
+    version: v2.4.0
     url: https://download.newrelic.com/infrastructure_agent/binaries/linux/noarch/nrjmx_linux_{{.Version | trimv}}_noarch.tar.gz
     stagingUrl: https://github.com/newrelic/{{.Name}}/releases/download/{{.Version}}/nrjmx_linux_{{.Version | trimv}}_noarch.tar.gz
     testFiles:
