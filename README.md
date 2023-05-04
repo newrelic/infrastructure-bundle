@@ -55,11 +55,7 @@ DOCKER_IMAGE_TAG=0.0.1-rc ./run-ci-locally.sh release
 
 Releases are created automatically according to the `CHANGELOG.md`
 
-You can check locally the correctness of the configuration running:
-```bash
-curl "https://raw.githubusercontent.com/newrelic/release-toolkit/v1/contrib/ohi-release-notes/run.sh" | bash -s -- $(filter-out $@,$(MAKECMDGOALS))
-```
-
+You can check locally the correctness of the configuration following [these steps](https://github.com/newrelic/release-toolkit/tree/main/contrib/ohi-release-notes#use-script-locally).
 
 ## Bumping versions
 
