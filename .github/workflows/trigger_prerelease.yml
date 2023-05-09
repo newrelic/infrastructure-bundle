@@ -2,7 +2,7 @@ name: Trigger prerelease creation
 
 # This workflow triggers a prerelease creation with changelog and the release notes created by the release toolkit.
 # This workflow should be triggered merely from the default branch.
-# If you wish to be 100% free creating a prerelease, just create it manually.
+# For more details about how to release follow https://github.com/newrelic/coreint-automation/docs/release_runbook.md
 
 on:
   workflow_dispatch:
