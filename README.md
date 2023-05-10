@@ -43,6 +43,9 @@ DOCKER_BUILDKIT=1 docker build . -t newrelic/infrastructure-bundle:dev
 
 ## Release
 
+Follow this [guide](https://github.com/newrelic/coreint-automation/blob/main/docs/release_runbook.md) to create a release.
+
+### Released Images
 CI workflow pushes the multiarch image to [dockerhub](https://hub.docker.com/repository/docker/newrelic/infrastructure-bundle/tags) by running `docker buildx` with `--push` whenever a release or prerelease is published in Github. The tag is generated from the release tag (after stripping the leading `v`). Additionally, prereleases will have an `-rc` suffix automatically appended to the tag.
 
 Locally, this can be also be done with the `./run-ci-locally.sh` script:
@@ -50,6 +53,7 @@ Locally, this can be also be done with the `./run-ci-locally.sh` script:
 ```bash
 DOCKER_IMAGE_TAG=0.0.1-rc ./run-ci-locally.sh release
 ```
+
 
 ## Bumping versions
 

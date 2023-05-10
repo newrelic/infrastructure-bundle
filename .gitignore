@@ -2,3 +2,6 @@ out/
 .idea
 /vendor
 /build
+
+# Release toolkit
+CHANGELOG.partial.md
