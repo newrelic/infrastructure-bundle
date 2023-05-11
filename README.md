@@ -57,6 +57,8 @@ DOCKER_IMAGE_TAG=0.0.1-rc ./run-ci-locally.sh release
 
 ## Bumping versions
 
+**Note** Renovate should take care of bumping versions, and auto-merge them when all checks passes. If so automatically releases will pick that versions bumps without needed to add any changelog.
+
 Versions, urls, and architectures of the bundled integrations are defined in `bundle.yml`.
 
 The version of the [base agent image](https://hub.docker.com/repository/docker/newrelic/infrastructure/tags) is also defined in `bundle.yml`, and is collected by the `docker-build.sh` wrapper script.
