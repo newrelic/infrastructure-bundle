@@ -15,6 +15,7 @@ Unreleased section should follow [Release Toolkit](https://github.com/newrelic/r
 - The integration releases are now triggered automatically.
 
 ### ⛓️ Dependencies
+- Updated newrelic/infrastructure to v1.41.0 - [Changelog 🔗](https://github.com/newrelic/infrastructure-agent/releases/tag/1.41.0)
 - Updated newrelic/nri-rabbitmq to v2.11.0 - [Changelog 🔗](https://github.com/newrelic/nri-rabbitmq/releases/tag/2.11.0)
 - Updated newrelic/nrjmx to v2.4.0 - [Changelog 🔗](https://github.com/newrelic/nrjmx/releases/tag/2.4.0)
 - Updated newrelic/nri-kafka to v3.4.3 - [Changelog 🔗](https://github.com/newrelic/nri-kafka/releases/tag/3.4.3)
