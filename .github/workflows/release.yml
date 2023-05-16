@@ -19,7 +19,7 @@ jobs:
       # The DOCKER_IMAGE_TAG var is generated here from the release tag, after some validation
       - name: Generate docker image version from git tag
         run: |
-          echo "${{ github.event.release.tag_name }}" | grep -E '^[0-9.]*[0-9]$'
+          echo "${{ github.event.release.tag_name }}" | grep -E '^[v]*[0-9.]*[0-9]$'
           DOCKER_IMAGE_TAG=$(echo "${{ github.event.release.tag_name }}" | sed 's/^v//')
           echo "DOCKER_IMAGE_TAG=$DOCKER_IMAGE_TAG" >> $GITHUB_ENV
       # On prereleases, "-rc" is appended to DOCKER_IMAGE_TAG
