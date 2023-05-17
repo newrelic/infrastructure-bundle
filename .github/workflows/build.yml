@@ -5,6 +5,7 @@ on:
     branches:
       - master
       - main
+      - renovate/**
   pull_request:
 
 jobs:
