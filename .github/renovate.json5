@@ -1,9 +1,6 @@
 {
   "extends": [
-    "config:base",
-    // Disable the creation of this issue that renovate updates with the pending issue we follow with Zenhub
-    // https://github.com/newrelic/infrastructure-bundle/issues/97
-    ":disableDependencyDashboard"
+    "config:base"
   ],
   // Label PRs with `dependencies`.
   "labels": ["dependencies"],
@@ -44,7 +41,7 @@
       // according to the SemVer spec.
       "matchCurrentVersion": "!/^(0|v0)/",
       // Renovate will do the following when detecting a new dependency bump:
-      // - If it's one of the exclusions it will create a PR (major, 0. or v0. and sarama)
+      // - If it's one of the exclusions it will create a PR (major, 0. or v0.)
       // - In case it matches one of the rest cases, it will create a branch that will be auto merged if tests pass.
       // - If in the previous step tests fail, a PR will be created instead of merging the branch.
       "automerge": true,
