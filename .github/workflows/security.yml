@@ -31,8 +31,8 @@ jobs:
           DOCKER_PLATFORMS=linux/amd64 ./docker-build.sh . --load
 
       - name: Run Trivy in table mode
-        # Table output is only useful when running on a pull request.
-        if: ${{ github.event_name == 'pull_request' }}
+        # Table output is only useful when running on a pull request or push.
+        if: contains(fromJSON('["push", "pull_request"]'), github.event_name)
         uses: aquasecurity/trivy-action@0.10.0
         with:
           image-ref: ${{ env.DOCKER_IMAGE }}:${{ env.DOCKER_IMAGE_TAG }}
