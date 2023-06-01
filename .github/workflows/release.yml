@@ -3,6 +3,8 @@ name: Container release
 on:
   release:
     types: [ prereleased, released ]
+env:
+  ORIGINAL_REPO_NAME: 'newrelic/infrastructure-bundle'
 jobs:
   build:
     name: Build and push image
@@ -43,3 +45,15 @@ jobs:
         env:
           DOCKER_IMAGE_TAG: latest
         run: ./docker-build.sh . --push
+
+  notify-failure:
+    if: ${{ always() && failure() }}
+    needs: [build]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Notify failure via Slack
+        uses: archive/github-actions-slack@master
+        with:
+          slack-bot-user-oauth-access-token: ${{ secrets.COREINT_SLACK_TOKEN }}
+          slack-channel: ${{ secrets.COREINT_SLACK_CHANNEL }}
+          slack-text: "❌ `${{ env.ORIGINAL_REPO_NAME }}`: [release pipeline failed](${{ github.server_url }}/${{ env.ORIGINAL_REPO_NAME }}/actions/runs/${{ github.run_id }})."
