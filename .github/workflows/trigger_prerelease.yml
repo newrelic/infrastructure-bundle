@@ -12,7 +12,9 @@ on:
 jobs:
   prerelease:
     uses: newrelic/coreint-automation/.github/workflows/trigger_prerelease.yaml@v1
+    with:
+      rt-included-files: bundle.yml
     secrets:
       bot_token: ${{ secrets.COREINT_BOT_TOKEN }}
-      slack_channel:  ${{ secrets.COREINT_SLACK_CHANNEL }}
+      slack_channel:  ${{ secrets.CAOS_COREINT_SLACK_CHANNEL }}
       slack_token: ${{ secrets.COREINT_SLACK_TOKEN }}
