@@ -30,7 +30,7 @@ jobs:
 
       - name: Run Trivy vulnerability scanner
         continue-on-error: true
-        uses: aquasecurity/trivy-action@0.10.0
+        uses: aquasecurity/trivy-action@0.11.0
         with:
           image-ref: ${{ env.DOCKER_IMAGE }}:${{ env.DOCKER_IMAGE_TAG }}
           format: table
