@@ -9,6 +9,11 @@ Unreleased section should follow [Release Toolkit](https://github.com/newrelic/r
 
 ## Unreleased
 
+## v3.2.6 - 2023-06-08
+
+### ⛓️ Dependencies
+- Updated newrelic/nri-rabbitmq to v2.12.0 - [Changelog 🔗](https://github.com/newrelic/nri-rabbitmq/releases/tag/2.12.0)
+
 ## v3.2.5 - 2023-06-07
 
 ### ⛓️ Dependencies
