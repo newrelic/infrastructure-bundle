@@ -4,7 +4,7 @@ go 1.20
 
 require (
 	github.com/google/go-github/v52 v52.0.0
-	github.com/google/go-github/v53 v53.0.0
+	github.com/google/go-github/v53 v53.1.0
 	golang.org/x/oauth2 v0.8.0
 	gopkg.in/yaml.v3 v3.0.1
 )
