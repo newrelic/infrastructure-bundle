@@ -3,7 +3,7 @@ module github.com/newrelic/infrastructure-bundle/builder
 go 1.20
 
 require (
-	github.com/google/go-github/v53 v53.1.0
+	github.com/google/go-github/v53 v53.2.0
 	golang.org/x/oauth2 v0.8.0
 	gopkg.in/yaml.v3 v3.0.1
 )
