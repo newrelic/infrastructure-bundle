@@ -9,6 +9,16 @@ Unreleased section should follow [Release Toolkit](https://github.com/newrelic/r
 
 ## Unreleased
 
+## v3.2.13 - 2023-08-03
+
+### ⛓️ Dependencies
+- Updated newrelic/nri-postgresql to v2.12.1 - [Changelog 🔗](https://github.com/newrelic/nri-postgresql/releases/tag/2.12.1)
+- Updated newrelic/nri-consul to v2.7.0 - [Changelog 🔗](https://github.com/newrelic/nri-consul/releases/tag/2.7.0)
+- Updated newrelic/nri-elasticsearch to v5.2.0 - [Changelog 🔗](https://github.com/newrelic/nri-elasticsearch/releases/tag/5.2.0)
+- Updated newrelic/nri-mssql to v2.10.0 - [Changelog 🔗](https://github.com/newrelic/nri-mssql/releases/tag/2.10.0)
+- Updated newrelic/nri-mysql to v1.10.0 - [Changelog 🔗](https://github.com/newrelic/nri-mysql/releases/tag/1.10.0)
+- Updated newrelic/nri-rabbitmq to v2.13.0 - [Changelog 🔗](https://github.com/newrelic/nri-rabbitmq/releases/tag/2.13.0)
+
 ## v3.2.12 - 2023-07-25
 
 ### ⛓️ Dependencies
