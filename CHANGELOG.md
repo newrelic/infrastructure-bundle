@@ -9,6 +9,16 @@ Unreleased section should follow [Release Toolkit](https://github.com/newrelic/r
 
 ## Unreleased
 
+## v3.2.14 - 2023-08-10
+
+### ⛓️ Dependencies
+- Updated newrelic/nri-redis to v1.11.1 - [Changelog 🔗](https://github.com/newrelic/nri-redis/releases/tag/1.11.1)
+- Updated newrelic/nri-consul to v2.7.1 - [Changelog 🔗](https://github.com/newrelic/nri-consul/releases/tag/2.7.1)
+- Updated newrelic/nri-mysql to v1.10.1 - [Changelog 🔗](https://github.com/newrelic/nri-mysql/releases/tag/1.10.1)
+- Updated newrelic/nri-postgresql to v2.12.2 - [Changelog 🔗](https://github.com/newrelic/nri-postgresql/releases/tag/2.12.2)
+- Updated newrelic/nri-elasticsearch to v5.2.1 - [Changelog 🔗](https://github.com/newrelic/nri-elasticsearch/releases/tag/5.2.1)
+- Updated newrelic/nri-mssql to v2.10.1 - [Changelog 🔗](https://github.com/newrelic/nri-mssql/releases/tag/2.10.1)
+
 ## v3.2.13 - 2023-08-03
 
 ### ⛓️ Dependencies
