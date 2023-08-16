@@ -17,7 +17,7 @@ import (
 	"sync"
 	"text/template"
 
-	"github.com/google/go-github/v53/github"
+	"github.com/google/go-github/v54/github"
 	"golang.org/x/oauth2"
 	"gopkg.in/yaml.v3"
 )
