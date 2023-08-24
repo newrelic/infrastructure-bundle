@@ -9,6 +9,13 @@ Unreleased section should follow [Release Toolkit](https://github.com/newrelic/r
 
 ## Unreleased
 
+## v3.2.15 - 2023-08-24
+
+### ⛓️ Dependencies
+- Updated newrelic/nri-nginx to v3.4.1 - [Changelog 🔗](https://github.com/newrelic/nri-nginx/releases/tag/3.4.1)
+- Updated newrelic/nri-rabbitmq to v2.13.1 - [Changelog 🔗](https://github.com/newrelic/nri-rabbitmq/releases/tag/2.13.1)
+- Updated newrelic/nri-f5 to v2.7.1 - [Changelog 🔗](https://github.com/newrelic/nri-f5/releases/tag/2.7.1)
+
 ## v3.2.14 - 2023-08-10
 
 ### ⛓️ Dependencies
