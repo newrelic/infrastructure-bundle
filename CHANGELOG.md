@@ -9,6 +9,11 @@ Unreleased section should follow [Release Toolkit](https://github.com/newrelic/r
 
 ## Unreleased
 
+## v3.2.18 - 2023-09-07
+
+### ⛓️ Dependencies
+- Updated newrelic/nri-jmx to v3.4.0 - [Changelog 🔗](https://github.com/newrelic/nri-jmx/releases/tag/3.4.0)
+
 ## v3.2.17 - 2023-08-31
 
 ### ⛓️ Dependencies
