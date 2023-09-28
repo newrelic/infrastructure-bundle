@@ -9,6 +9,12 @@ Unreleased section should follow [Release Toolkit](https://github.com/newrelic/r
 
 ## Unreleased
 
+## v3.2.20 - 2023-09-28
+
+### ⛓️ Dependencies
+- Updated newrelic/nri-consul to v2.7.2 - [Changelog 🔗](https://github.com/newrelic/nri-consul/releases/tag/2.7.2)
+- Updated newrelic/nri-apache to v1.12.0 - [Changelog 🔗](https://github.com/newrelic/nri-apache/releases/tag/1.12.0)
+
 ## v3.2.19 - 2023-09-21
 
 ### ⛓️ Dependencies
