@@ -9,6 +9,11 @@ Unreleased section should follow [Release Toolkit](https://github.com/newrelic/r
 
 ## Unreleased
 
+## v3.2.22 - 2023-10-19
+
+### ⛓️ Dependencies
+- Updated newrelic/nri-apache to v1.12.1 - [Changelog 🔗](https://github.com/newrelic/nri-apache/releases/tag/1.12.1)
+
 ## v3.2.21 - 2023-09-29
 
 ### ⛓️ Dependencies
