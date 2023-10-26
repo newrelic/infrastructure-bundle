@@ -9,6 +9,13 @@ Unreleased section should follow [Release Toolkit](https://github.com/newrelic/r
 
 ## Unreleased
 
+## v3.2.23 - 2023-10-26
+
+### ⛓️ Dependencies
+- Updated newrelic/infrastructure to v1.48.0 - [Changelog 🔗](https://github.com/newrelic/infrastructure-agent/releases/tag/1.48.0)
+- Updated newrelic/nri-cassandra to v2.13.2 - [Changelog 🔗](https://github.com/newrelic/nri-cassandra/releases/tag/2.13.2)
+- Updated newrelic/nri-couchbase to v2.6.1 - [Changelog 🔗](https://github.com/newrelic/nri-couchbase/releases/tag/2.6.1)
+
 ## v3.2.22 - 2023-10-19
 
 ### ⛓️ Dependencies
