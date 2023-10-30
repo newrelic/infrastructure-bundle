@@ -56,7 +56,7 @@ integrations:
   - name: nri-memcached
     version: v2.5.1
   - name: nri-mongodb
-    version: v2.8.0
+    version: v2.8.1
   - name: nri-mysql
     version: v1.10.2
   - name: nri-nagios
