@@ -9,6 +9,19 @@ Unreleased section should follow [Release Toolkit](https://github.com/newrelic/r
 
 ## Unreleased
 
+## v3.2.24 - 2023-11-02
+
+### ⛓️ Dependencies
+- Updated newrelic/nri-kafka to v3.4.9 - [Changelog 🔗](https://github.com/newrelic/nri-kafka/releases/tag/3.4.9)
+- Updated newrelic/nri-f5 to v2.7.2 - [Changelog 🔗](https://github.com/newrelic/nri-f5/releases/tag/2.7.2)
+- Updated newrelic/nri-memcached to v2.5.1 - [Changelog 🔗](https://github.com/newrelic/nri-memcached/releases/tag/2.5.1)
+- Updated newrelic/nri-mysql to v1.10.2 - [Changelog 🔗](https://github.com/newrelic/nri-mysql/releases/tag/1.10.2)
+- Updated newrelic/nri-mongodb to v2.8.1 - [Changelog 🔗](https://github.com/newrelic/nri-mongodb/releases/tag/2.8.1)
+- Updated newrelic/nri-redis to v1.11.2 - [Changelog 🔗](https://github.com/newrelic/nri-redis/releases/tag/1.11.2)
+- Updated newrelic/nri-elasticsearch to v5.2.2 - [Changelog 🔗](https://github.com/newrelic/nri-elasticsearch/releases/tag/5.2.2)
+- Updated newrelic/nri-haproxy to v2.5.1 - [Changelog 🔗](https://github.com/newrelic/nri-haproxy/releases/tag/2.5.1)
+- Updated newrelic/nri-nagios to v2.9.1 - [Changelog 🔗](https://github.com/newrelic/nri-nagios/releases/tag/2.9.1)
+
 ## v3.2.23 - 2023-10-26
 
 ### ⛓️ Dependencies
