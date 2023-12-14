@@ -9,6 +9,15 @@ Unreleased section should follow [Release Toolkit](https://github.com/newrelic/r
 
 ## Unreleased
 
+## v3.2.26 - 2023-12-14
+
+### ⛓️ Dependencies
+- Updated newrelic/nri-discovery-kubernetes to v1.7.2 - [Changelog 🔗](https://github.com/newrelic/nri-discovery-kubernetes/releases/tag/v1.7.2)
+- Updated newrelic/nri-kafka to v3.6.0 - [Changelog 🔗](https://github.com/newrelic/nri-kafka/releases/tag/v3.6.0)
+- Updated newrelic/nri-consul to v2.7.3 - [Changelog 🔗](https://github.com/newrelic/nri-consul/releases/tag/v2.7.3)
+- Updated newrelic/nri-mssql to v2.10.2 - [Changelog 🔗](https://github.com/newrelic/nri-mssql/releases/tag/v2.10.2)
+- Updated newrelic/nri-rabbitmq to v2.13.2 - [Changelog 🔗](https://github.com/newrelic/nri-rabbitmq/releases/tag/v2.13.2)
+
 ## v3.2.25 - 2023-11-15
 
 ### ⛓️ Dependencies
