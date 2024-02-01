@@ -9,6 +9,13 @@ Unreleased section should follow [Release Toolkit](https://github.com/newrelic/r
 
 ## Unreleased
 
+## v3.2.29 - 2024-02-01
+
+### ⛓️ Dependencies
+- Updated newrelic/nri-apache to v1.12.2 - [Changelog 🔗](https://github.com/newrelic/nri-apache/releases/tag/v1.12.2)
+- Updated newrelic/nri-mssql to v2.10.3 - [Changelog 🔗](https://github.com/newrelic/nri-mssql/releases/tag/v2.10.3)
+- Updated newrelic/nri-kafka to v3.7.0 - [Changelog 🔗](https://github.com/newrelic/nri-kafka/releases/tag/v3.7.0)
+
 ## v3.2.28 - 2024-01-25
 
 ### ⛓️ Dependencies
