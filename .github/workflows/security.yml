@@ -69,7 +69,7 @@ jobs:
           args: --file=Dockerfile --severity-threshold=critical
   
   notify-failure:
-    if: ${{ always() && failure() }}
+    if: ${{ github.event_name == 'schedule' && failure() }}
     needs: [build]
     runs-on: ubuntu-latest
     steps:
@@ -78,4 +78,4 @@ jobs:
         with:
           slack-bot-user-oauth-access-token: ${{ secrets.COREINT_SLACK_TOKEN }}
           slack-channel: ${{ secrets.CAOS_COREINT_SLACK_CHANNEL }}
-          slack-text: "❌ `${{ env.ORIGINAL_REPO_NAME }}`: [security pipeline failed](${{ github.server_url }}/${{ env.ORIGINAL_REPO_NAME }}/actions/runs/${{ github.run_id }})."
+          slack-text: "❌ `'newrelic/infrastructure-bundle'`: [security pipeline failed](${{ github.server_url }}/newrelic/infrastructure-bundle/actions/runs/${{ github.run_id }})."
