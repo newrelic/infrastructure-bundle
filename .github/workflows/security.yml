@@ -67,3 +67,15 @@ jobs:
         with:
           image: ${{ env.DOCKER_IMAGE }}:${{ env.DOCKER_IMAGE_TAG }}
           args: --file=Dockerfile --severity-threshold=critical
+  
+  notify-failure:
+    if: ${{ github.event_name == 'schedule' && failure() }}
+    needs: [build]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Notify failure via Slack
+        uses: archive/github-actions-slack@master
+        with:
+          slack-bot-user-oauth-access-token: ${{ secrets.COREINT_SLACK_TOKEN }}
+          slack-channel: ${{ secrets.CAOS_COREINT_SLACK_CHANNEL }}
+          slack-text: "❌ `'newrelic/infrastructure-bundle'`: [security pipeline failed](${{ github.server_url }}/newrelic/infrastructure-bundle/actions/runs/${{ github.run_id }})."
