@@ -58,7 +58,8 @@ func main() {
 	outdir := flag.String("outdir", "out", "path to output directory")
 	workers := flag.Int("workers", 4, "number of download threads")
 	agentonly := flag.Bool("agent-version", false, "print agent version and exit")
-	staging := flag.Bool("staging", false, "use stagingUrl")
+	agentlatest := flag.Bool("agent-version-latest", false, "print latest agent version and exit")
+	staging := flag.Bool("staging", false, "use stagingUrl and pre-releases")
 	overrideLatest := flag.Bool("override-latest", false, "ignore version and download latest from GitHub")
 	checkLatest := flag.Bool("check-latest", false, "check for new versions and exit")
 	flag.Parse()
@@ -77,6 +78,17 @@ func main() {
 	// Print agent version and exit
 	if *agentonly {
 		fmt.Print(conf.AgentVersion)
+		return
+	}
+
+	// Print agent version and exit
+	if *agentlatest {
+		gh := github.NewClient(oauthClientFromEnv())
+		v, err := getLatestAgent(gh, conf.AgentVersion, *staging)
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Print(v)
 		return
 	}
 
@@ -132,6 +144,26 @@ func main() {
 	}
 
 	log.Printf("All done, integrations installed to '%s'", *outdir)
+}
+
+// getLatestAgent fetches the image name of the latest agent release (or prerelease)
+func getLatestAgent(gh *github.Client, curentVersion string, useStaging bool) (string, error) {
+	org := "newrelic"
+	repo := "infrastructure-agent"
+	newVersion, err := findLatestRelease(gh, useStaging, org, repo)
+	if err != nil {
+		return "", fmt.Errorf("failed to retrieve latest release: %w", err)
+	}
+
+	if curentVersion != newVersion {
+		log.Printf("%s %s -> %s", repo, curentVersion, newVersion)
+	}
+
+	if useStaging {
+		return newVersion + "-rc", nil
+	}
+
+	return newVersion, nil
 }
 
 // expand compiles templates, extends defaults to integrations and performs basic validation
@@ -353,15 +385,31 @@ func (i *integration) overrideVersion(gh *github.Client, includePrereleases bool
 		return fmt.Errorf("bad format for org/repo: %s", i.Repo)
 	}
 
-	log.Printf("Fetching releases for %s...", i.Name)
+	newVersion, err := findLatestRelease(gh, includePrereleases, orgRepo[0], orgRepo[1])
+	if err != nil {
+		return err
+	}
+
+	if i.Version != newVersion {
+		log.Printf("%s %s -> %s", i.Name, i.Version, newVersion)
+		i.oldVersion = i.Version
+		i.Version = newVersion
+	}
+
+	return nil
+}
+
+func findLatestRelease(gh *github.Client, includePrereleases bool, org string, repo string) (string, error) {
+
+	log.Printf("Fetching releases for %s...", repo)
 
 	allReleases := make([]*github.RepositoryRelease, 0, 30) // GH returns max 30 releases per page
 	for page := 1; page != 0; {
-		releases, response, err := gh.Repositories.ListReleases(context.Background(), orgRepo[0], orgRepo[1], &github.ListOptions{
+		releases, response, err := gh.Repositories.ListReleases(context.Background(), org, repo, &github.ListOptions{
 			Page: page,
 		})
 		if err != nil {
-			return fmt.Errorf("could not get releases for %s: %w", i.Repo, err)
+			return "", fmt.Errorf("could not get releases for %s: %w", repo, err)
 		}
 
 		allReleases = append(allReleases, releases...)
@@ -372,7 +420,7 @@ func (i *integration) overrideVersion(gh *github.Client, includePrereleases bool
 	for _, r := range allReleases {
 		// Filter out pre-releases if `includePrereleases` is not set.
 		if !includePrereleases && r.GetPrerelease() {
-			log.Printf("skipping pre-release %s %s", i.Name, r.GetTagName())
+			log.Printf("skipping pre-release %s %s", repo, r.GetTagName())
 			continue
 		}
 
@@ -380,7 +428,7 @@ func (i *integration) overrideVersion(gh *github.Client, includePrereleases bool
 	}
 
 	if len(releases) == 0 {
-		return fmt.Errorf("repo %s does not have any acceptable release", i.Repo)
+		return "", fmt.Errorf("repo %s does not have any acceptable release", repo)
 	}
 
 	// Sort most recent first
@@ -391,16 +439,9 @@ func (i *integration) overrideVersion(gh *github.Client, includePrereleases bool
 
 	newVersion := releases[0].GetTagName()
 	if newVersion == "" {
-		return fmt.Errorf("tagName for latest release of %s is empty", i.Repo)
+		return "", fmt.Errorf("tagName for latest release of %s is empty", repo)
 	}
-
-	if i.Version != newVersion {
-		log.Printf("%s %s -> %s", i.Name, i.Version, newVersion)
-		i.oldVersion = i.Version
-		i.Version = newVersion
-	}
-
-	return nil
+	return newVersion, nil
 }
 
 // oauthClientFromEnv returns an OAuth client using the GITHUB_TOKEN env var if it's present, or http.DefaultClient otherwise
