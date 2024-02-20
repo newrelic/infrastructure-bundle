@@ -44,5 +44,7 @@ jobs:
           username: ${{ secrets.OHAI_DOCKER_HUB_ID }}
           password: ${{ secrets.OHAI_DOCKER_HUB_PASSWORD }}
       - name: Build and push docker image
-        run: ./docker-build.sh . --push
+        run: |
+          export AGENT_VERSION=`go run ./downloader.go -agent-version-latest -staging`
+          ./docker-build.sh . --push
 

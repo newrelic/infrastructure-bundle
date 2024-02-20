@@ -16,6 +16,8 @@ if [ -z "$AGENT_VERSION" ]; then
     fi
 fi
 
+echo Building the image leveraging agent_version=$AGENT_VERSION
+
 docker buildx build \
   --platform="${DOCKER_PLATFORMS}" \
   --build-arg agent_version="$AGENT_VERSION" \
