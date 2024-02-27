@@ -44,7 +44,7 @@ integrations:
   - name: nri-couchbase
     version: v2.6.1
   - name: nri-elasticsearch
-    version: v5.2.2
+    version: v5.2.3
   - name: nri-f5
     version: v2.7.2
   - name: nri-haproxy
