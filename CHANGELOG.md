@@ -9,6 +9,12 @@ Unreleased section should follow [Release Toolkit](https://github.com/newrelic/r
 
 ## Unreleased
 
+## v3.2.32 - 2024-03-07
+
+### ⛓️ Dependencies
+- Updated newrelic/nrjmx to v2.6.0 - [Changelog 🔗](https://github.com/newrelic/nrjmx/releases/tag/v2.6.0)
+- Updated newrelic/nri-jmx to v3.6.0 - [Changelog 🔗](https://github.com/newrelic/nri-jmx/releases/tag/v3.6.0)
+
 ## v3.2.31 - 2024-02-29
 
 ### ⛓️ Dependencies
