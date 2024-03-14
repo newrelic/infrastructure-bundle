@@ -9,6 +9,15 @@ Unreleased section should follow [Release Toolkit](https://github.com/newrelic/r
 
 ## Unreleased
 
+## v3.2.34 - 2024-03-14
+
+### ⛓️ Dependencies
+- Updated newrelic/nri-haproxy to v3 - [Changelog 🔗](https://github.com/newrelic/nri-haproxy/releases/tag/v3.0.0)
+- Updated newrelic/nri-nagios to v2.9.3 - [Changelog 🔗](https://github.com/newrelic/nri-nagios/releases/tag/v2.9.3)
+- Updated newrelic/nri-memcached to v2.5.4 - [Changelog 🔗](https://github.com/newrelic/nri-memcached/releases/tag/v2.5.4)
+- Updated newrelic/nri-mysql to v1.10.5 - [Changelog 🔗](https://github.com/newrelic/nri-mysql/releases/tag/v1.10.5)
+- Updated newrelic/nri-rabbitmq to v2.13.4 - [Changelog 🔗](https://github.com/newrelic/nri-rabbitmq/releases/tag/v2.13.4)
+
 ## v3.2.33 - 2024-03-07
 
 ### 🐞 Bug fixes
