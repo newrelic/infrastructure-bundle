@@ -9,6 +9,11 @@ Unreleased section should follow [Release Toolkit](https://github.com/newrelic/r
 
 ## Unreleased
 
+## v3.2.35 - 2024-03-21
+
+### ⛓️ Dependencies
+- Updated newrelic/nri-nginx to v3.4.4 - [Changelog 🔗](https://github.com/newrelic/nri-nginx/releases/tag/v3.4.4)
+
 ## v3.2.34 - 2024-03-14
 
 ### ⛓️ Dependencies
