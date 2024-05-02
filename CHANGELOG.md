@@ -9,6 +9,11 @@ Unreleased section should follow [Release Toolkit](https://github.com/newrelic/r
 
 ## Unreleased
 
+## v3.2.40 - 2024-05-02
+
+### ⛓️ Dependencies
+- Updated newrelic/nri-mongodb to v2.8.2 - [Changelog 🔗](https://github.com/newrelic/nri-mongodb/releases/tag/v2.8.2)
+
 ## v3.2.39 - 2024-04-25
 
 ### ⛓️ Dependencies
