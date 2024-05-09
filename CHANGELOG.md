@@ -9,6 +9,17 @@ Unreleased section should follow [Release Toolkit](https://github.com/newrelic/r
 
 ## Unreleased
 
+## v3.2.41 - 2024-05-09
+
+### ⛓️ Dependencies
+- Updated newrelic/nri-couchbase to v2.6.4 - [Changelog 🔗](https://github.com/newrelic/nri-couchbase/releases/tag/v2.6.4)
+- Updated newrelic/nri-kafka to v3.7.3 - [Changelog 🔗](https://github.com/newrelic/nri-kafka/releases/tag/v3.7.3)
+- Updated newrelic/infrastructure to v1.52.1 - [Changelog 🔗](https://github.com/newrelic/infrastructure-agent/releases/tag/1.52.1)
+- Updated newrelic/nri-discovery-kubernetes to v1.8.0 - [Changelog 🔗](https://github.com/newrelic/nri-discovery-kubernetes/releases/tag/v1.8.0)
+- Updated newrelic/nri-postgresql to v2.13.4 - [Changelog 🔗](https://github.com/newrelic/nri-postgresql/releases/tag/v2.13.4)
+- Updated newrelic/nri-mongodb to v2.8.3 - [Changelog 🔗](https://github.com/newrelic/nri-mongodb/releases/tag/v2.8.3)
+- Updated newrelic/nri-mssql to v2.12.2 - [Changelog 🔗](https://github.com/newrelic/nri-mssql/releases/tag/v2.12.2)
+
 ## v3.2.40 - 2024-05-02
 
 ### ⛓️ Dependencies
