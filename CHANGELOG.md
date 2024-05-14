@@ -9,6 +9,12 @@ Unreleased section should follow [Release Toolkit](https://github.com/newrelic/r
 
 ## Unreleased
 
+## v3.2.42 - 2024-05-14
+
+### ⛓️ Dependencies
+- Updated newrelic/infrastructure to v1.52.2 - [Changelog 🔗](https://github.com/newrelic/infrastructure-agent/releases/tag/1.52.2)
+- Updated newrelic/nri-discovery-kubernetes to v1.9.0 - [Changelog 🔗](https://github.com/newrelic/nri-discovery-kubernetes/releases/tag/v1.9.0)
+
 ## v3.2.41 - 2024-05-09
 
 ### ⛓️ Dependencies
