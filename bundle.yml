@@ -78,7 +78,7 @@ integrations:
     testFiles:
       - /usr/bin/nrjmx
   - name: nri-discovery-kubernetes
-    version: v1.9.0
+    version: v1.9.1
     url: https://github.com/newrelic/{{.Name}}/releases/download/{{.Version}}/{{.Name}}_{{.Version | trimv}}_Linux_{{.Arch}}.tar.gz
     stagingUrl: https://github.com/newrelic/{{.Name}}/releases/download/{{.Version}}/{{.Name}}_{{.Version | trimv}}_Linux_{{.Arch}}.tar.gz
     subpath: var/db/newrelic-infra
