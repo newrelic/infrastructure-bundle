@@ -9,6 +9,24 @@ Unreleased section should follow [Release Toolkit](https://github.com/newrelic/r
 
 ## Unreleased
 
+## v3.2.44 - 2024-05-23
+
+### ⛓️ Dependencies
+- Updated newrelic/nri-f5 to v2.7.5 - [Changelog 🔗](https://github.com/newrelic/nri-f5/releases/tag/v2.7.5)
+- Updated newrelic/nri-consul to v2.7.11 - [Changelog 🔗](https://github.com/newrelic/nri-consul/releases/tag/v2.7.11)
+- Updated newrelic/nri-apache to v1.12.5 - [Changelog 🔗](https://github.com/newrelic/nri-apache/releases/tag/v1.12.5)
+- Updated newrelic/nri-discovery-kubernetes to v1.9.1 - [Changelog 🔗](https://github.com/newrelic/nri-discovery-kubernetes/releases/tag/v1.9.1)
+- Updated newrelic/infrastructure to v1.52.3 - [Changelog 🔗](https://github.com/newrelic/infrastructure-agent/releases/tag/1.52.3)
+- Updated newrelic/nri-couchbase to v2.6.5 - [Changelog 🔗](https://github.com/newrelic/nri-couchbase/releases/tag/v2.6.5)
+- Updated newrelic/nri-elasticsearch to v5.2.5 - [Changelog 🔗](https://github.com/newrelic/nri-elasticsearch/releases/tag/v5.2.5)
+- Updated newrelic/nri-memcached to v2.5.6 - [Changelog 🔗](https://github.com/newrelic/nri-memcached/releases/tag/v2.5.6)
+- Updated newrelic/nri-mongodb to v2.8.5 - [Changelog 🔗](https://github.com/newrelic/nri-mongodb/releases/tag/v2.8.5)
+- Updated newrelic/nri-mysql to v1.10.8 - [Changelog 🔗](https://github.com/newrelic/nri-mysql/releases/tag/v1.10.8)
+- Updated newrelic/nri-nagios to v2.9.5 - [Changelog 🔗](https://github.com/newrelic/nri-nagios/releases/tag/v2.9.5)
+- Updated newrelic/nri-postgresql to v2.13.5 - [Changelog 🔗](https://github.com/newrelic/nri-postgresql/releases/tag/v2.13.5)
+- Updated newrelic/nri-rabbitmq to v2.13.6 - [Changelog 🔗](https://github.com/newrelic/nri-rabbitmq/releases/tag/v2.13.6)
+- Updated newrelic/nri-redis to v1.11.6 - [Changelog 🔗](https://github.com/newrelic/nri-redis/releases/tag/v1.11.6)
+
 ## v3.2.43 - 2024-05-16
 
 ### ⛓️ Dependencies
