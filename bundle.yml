@@ -87,4 +87,4 @@ integrations:
     testFiles:
       - /var/db/newrelic-infra/nri-discovery-kubernetes
   - name: nri-mssql
-    version: v2.12.2
+    version: v2.12.4
