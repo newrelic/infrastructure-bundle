@@ -9,6 +9,13 @@ Unreleased section should follow [Release Toolkit](https://github.com/newrelic/r
 
 ## Unreleased
 
+## v3.2.48 - 2024-07-04
+
+### ⛓️ Dependencies
+- Updated newrelic/nri-cassandra to v2.13.7 - [Changelog 🔗](https://github.com/newrelic/nri-cassandra/releases/tag/v2.13.7)
+- Updated newrelic/nri-couchbase to v2.6.6 - [Changelog 🔗](https://github.com/newrelic/nri-couchbase/releases/tag/v2.6.6)
+- Updated newrelic/nri-rabbitmq to v2.13.7 - [Changelog 🔗](https://github.com/newrelic/nri-rabbitmq/releases/tag/v2.13.7)
+
 ## v3.2.47 - 2024-06-27
 
 ### ⛓️ Dependencies
