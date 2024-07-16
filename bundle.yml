@@ -48,7 +48,7 @@ integrations:
   - name: nri-f5
     version: v2.7.5
   - name: nri-haproxy
-    version: v3.0.2
+    version: v3.0.1
   - name: nri-jmx
     version: v3.7.0
     testFiles:
@@ -87,4 +87,4 @@ integrations:
     testFiles:
       - /var/db/newrelic-infra/nri-discovery-kubernetes
   - name: nri-mssql
-    version: v2.12.5
+    version: v2.12.6
