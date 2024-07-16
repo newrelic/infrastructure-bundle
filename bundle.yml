@@ -1,6 +1,6 @@
 # Version of the base agent image to use (`newrelic/infrastructure).
 # This is used by the `docker-build.sh` wrapper if AGENT_VERSION is not set
-agentVersion: 1.53.0
+agentVersion: 1.55.0
 
 # url, stagingUrl, and repo fields are compiled as templates. The `trimv` helper function can be used to remove the leading v
 # from a version string.
@@ -62,7 +62,7 @@ integrations:
   - name: nri-mysql
     version: v1.10.8
   - name: nri-nagios
-    version: v2.9.6
+    version: v2.9.5
   - name: nri-nginx
     version: v3.4.6
   - name: nri-postgresql
