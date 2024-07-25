@@ -9,6 +9,28 @@ Unreleased section should follow [Release Toolkit](https://github.com/newrelic/r
 
 ## Unreleased
 
+## v3.2.49 - 2024-07-25
+
+### ⛓️ Dependencies
+- Updated newrelic/infrastructure to v1.55.1 - [Changelog 🔗](https://github.com/newrelic/infrastructure-agent/releases/tag/1.55.1)
+- Updated newrelic/nri-mssql to v2.12.6 - [Changelog 🔗](https://github.com/newrelic/nri-mssql/releases/tag/v2.12.6)
+- Updated newrelic/nri-nagios to v2.9.6 - [Changelog 🔗](https://github.com/newrelic/nri-nagios/releases/tag/v2.9.6)
+- Updated newrelic/nri-redis to v1.11.7 - [Changelog 🔗](https://github.com/newrelic/nri-redis/releases/tag/v1.11.7)
+- Updated newrelic/nri-haproxy to v3.0.2 - [Changelog 🔗](https://github.com/newrelic/nri-haproxy/releases/tag/v3.0.2)
+- Updated newrelic/nri-elasticsearch to v5.2.6 - [Changelog 🔗](https://github.com/newrelic/nri-elasticsearch/releases/tag/v5.2.6)
+- Updated newrelic/nri-consul to v2.7.13 - [Changelog 🔗](https://github.com/newrelic/nri-consul/releases/tag/v2.7.13)
+- Updated newrelic/nri-discovery-kubernetes to v1.9.2 - [Changelog 🔗](https://github.com/newrelic/nri-discovery-kubernetes/releases/tag/v1.9.2)
+- Updated newrelic/nri-apache to v1.12.6 - [Changelog 🔗](https://github.com/newrelic/nri-apache/releases/tag/v1.12.6)
+- Updated newrelic/nri-memcached to v2.5.7 - [Changelog 🔗](https://github.com/newrelic/nri-memcached/releases/tag/v2.5.7)
+- Updated newrelic/nri-cassandra to v2.13.8 - [Changelog 🔗](https://github.com/newrelic/nri-cassandra/releases/tag/v2.13.8)
+- Updated newrelic/nri-f5 to v2.7.6 - [Changelog 🔗](https://github.com/newrelic/nri-f5/releases/tag/v2.7.6)
+- Updated newrelic/nri-kafka to v3.7.4 - [Changelog 🔗](https://github.com/newrelic/nri-kafka/releases/tag/v3.7.4)
+- Updated newrelic/nri-mysql to v1.10.9 - [Changelog 🔗](https://github.com/newrelic/nri-mysql/releases/tag/v1.10.9)
+- Updated newrelic/nri-couchbase to v2.6.7 - [Changelog 🔗](https://github.com/newrelic/nri-couchbase/releases/tag/v2.6.7)
+- Updated newrelic/nri-rabbitmq to v2.13.8 - [Changelog 🔗](https://github.com/newrelic/nri-rabbitmq/releases/tag/v2.13.8)
+- Updated newrelic/nri-nginx to v3.4.7 - [Changelog 🔗](https://github.com/newrelic/nri-nginx/releases/tag/v3.4.7)
+- Updated newrelic/nri-postgresql to v2.13.6 - [Changelog 🔗](https://github.com/newrelic/nri-postgresql/releases/tag/v2.13.6)
+
 ## v3.2.48 - 2024-07-04
 
 ### ⛓️ Dependencies
