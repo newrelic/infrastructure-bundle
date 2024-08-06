@@ -1,6 +1,6 @@
 module github.com/newrelic/infrastructure-bundle/builder
 
-go 1.22.0
+go 1.22.6
 
 require (
 	github.com/google/go-github/v63 v63.0.0
