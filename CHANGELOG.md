@@ -9,6 +9,16 @@ Unreleased section should follow [Release Toolkit](https://github.com/newrelic/r
 
 ## Unreleased
 
+## v3.2.51 - 2024-08-20
+
+### ⛓️ Dependencies
+- Updated newrelic/infrastructure to v1.56.1 - [Changelog 🔗](https://github.com/newrelic/infrastructure-agent/releases/tag/1.56.1)
+- Updated newrelic/nri-cassandra to v2.13.9 - [Changelog 🔗](https://github.com/newrelic/nri-cassandra/releases/tag/v2.13.9)
+- Updated newrelic/nri-mysql to v1.10.10 - [Changelog 🔗](https://github.com/newrelic/nri-mysql/releases/tag/v1.10.10)
+- Updated newrelic/nri-nginx to v3.4.8 - [Changelog 🔗](https://github.com/newrelic/nri-nginx/releases/tag/v3.4.8)
+- Updated newrelic/nri-postgresql to v2.13.7 - [Changelog 🔗](https://github.com/newrelic/nri-postgresql/releases/tag/v2.13.7)
+- Updated newrelic/nri-redis to v1.11.8 - [Changelog 🔗](https://github.com/newrelic/nri-redis/releases/tag/v1.11.8)
+
 ## v3.2.50 - 2024-08-08
 
 ### ⛓️ Dependencies
