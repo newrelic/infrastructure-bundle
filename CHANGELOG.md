@@ -9,6 +9,21 @@ Unreleased section should follow [Release Toolkit](https://github.com/newrelic/r
 
 ## Unreleased
 
+## v3.2.54 - 2024-09-19
+
+### ⛓️ Dependencies
+- Updated newrelic/nri-redis to v1.11.9 - [Changelog 🔗](https://github.com/newrelic/nri-redis/releases/tag/v1.11.9)
+- Updated newrelic/nri-apache to v1.12.7 - [Changelog 🔗](https://github.com/newrelic/nri-apache/releases/tag/v1.12.7)
+- Updated newrelic/nri-postgresql to v2.14.0 - [Changelog 🔗](https://github.com/newrelic/nri-postgresql/releases/tag/v2.14.0)
+- Updated newrelic/nri-nagios to v2.9.7 - [Changelog 🔗](https://github.com/newrelic/nri-nagios/releases/tag/v2.9.7)
+- Updated newrelic/nri-mongodb to v2.8.7 - [Changelog 🔗](https://github.com/newrelic/nri-mongodb/releases/tag/v2.8.7)
+- Updated newrelic/nri-couchbase to v2.6.8 - [Changelog 🔗](https://github.com/newrelic/nri-couchbase/releases/tag/v2.6.8)
+- Updated newrelic/nri-mssql to v2.12.7 - [Changelog 🔗](https://github.com/newrelic/nri-mssql/releases/tag/v2.12.7)
+- Updated newrelic/nri-kafka to v3.7.5 - [Changelog 🔗](https://github.com/newrelic/nri-kafka/releases/tag/v3.7.5)
+- Updated newrelic/nri-cassandra to v2.13.10 - [Changelog 🔗](https://github.com/newrelic/nri-cassandra/releases/tag/v2.13.10)
+- Updated newrelic/nri-rabbitmq to v2.13.9 - [Changelog 🔗](https://github.com/newrelic/nri-rabbitmq/releases/tag/v2.13.9)
+- Updated newrelic/nri-nginx to v3.4.9 - [Changelog 🔗](https://github.com/newrelic/nri-nginx/releases/tag/v3.4.9)
+
 ## v3.2.53 - 2024-09-16
 
 ### ⛓️ Dependencies
