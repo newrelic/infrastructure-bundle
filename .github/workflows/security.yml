@@ -39,7 +39,8 @@ jobs:
           format: table
           exit-code: 1
           ignore-unfixed: true
-          severity: 'CRITICAL,HIGH'
+          severity: "CRITICAL,HIGH"
+          cache: false
 
       - name: Run Trivy in report mode
         # Only generate sarif when running nightly on the main branch.

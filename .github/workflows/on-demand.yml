@@ -37,6 +37,7 @@ jobs:
           exit-code: 1
           ignore-unfixed: true
           severity: CRITICAL,HIGH
+          cache: false
 
       - uses: docker/login-action@v3
         with:
