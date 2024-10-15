@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
     inputs:
       agent_version:
-        description: 'Agent version'
+        description: "Agent version"
         required: true
 jobs:
   build:
@@ -45,4 +45,3 @@ jobs:
           password: ${{ secrets.OHAI_DOCKER_HUB_PASSWORD }}
       - name: Build and push docker image
         run: ./docker-build.sh . --push
-

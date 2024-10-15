@@ -51,7 +51,7 @@ jobs:
 
   notify-failure:
     if: ${{ always() && failure() }}
-    needs: [ build ]
+    needs: [build]
     runs-on: ubuntu-latest
     steps:
       - name: Notify failure via Slack
