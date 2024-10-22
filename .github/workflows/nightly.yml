@@ -28,7 +28,14 @@ jobs:
           # GITHUB_TOKEN is needed when -override-latest is used so we don't reach GH API rate limit
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: go run downloader.go -staging -override-latest
-
+      - uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.OHAI_DOCKER_HUB_ID }}
+          password: ${{ secrets.OHAI_DOCKER_HUB_PASSWORD }} 
+      - name: Build and push docker image
+        run: |
+          export AGENT_VERSION=`go run ./downloader.go -agent-version-latest -staging`
+          ./docker-build.sh . --push
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@0.28.0
         with:
@@ -37,15 +44,6 @@ jobs:
           exit-code: 1
           ignore-unfixed: true
           severity: CRITICAL,HIGH
-
-      - uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.OHAI_DOCKER_HUB_ID }}
-          password: ${{ secrets.OHAI_DOCKER_HUB_PASSWORD }}
-      - name: Build and push docker image
-        run: |
-          export AGENT_VERSION=`go run ./downloader.go -agent-version-latest -staging`
-          ./docker-build.sh . --push
 
   notify-failure:
     if: ${{ always() && failure() }}
