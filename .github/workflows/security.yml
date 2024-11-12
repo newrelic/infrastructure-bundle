@@ -40,6 +40,9 @@ jobs:
           exit-code: 1
           ignore-unfixed: true
           severity: "CRITICAL,HIGH"
+        env:
+          TRIVY_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-db
+          TRIVY_JAVA_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-java-db
 
       - name: Run Trivy in report mode
         # Only generate sarif when running nightly on the main branch.
@@ -52,6 +55,9 @@ jobs:
           output: "trivy-results.sarif"
           ignore-unfixed: false # Get full report when running nightly.
           severity: "CRITICAL,HIGH"
+        env:
+          TRIVY_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-db
+          TRIVY_JAVA_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-java-db
 
       - name: Upload Trivy scan results to GitHub Security tab
         # Only upload sarif when running nightly on the main branch.
