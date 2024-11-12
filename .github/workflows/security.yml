@@ -40,10 +40,6 @@ jobs:
           exit-code: 1
           ignore-unfixed: true
           severity: "CRITICAL,HIGH"
-        env:
-          # dbs are downloaded async in download_trivy_db.yml
-          TRIVY_SKIP_DB_UPDATE: true
-          TRIVY_SKIP_JAVA_DB_UPDATE: true
 
       - name: Run Trivy in report mode
         # Only generate sarif when running nightly on the main branch.
@@ -56,10 +52,6 @@ jobs:
           output: "trivy-results.sarif"
           ignore-unfixed: false # Get full report when running nightly.
           severity: "CRITICAL,HIGH"
-        env:
-          # dbs are downloaded async in download_trivy_db.yml
-          TRIVY_SKIP_DB_UPDATE: true
-          TRIVY_SKIP_JAVA_DB_UPDATE: true
 
       - name: Upload Trivy scan results to GitHub Security tab
         # Only upload sarif when running nightly on the main branch.
