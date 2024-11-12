@@ -38,9 +38,8 @@ jobs:
           ignore-unfixed: true
           severity: CRITICAL,HIGH
         env:
-          # dbs are downloaded async in download_trivy_db.yml
-          TRIVY_SKIP_DB_UPDATE: true
-          TRIVY_SKIP_JAVA_DB_UPDATE: true
+          TRIVY_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-db
+          TRIVY_JAVA_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-java-db
 
       - uses: docker/login-action@v3
         with:
