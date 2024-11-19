@@ -62,7 +62,7 @@ integrations:
   - name: nri-mysql
     version: v1.11.0
   - name: nri-nagios
-    version: v2.10.0
+    version: v2.10.1
   - name: nri-nginx
     version: v3.5.0
   - name: nri-postgresql
