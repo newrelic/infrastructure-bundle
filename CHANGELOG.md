@@ -9,6 +9,12 @@ Unreleased section should follow [Release Toolkit](https://github.com/newrelic/r
 
 ## Unreleased
 
+## v3.2.62 - 2024-12-05
+
+### ⛓️ Dependencies
+- Updated newrelic/nri-postgresql to v2.16.0 - [Changelog 🔗](https://github.com/newrelic/nri-postgresql/releases/tag/v2.16.0)
+- Updated newrelic/nri-nagios to v2.10.1 - [Changelog 🔗](https://github.com/newrelic/nri-nagios/releases/tag/v2.10.1)
+
 ## v3.2.61 - 2024-11-14
 
 ### ⛓️ Dependencies
