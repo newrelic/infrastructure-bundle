@@ -3,19 +3,10 @@ on:
   schedule:
     - cron: "0 3 * * *"
   pull_request:
-    branches:
-      - main
-      - master
   push:
     branches:
       - master
       - main
-  workflow_dispatch:
-    inputs:
-      reason:
-        description: 'Reason for manual trigger'
-        required: false
-        type: string
 
 jobs:
   nightly:
