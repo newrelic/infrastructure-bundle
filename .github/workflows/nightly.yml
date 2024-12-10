@@ -2,11 +2,14 @@ name: Nightly build
 on:
   schedule:
     - cron: "0 3 * * *"
+  pull_request:
+    branches:
+      - main
+      - master
   push:
     branches:
       - master
       - main
-      - NR-341878-use-reusable-workflow-for-docker-image-security-checks
   workflow_dispatch:
     inputs:
       reason:
