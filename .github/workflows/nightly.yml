@@ -20,7 +20,6 @@ jobs:
     secrets:
       docker_username: ${{ secrets.OHAI_DOCKER_HUB_ID }}
       docker_password: ${{ secrets.OHAI_DOCKER_HUB_PASSWORD }}
-      github_token: ${{ secrets.GITHUB_TOKEN }}
     with:
       docker_image: newrelic/infrastructure-bundle
       docker_tag: nightly
