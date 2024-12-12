@@ -66,14 +66,6 @@ jobs:
         with:
           sarif_file: "trivy-results.sarif"
 
-      - name: Run Snyk to check Docker image for vulnerabilities
-        uses: snyk/actions/docker@master
-        env:
-          SNYK_TOKEN: ${{ secrets.CAOS_SNYK_TOKEN }}
-        with:
-          image: ${{ env.DOCKER_IMAGE }}:${{ env.DOCKER_IMAGE_TAG }}
-          args: --file=Dockerfile --severity-threshold=critical
-
   notify-failure:
     if: ${{ github.event_name == 'schedule' && failure() }}
     needs: [build]
