@@ -29,4 +29,3 @@ jobs:
     secrets:
       docker_username: ${{ secrets.OHAI_DOCKER_HUB_ID }}
       docker_password: ${{ secrets.OHAI_DOCKER_HUB_PASSWORD }}
-      github_token: ${{ secrets.COREINT_BOT_TOKEN }}
