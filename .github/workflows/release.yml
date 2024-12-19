@@ -5,7 +5,7 @@ on:
 
 jobs:
   container-release:
-    uses: newrelic/coreint-automation/.github/workflows/reusable_image_release.yaml@NR-341876-Make-docker-images-pre-release-uniform
+    uses: newrelic/coreint-automation/.github/workflows/reusable_image_release.yaml@v3
     with:
       original_repo_name: 'newrelic/infrastructure-bundle'
       docker_image_name: 'newrelic/infrastructure-bundle'
@@ -22,7 +22,7 @@ jobs:
       release_command: |
         go run downloader.go
         ./docker-build.sh . --push
-        if [ "$PRERELEASE" = "false" ]; then
+        if [[ "${{ github.event.release.prerelease }}" == "false" ]]; then
           DOCKER_IMAGE_TAG=latest ./docker-build.sh . --push
         fi
     
