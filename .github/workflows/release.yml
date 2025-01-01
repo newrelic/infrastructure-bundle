@@ -17,7 +17,7 @@ jobs:
         go run downloader.go
         ./docker-build.sh . --push
         if [[ "${{ github.event.release.prerelease }}" == "false" ]]; then
-          echo "DOCKER_IMAGE_TAG=latest" >> $GITHUB_ENV
+          DOCKER_IMAGE_TAG=latest
           ./docker-build.sh . --push
         fi
     
