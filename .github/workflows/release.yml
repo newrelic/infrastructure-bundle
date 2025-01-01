@@ -9,15 +9,10 @@ jobs:
     with:
       original_repo_name: 'newrelic/infrastructure-bundle'
       docker_image_name: 'newrelic/infrastructure-bundle'
+
       docker_platforms: 'linux/amd64,linux/arm64,linux/arm'
       go_version_file: 'go.mod'
       
-      run_nix_unit_tests: false
-      run_windows_unit_tests: false
-      run_integration_tests: false
-      
-      use_build_push_action: false
-
       release_command_sh: |
         go run downloader.go
         ./docker-build.sh . --push
