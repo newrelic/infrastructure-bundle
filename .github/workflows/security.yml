@@ -4,6 +4,8 @@ on:
     branches:
       - renovate/**
   pull_request:
+  schedule:
+    - cron: "14 3 * * *" # Daily at 3:14 AM
 
 jobs:
   build:
@@ -41,3 +43,37 @@ jobs:
         env:
           TRIVY_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-db
           TRIVY_JAVA_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-java-db
+
+      - name: Run Trivy in report mode
+        # Only generate sarif when running nightly on the main branch.
+        if: ${{ github.event_name == 'schedule' }}
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: ${{ env.DOCKER_IMAGE }}:${{ env.DOCKER_IMAGE_TAG }}
+          format: "template"
+          template: "@/contrib/sarif.tpl"
+          output: "trivy-results.sarif"
+          ignore-unfixed: false # Get full report when running nightly.
+          severity: "CRITICAL,HIGH"
+        env:
+          TRIVY_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-db
+          TRIVY_JAVA_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-java-db
+
+      - name: Upload Trivy scan results to GitHub Security tab
+        # Only upload sarif when running nightly on the main branch.
+        if: ${{ github.event_name == 'schedule' }}
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: "trivy-results.sarif"
+
+  notify-failure:
+    if: ${{ github.event_name == 'schedule' && failure() }}
+    needs: [build]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Notify failure via Slack
+        uses: archive/github-actions-slack@master
+        with:
+          slack-bot-user-oauth-access-token: ${{ secrets.COREINT_SLACK_TOKEN }}
+          slack-channel: ${{ secrets.CAOS_COREINT_SLACK_CHANNEL }}
+          slack-text: "❌ `'newrelic/infrastructure-bundle'`: [security pipeline failed](${{ github.server_url }}/newrelic/infrastructure-bundle/actions/runs/${{ github.run_id }})."
