@@ -5,13 +5,10 @@ on:
 
 jobs:
   container-release:
-    uses: newrelic/coreint-automation/.github/workflows/reusable_image_release.yaml@NR-341876-Make-docker-images-pre-release-uniform
+    uses: newrelic/coreint-automation/.github/workflows/reusable_image_release.yaml@v3
     with:
       original_repo_name: 'newrelic/infrastructure-bundle'
       docker_image_name: 'newrelic/infrastructure-bundle'
-
-      docker_platforms: 'linux/amd64,linux/arm64,linux/arm'
-      go_version_file: 'go.mod'
       
       release_command_sh: |
         go run downloader.go
