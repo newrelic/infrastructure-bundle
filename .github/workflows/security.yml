@@ -31,7 +31,7 @@ jobs:
       - name: Run Trivy in table mode
         # Table output is only useful when running on a pull request or push.
         if: contains(fromJSON('["push", "pull_request"]'), github.event_name)
-        uses: aquasecurity/trivy-action@0.28.0
+        uses: aquasecurity/trivy-action@0.29.0
         with:
           image-ref: ${{ env.DOCKER_IMAGE }}:${{ env.DOCKER_IMAGE_TAG }}
           format: table
