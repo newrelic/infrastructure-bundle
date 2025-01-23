@@ -40,7 +40,7 @@ integrations:
   - name: nri-cassandra
     version: v2.14.1
   - name: nri-consul
-    version: v2.8.2
+    version: v2.8.3
   - name: nri-couchbase
     version: v2.7.2
   - name: nri-elasticsearch
