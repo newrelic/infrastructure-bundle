@@ -13,6 +13,8 @@ jobs:
     secrets:
       docker_username: ${{ secrets.OHAI_DOCKER_HUB_ID }}
       docker_password: ${{ secrets.OHAI_DOCKER_HUB_PASSWORD }}
+      slack_channel: ${{ secrets.COREINT_SLACK_CHANNEL }}
+      slack_token: ${{ secrets.COREINT_SLACK_TOKEN }}
     with:
       docker_image: newrelic/infrastructure-bundle
       docker_tag: nightly
