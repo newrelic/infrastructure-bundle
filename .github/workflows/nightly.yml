@@ -20,7 +20,7 @@ jobs:
       build_command: |
         export AGENT_VERSION=`go run ./downloader.go -agent-version-latest -staging`
         go run downloader.go -staging -override-latest
-        DOCKER_IMAGE_TAG=nightly
+        export DOCKER_IMAGE_TAG=nightly
         ./docker-build.sh . --push
       setup_qemu: true
       setup_buildx: true
