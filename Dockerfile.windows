@@ -12,4 +12,5 @@ COPY ./start.ps1 C:\\newrelic
 
 COPY start.ps1 C:\\newrelic\\start.ps1
 
+USER ContainerAdministrator
 ENTRYPOINT ["powershell.exe", "-File", "C:\\newrelic\\start.ps1"]

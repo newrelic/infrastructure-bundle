@@ -1,9 +1,30 @@
-. "C:\newrelic\Program Files\New Relic\newrelic-infra\installer.ps1"
+# // Runs installer in a new scope
+& "C:\newrelic\Program Files\New Relic\newrelic-infra\installer.ps1"
+
+$service = Start-Service -Name "newrelic-infra" -PassThru
+
+if ($service.Status -ne 'Running') {
+    Write-Error "Failed to start newrelic-infra service"
+    exit 1
+}
+
+# $process = Start-Process -FilePath  "C:\newrelic\Program Files\New Relic\newrelic-infra\newrelic-infra.exe" -PassThru
+
+# Start-Sleep -Seconds 5
+
+# if ($process.)
+
+# if ($process.HasExited) {
+#     Write-Error "newrelic-infra.exe process exited unexpectedly"
+#     exit 1
+# }
 
 
-net start newrelic-infra
+Write-Output "Neew Relic Infrastructure started successfully"
 
-# Start-Process "C:\newrelic\Program Files/New Relic/newrelic-infra/newrelic-infra-service.exe"
+# net start newrelic-infra
+
+# Start-Process "C:\newrelic\Program Files\New Relic\newrelic-infra\newrelic-infra.exe"
 # Start-Process "C:\newrelic\New Relic\newrelic-infra\newrelic-integrations\bin\nri-apache.exe"
 # Start-Process "C:\newrelic\New Relic\newrelic-infra\newrelic-integrations\bin\nri-cassandra.exe"
 # Start-Process "C:\newrelic\New Relic\newrelic-infra\newrelic-integrations\bin\nri-consul.exe"
