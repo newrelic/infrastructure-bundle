@@ -9,6 +9,15 @@ Unreleased section should follow [Release Toolkit](https://github.com/newrelic/r
 
 ## Unreleased
 
+## v3.2.66 - 2025-02-06
+
+### ⛓️ Dependencies
+- Updated newrelic/nri-couchbase to v2.7.3 - [Changelog 🔗](https://github.com/newrelic/nri-couchbase/releases/tag/v2.7.3)
+- Updated newrelic/nri-rabbitmq to v2.14.2 - [Changelog 🔗](https://github.com/newrelic/nri-rabbitmq/releases/tag/v2.14.2)
+- Updated newrelic/nri-cassandra to v2.14.2 - [Changelog 🔗](https://github.com/newrelic/nri-cassandra/releases/tag/v2.14.2)
+- Updated newrelic/nri-nginx to v3.5.2 - [Changelog 🔗](https://github.com/newrelic/nri-nginx/releases/tag/v3.5.2)
+- Updated newrelic/nri-mysql to v1.13.0 - [Changelog 🔗](https://github.com/newrelic/nri-mysql/releases/tag/v1.13.0)
+
 ## v3.2.65 - 2025-01-30
 
 ### ⛓️ Dependencies
