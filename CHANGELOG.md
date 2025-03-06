@@ -9,6 +9,18 @@ Unreleased section should follow [Release Toolkit](https://github.com/newrelic/r
 
 ## Unreleased
 
+## v3.2.68 - 2025-03-06
+
+### ⛓️ Dependencies
+- Updated newrelic/infrastructure to v1.62.0 - [Changelog 🔗](https://github.com/newrelic/infrastructure-agent/releases/tag/1.62.0)
+- Updated newrelic/nri-mssql to v2.17.0 - [Changelog 🔗](https://github.com/newrelic/nri-mssql/releases/tag/v2.17.0)
+- Updated newrelic/nri-postgresql to v2.17.1 - [Changelog 🔗](https://github.com/newrelic/nri-postgresql/releases/tag/v2.17.1)
+- Updated newrelic/nrjmx to v2.7.0 - [Changelog 🔗](https://github.com/newrelic/nrjmx/releases/tag/v2.7.0)
+- Updated newrelic/nri-nginx to v3.5.3 - [Changelog 🔗](https://github.com/newrelic/nri-nginx/releases/tag/v3.5.3)
+- Updated newrelic/nri-f5 to v2.8.3 - [Changelog 🔗](https://github.com/newrelic/nri-f5/releases/tag/v2.8.3)
+- Updated newrelic/nri-jmx to v3.8.1 - [Changelog 🔗](https://github.com/newrelic/nri-jmx/releases/tag/v3.8.1)
+- Updated newrelic/nri-kafka to v3.10.2 - [Changelog 🔗](https://github.com/newrelic/nri-kafka/releases/tag/v3.10.2)
+
 ## v3.2.67 - 2025-02-20
 
 ### ⛓️ Dependencies
