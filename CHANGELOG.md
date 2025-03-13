@@ -9,6 +9,11 @@ Unreleased section should follow [Release Toolkit](https://github.com/newrelic/r
 
 ## Unreleased
 
+## v3.2.69 - 2025-03-13
+
+### ⛓️ Dependencies
+- Updated newrelic/nri-haproxy to v3.1.2 - [Changelog 🔗](https://github.com/newrelic/nri-haproxy/releases/tag/v3.1.2)
+
 ## v3.2.68 - 2025-03-06
 
 ### ⛓️ Dependencies
