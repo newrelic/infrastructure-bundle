@@ -56,7 +56,7 @@ integrations:
   - name: nri-kafka
     version: v3.10.2
   - name: nri-memcached
-    version: v2.6.2
+    version: v2.7.0
   - name: nri-mongodb
     version: v2.9.2
   - name: nri-mysql
