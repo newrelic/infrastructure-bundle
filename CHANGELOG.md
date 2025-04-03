@@ -9,6 +9,21 @@ Unreleased section should follow [Release Toolkit](https://github.com/newrelic/r
 
 ## Unreleased
 
+## v3.2.71 - 2025-04-03
+
+### ⛓️ Dependencies
+- Updated newrelic/infrastructure to v1.63.1 - [Changelog 🔗](https://github.com/newrelic/infrastructure-agent/releases/tag/1.63.1)
+- Updated newrelic/nri-discovery-kubernetes to v1.11.1 - [Changelog 🔗](https://github.com/newrelic/nri-discovery-kubernetes/releases/tag/v1.11.1)
+- Updated newrelic/nri-mssql to v2.17.2 - [Changelog 🔗](https://github.com/newrelic/nri-mssql/releases/tag/v2.17.2)
+- Updated newrelic/nri-apache to v1.14.0 - [Changelog 🔗](https://github.com/newrelic/nri-apache/releases/tag/v1.14.0)
+- Updated newrelic/nri-consul to v2.9.0 - [Changelog 🔗](https://github.com/newrelic/nri-consul/releases/tag/v2.9.0)
+- Updated newrelic/nri-couchbase to v2.8.0 - [Changelog 🔗](https://github.com/newrelic/nri-couchbase/releases/tag/v2.8.0)
+- Updated newrelic/nri-haproxy to v3.2.0 - [Changelog 🔗](https://github.com/newrelic/nri-haproxy/releases/tag/v3.2.0)
+- Updated newrelic/nri-nagios to v2.11.0 - [Changelog 🔗](https://github.com/newrelic/nri-nagios/releases/tag/v2.11.0)
+- Updated newrelic/nri-nginx to v3.6.0 - [Changelog 🔗](https://github.com/newrelic/nri-nginx/releases/tag/v3.6.0)
+- Updated newrelic/nri-rabbitmq to v2.15.0 - [Changelog 🔗](https://github.com/newrelic/nri-rabbitmq/releases/tag/v2.15.0)
+- Updated newrelic/nri-mysql to v1.14.1 - [Changelog 🔗](https://github.com/newrelic/nri-mysql/releases/tag/v1.14.1)
+
 ## v3.2.70 - 2025-03-20
 
 ### ⛓️ Dependencies
