@@ -38,3 +38,36 @@ jobs:
 
       - name: Check if CHANGELOG is valid
         uses: newrelic/release-toolkit/validate-markdown@v1
+  
+  build-fips:
+    name: Build fips and scan image
+    runs-on: ubuntu-latest
+    env:  # Variables as understood by docker-build.sh
+      DOCKER_IMAGE: newrelic/infrastructure-bundle-fips
+      DOCKER_IMAGE_TAG: ci
+      OUTDIR: out-fips
+      BASE_IMAGE_NAME: newrelic/infrastructure-fips
+      DOCKER_PLATFORMS: linux/amd64,linux/arm64
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Download integrations
+        run: go run downloader.go -bundle=bundle-fips.yml -outdir=out-fips
+
+      # Due to a limitation of buildx, multiarch images cannot be `--load`ed to the host
+      # Therefore, to test vulnerabilities, we also re-build (fast with cache) for amd64 only and load it
+      - name: Build docker image for all platforms
+        run: |
+          # Test build, but not load, for all archs
+          ./docker-build.sh .
+          # Build and load for amd64 only (for snyk)
+          DOCKER_PLATFORMS=linux/amd64 ./docker-build.sh . --load
+
+      - name: Check if CHANGELOG is valid
+        uses: newrelic/release-toolkit/validate-markdown@v1

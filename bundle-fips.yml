@@ -1,0 +1,90 @@
+# Version of the base agent image to use (`newrelic/infrastructure).
+# This is used by the `docker-build.sh` wrapper if AGENT_VERSION is not set
+agentVersion: 1.63.1
+
+# url, stagingUrl, and repo fields are compiled as templates. The `trimv` helper function can be used to remove the leading v
+# from a version string.
+
+# Used as defaults for all integrations below, can be overridden. Template.
+url: https://download.newrelic.com/infrastructure_agent/binaries/linux/{{.Arch}}/{{.Name}}-fips_linux_{{.Version | trimv}}_{{.Arch}}.tar.gz
+# stagingUrl will be used if the download is invoked with -staging. Template.
+stagingUrl: https://github.com/newrelic/{{.Name}}/releases/download/{{.Version}}/{{.Name}}-fips_linux_{{.Version | trimv}}_{{.Arch}}.tar.gz
+
+# List of architectures to fetch.
+archs: [ amd64, arm64 ]
+# GitHub repo hosting the integration. Used to fetch the latest available version when using -latest. Template.
+repo: newrelic/{{.Name}}
+
+# List of files to check for existence after integration has been unpacked. Template.
+testFiles:
+  # Test for existence of the main integation binary
+  - /var/db/newrelic-infra/newrelic-integrations/bin/{{.Name}}
+
+# List of integrations to download.
+# Individual entries may override any of the values defined above.
+integrations:
+#  - name: nri-apache
+#    version: 1.5.0
+#
+#    subpath: "" # Custom path to extract archive into. By default, it is assumed that the integration tarball is structured to be extracted in `/`.
+#    archReplacements: # Used as a key->value replacement when making the current arch from []archs available in {{.Arch}}. Useful for sketchy naming schemes.
+#      amd64: x86_64
+#
+#    # Overrides:
+#    archs: [] # Bundle this integration only in the specified architectures.
+#    url: "" # Defaults to global `url`, useful if tarballs have odd naming schemes.
+#    stagingUrl: "" # Defaults to global `stagingUrl`.
+#    repo: "" # Defaults to global `repo`.
+  - name: nri-apache
+    version: v1.14.0
+  # - name: nri-cassandra
+  #   version: v2.14.3
+  - name: nri-consul
+    version: v2.9.0
+  - name: nri-couchbase
+    version: v2.8.0
+  - name: nri-elasticsearch
+    version: v5.4.0
+  # - name: nri-f5
+  #   version: v2.8.3
+  - name: nri-haproxy
+    version: v3.2.0
+  # - name: nri-jmx
+  #   version: v3.8.1
+  #   testFiles:
+  #     - /opt/newrelic-infra/newrelic-integrations/bin/nri-jmx
+  # - name: nri-kafka
+  #   version: v3.10.2
+  - name: nri-memcached
+    version: v2.7.0
+  # - name: nri-mongodb
+  #   version: v2.9.2
+  - name: nri-mysql
+    version: v1.15.0
+  - name: nri-nagios
+    version: v2.11.0
+  - name: nri-nginx
+    version: v3.6.0
+  - name: nri-postgresql
+    version: v2.17.1
+  - name: nri-rabbitmq
+    version: v2.15.0
+  - name: nri-redis
+    version: v1.12.1
+  # - name: nrjmx
+  #   version: v2.7.0
+  #   url: https://download.newrelic.com/infrastructure_agent/binaries/linux/noarch/nrjmx_linux_{{.Version | trimv}}_noarch.tar.gz
+  #   stagingUrl: https://github.com/newrelic/{{.Name}}/releases/download/{{.Version}}/nrjmx_linux_{{.Version | trimv}}_noarch.tar.gz
+  #   testFiles:
+  #     - /usr/bin/nrjmx
+  - name: nri-discovery-kubernetes
+    version: v1.11.2
+    url: https://github.com/newrelic/{{.Name}}/releases/download/{{.Version}}/{{.Name}}-fips_{{.Version | trimv}}_Linux_{{.Arch}}.tar.gz
+    stagingUrl: https://github.com/newrelic/{{.Name}}/releases/download/{{.Version}}/{{.Name}}-fips_{{.Version | trimv}}_Linux_{{.Arch}}.tar.gz
+    subpath: var/db/newrelic-infra
+    archReplacements:
+      amd64: x86_64
+    testFiles:
+      - /var/db/newrelic-infra/nri-discovery-kubernetes
+  - name: nri-mssql
+    version: v2.17.2

@@ -1,5 +1,6 @@
 ARG agent_version=latest
-ARG base_image=newrelic/infrastructure:${agent_version}
+ARG base_image_name=newrelic/infrastructure
+ARG base_image=${base_image_name}:${agent_version}
 
 # ephemeral building container
 FROM $base_image
@@ -8,9 +9,10 @@ FROM $base_image
 ARG TARGETOS
 ARG TARGETARCH
 ARG jre_version
+ARG out_dir
 
 # required for nri-jmx
 RUN if [ -n "${jre_version}" ]; then apk add --no-cache openjdk8-jre=${jre_version}; else apk add --no-cache openjdk8-jre; fi
 
 # integrations
-COPY out/${TARGETARCH} /
+COPY ${out_dir}/${TARGETARCH} /
