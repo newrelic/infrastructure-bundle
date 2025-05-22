@@ -60,7 +60,7 @@ integrations:
   - name: nri-mongodb
     version: v2.9.2
   - name: nri-mysql
-    version: v1.14.1
+    version: v1.15.0
   - name: nri-nagios
     version: v2.11.0
   - name: nri-nginx
