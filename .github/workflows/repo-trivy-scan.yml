@@ -1,0 +1,42 @@
+# In your repository, e.g., newrelic-csec/infrastructure-bundle/.github/workflows/security-scan.yml
+name: 'Build and Scan'
+
+# This section now has two triggers
+on:
+  # 1. This trigger runs the workflow on every new pull request
+  pull_request:
+
+  # 2. This new trigger runs the workflow on a schedule
+  schedule:
+    # This is a cron expression that means "at 00:00 UTC every day" (midnight)
+    - cron: '0 0 * * *'
+
+jobs:
+  # JOB 1: Build the Docker image and output its name
+  build:
+    name: Build Docker Image
+    runs-on: ubuntu-latest
+    outputs:
+      image-name: ${{ steps.build-image.outputs.image-name }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      # This is your repository's specific build logic.
+      # It will run for both PRs and the scheduled job.
+      - name: Build local Docker image
+        id: build-image
+        run: |
+          docker build -t my-app:${{ github.sha }} .
+          echo "image-name=my-app:${{ github.sha }}" >> $GITHUB_OUTPUT
+
+
+  # JOB 2: Call the reusable organization workflow
+  scan:
+    name: Trigger Organization Scan
+    needs: build
+    uses: newrelic-csec/.github/.github/workflows/required-trivy-scan.yml@main
+    with:
+      image-name: ${{ needs.build.outputs.image-name }}
+    secrets: inherit
