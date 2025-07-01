@@ -9,6 +9,11 @@ Unreleased section should follow [Release Toolkit](https://github.com/newrelic/r
 
 ## Unreleased
 
+## v3.2.77 - 2025-07-01
+
+### ⛓️ Dependencies
+- Updated newrelic/nri-postgresql to v2.19.1 - [Changelog 🔗](https://github.com/newrelic/nri-postgresql/releases/tag/v2.19.1)
+
 ## v3.2.76 - 2025-06-30
 
 ### ⛓️ Dependencies
