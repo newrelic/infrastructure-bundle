@@ -1,0 +1,16 @@
+FROM mcr.microsoft.com/windows/servercore:ltsc2019
+
+WORKDIR C:\\newrelic
+
+COPY out\\amd64 C:\\newrelic
+COPY ./start.ps1 C:\\newrelic
+
+# ENV NEW_RELIC_LICENSE_KEY=""
+# ENV NEW_RELIC_APP_NAME=""
+
+# RUN powershell.exe -File "C:\\newrelic\\Program Files\\New Relic\\newrelic-infra\\installer.ps1"
+
+COPY start.ps1 C:\\newrelic\\start.ps1
+
+USER ContainerAdministrator
+ENTRYPOINT ["powershell.exe", "-File", "C:\\newrelic\\start.ps1"]
