@@ -1,0 +1,67 @@
+name: 'Build and Scan'
+
+on:
+  pull_request:
+  schedule:
+    # Runs daily at midnight UTC
+    - cron: '*/5 * * * *'
+
+jobs:
+  # JOB 1: Build the Docker image using the custom script and push it to GHCR
+  build:
+    name: 'Build and Push Docker Image'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write # Required to push images to GHCR
+
+    # This section defines the outputs that this job will provide to other jobs
+    outputs:
+      image-name: ${{ steps.tag-and-push.outputs.image-name }}
+      
+    # These variables are now available to ALL steps in this 'build' job
+    env:
+      DOCKER_IMAGE: newrelic/infrastructure-bundle
+      DOCKER_IMAGE_TAG: ci
+
+    steps:
+      - name: 'Checkout code'
+        uses: actions/checkout@v4
+
+      - name: 'Log in to GitHub Container Registry'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+          
+      - name: 'Set up Go'
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: 'Download integrations'
+        run: go run downloader.go
+
+      - name: 'Build local Docker image with custom script'
+        run: DOCKER_PLATFORMS=linux/amd64 ./docker-build.sh . --load
+
+      - name: 'Tag and Push image to GHCR'
+        id: tag-and-push
+        run: |
+          IMAGE_ID=ghcr.io/${{ github.repository }}:${{ github.sha }}
+          # This command uses the env variables to find the source image
+          docker tag ${{ env.DOCKER_IMAGE }}:${{ env.DOCKER_IMAGE_TAG }} $IMAGE_ID
+          docker push $IMAGE_ID
+          echo "image-name=$IMAGE_ID" >> $GITHUB_OUTPUT
+
+  # JOB 2: Call the reusable organization workflow
+  scan:
+    name: 'Trigger Organization Scan'
+    needs: build
+    permissions:
+      security-events: write # Required to allow the called workflow to upload SARIF results
+    uses: newrelic-csec/.github/.github/workflows/required-trivy-scan.yml@main
+    with:
+      image-name: ${{ needs.build.outputs.image-name }}
+    secrets: inherit
