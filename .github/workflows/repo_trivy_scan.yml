@@ -1,4 +1,4 @@
-name: 'Build and Scan'
+name: 'Repo Level Trivy Scan'
 
 on:
   pull_request:
@@ -9,7 +9,7 @@ on:
 jobs:
   # JOB 1: Build the Docker image using the custom script and push it to GHCR
   build:
-    name: 'Build and Push Docker Image'
+    name: 'Repo Level Trivy Scan Build and Push Docker Image'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -57,7 +57,7 @@ jobs:
 
   # JOB 2: Call the reusable organization workflow
   scan:
-    name: 'Trigger Organization Scan'
+    name: 'Trigger Organization Scan from Repo Level Trivy Scan'
     needs: build
     permissions:
       security-events: write # Required to allow the called workflow to upload SARIF results
