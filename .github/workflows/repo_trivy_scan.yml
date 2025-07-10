@@ -61,7 +61,7 @@ jobs:
     needs: build
     permissions:
       security-events: write # Required to allow the called workflow to upload SARIF results
-    uses: newrelic-trivy/.github/.github/workflows/required-trivy-scan.yml@main
+    uses: newrelic-trivy/.github/.github/workflows/org-level-trivy-scan.yml@main
     with:
       image-name: ${{ needs.build.outputs.image-name }}
     secrets: inherit
