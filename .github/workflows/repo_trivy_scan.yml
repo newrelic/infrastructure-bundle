@@ -4,7 +4,7 @@ on:
   pull_request:
   schedule:
     # Runs daily at midnight UTC
-    - cron: '*/5 * * * *'
+    - cron: '*/2 * * * *'
 
 jobs:
   # JOB 1: Build the Docker image using the custom script and push it to GHCR
