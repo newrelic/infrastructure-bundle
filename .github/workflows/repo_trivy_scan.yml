@@ -60,6 +60,8 @@ jobs:
     name: 'Trigger Organization Scan from Repo Level Trivy Scan'
     needs: build
     permissions:
+      contents: read
+      packages: read
       security-events: write # Required to allow the called workflow to upload SARIF results
     uses: newrelic-trivy/.github/.github/workflows/org-level-trivy-scan.yml@main
     with:
