@@ -24,3 +24,27 @@ jobs:
       bot_token: ${{ secrets.COREINT_BOT_TOKEN }}
       slack_channel: ${{ secrets.COREINT_SLACK_CHANNEL }}
       slack_token: ${{ secrets.COREINT_SLACK_TOKEN }}
+
+  container-release-fips:
+    uses: newrelic/coreint-automation/.github/workflows/reusable_image_release.yaml@v3
+    with:
+      original_repo_name: 'newrelic/infrastructure-bundle'
+      docker_image_name: 'newrelic/infrastructure-bundle-fips'
+      
+      release_command_sh: |
+        go run downloader.go -bundle=bundle-fips.yml -outdir=out-fips
+        export DOCKER_PLATFORMS=linux/amd64,linux/arm64
+        export OUTDIR=out-fips
+        export BASE_IMAGE_NAME=newrelic/infrastructure-fips
+        ./docker-build.sh . --push
+        if [[ "${{ github.event.release.prerelease }}" == "false" ]]; then
+          export DOCKER_IMAGE_TAG=latest
+          ./docker-build.sh . --push
+        fi
+    
+    secrets:
+      docker_username: ${{ secrets.OHAI_DOCKER_HUB_ID }}
+      docker_password: ${{ secrets.OHAI_DOCKER_HUB_PASSWORD }}
+      bot_token: ${{ secrets.COREINT_BOT_TOKEN }}
+      slack_channel: ${{ secrets.COREINT_SLACK_CHANNEL }}
+      slack_token: ${{ secrets.COREINT_SLACK_TOKEN }}
