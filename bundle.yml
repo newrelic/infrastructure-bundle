@@ -54,7 +54,7 @@ integrations:
     testFiles:
       - /opt/newrelic-infra/newrelic-integrations/bin/nri-jmx
   - name: nri-kafka
-    version: v3.13.0
+    version: v3.13.1
   - name: nri-memcached
     version: v2.7.1
   - name: nri-mongodb
