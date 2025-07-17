@@ -9,6 +9,12 @@ Unreleased section should follow [Release Toolkit](https://github.com/newrelic/r
 
 ## Unreleased
 
+## v3.2.81 - 2025-07-17
+
+### ⛓️ Dependencies
+- Updated newrelic/nri-cassandra to v2.14.5 - [Changelog 🔗](https://github.com/newrelic/nri-cassandra/releases/tag/v2.14.5)
+- Updated newrelic/nri-kafka to v3.13.1 - [Changelog 🔗](https://github.com/newrelic/nri-kafka/releases/tag/v3.13.1)
+
 ## v3.2.80 - 2025-07-16
 
 ### ⛓️ Dependencies
