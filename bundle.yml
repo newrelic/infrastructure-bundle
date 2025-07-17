@@ -46,7 +46,7 @@ integrations:
   - name: nri-elasticsearch
     version: v5.4.1
   - name: nri-f5
-    version: v2.8.4
+    version: v2.8.5
   - name: nri-haproxy
     version: v3.2.1
   - name: nri-jmx
