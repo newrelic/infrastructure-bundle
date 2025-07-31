@@ -9,6 +9,11 @@ Unreleased section should follow [Release Toolkit](https://github.com/newrelic/r
 
 ## Unreleased
 
+## v3.2.82 - 2025-07-31
+
+### ⛓️ Dependencies
+- Updated newrelic/nri-f5 to v2.8.5 - [Changelog 🔗](https://github.com/newrelic/nri-f5/releases/tag/v2.8.5)
+
 ## v3.2.81 - 2025-07-17
 
 ### ⛓️ Dependencies
