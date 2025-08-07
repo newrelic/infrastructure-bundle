@@ -9,6 +9,15 @@ Unreleased section should follow [Release Toolkit](https://github.com/newrelic/r
 
 ## Unreleased
 
+## v3.2.83 - 2025-08-07
+
+### ⛓️ Dependencies
+- Updated newrelic/nri-discovery-kubernetes to v1.13.0 - [Changelog 🔗](https://github.com/newrelic/nri-discovery-kubernetes/releases/tag/v1.13.0)
+- Updated newrelic/nri-f5 to v2.8.6 - [Changelog 🔗](https://github.com/newrelic/nri-f5/releases/tag/v2.8.6)
+- Updated newrelic/nri-kafka to v3.13.2 - [Changelog 🔗](https://github.com/newrelic/nri-kafka/releases/tag/v3.13.2)
+- Updated newrelic/nri-cassandra to v2.14.6 - [Changelog 🔗](https://github.com/newrelic/nri-cassandra/releases/tag/v2.14.6)
+- Updated newrelic/nri-postgresql to v2.20.0 - [Changelog 🔗](https://github.com/newrelic/nri-postgresql/releases/tag/v2.20.0)
+
 ## v3.2.82 - 2025-07-31
 
 ### ⛓️ Dependencies
