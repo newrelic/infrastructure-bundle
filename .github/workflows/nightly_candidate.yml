@@ -7,6 +7,8 @@ on:
       - master
       - main
 
+permissions:
+  contents: read
 jobs:
   nightly:
     uses: newrelic/coreint-automation/.github/workflows/reusable_nightly.yaml@v3
