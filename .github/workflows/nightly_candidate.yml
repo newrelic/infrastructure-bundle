@@ -1,0 +1,34 @@
+name: Nightly Candidate Build
+on:
+  schedule:
+    - cron: "0 3 * * *"
+  push:
+    branches:
+      - master
+      - main
+
+permissions:
+  contents: read
+jobs:
+  nightly:
+    uses: newrelic/coreint-automation/.github/workflows/reusable_nightly.yaml@v3
+    secrets:
+      docker_username: ${{ secrets.OHAI_DOCKER_HUB_ID }}
+      docker_password: ${{ secrets.OHAI_DOCKER_HUB_PASSWORD }}
+      slack_channel: ${{ secrets.COREINT_SLACK_CHANNEL }}
+      slack_token: ${{ secrets.COREINT_SLACK_TOKEN }}
+    with:
+      docker_image: newrelic/infrastructure-bundle
+      docker_tag: nightly-candidate
+      target_branches: "master,main"
+      build_command: |
+        yq eval '.integrations += [{"name":"nri-statsd"}]' -i bundle.yml
+        export AGENT_VERSION=`go run ./downloader.go -agent-version-latest`
+        go run downloader.go -staging -override-latest
+        export DOCKER_IMAGE_TAG=nightly-candidate
+        ./docker-build.sh . --push
+      setup_qemu: true
+      setup_buildx: true
+      setup_go: true
+      go_version_file: go.mod
+      trivy_scan: true
