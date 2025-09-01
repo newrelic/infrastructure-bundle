@@ -68,7 +68,7 @@ integrations:
   - name: nri-postgresql
     version: v2.20.1
   - name: nri-rabbitmq
-    version: v2.15.1
+    version: v2.15.2
   - name: nri-redis
     version: v1.12.3
   - name: nrjmx
