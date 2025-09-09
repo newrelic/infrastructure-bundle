@@ -5,6 +5,9 @@ on:
       agent_version:
         description: "Agent version"
         required: true
+  push:
+    branches:
+      - NR-351464-add-fips-compliant-image
 jobs:
   build:
     name: Build and push image
