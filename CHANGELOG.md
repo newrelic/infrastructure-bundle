@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 Unreleased section should follow [Release Toolkit](https://github.com/newrelic/release-toolkit#render-markdown-and-update-markdown)
 
 ## Unreleased
+
+### enhancements
 - Added support for a FIPS compatible infrastructure bundle image
 
 ## v3.2.86 - 2025-09-11
