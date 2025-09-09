@@ -6,9 +6,11 @@ on:
     branches:
       - master
       - main
+  workflow_dispatch:
 
 jobs:
   nightly:
+    name: Nightly standard build
     uses: newrelic/coreint-automation/.github/workflows/reusable_nightly.yaml@v3
     secrets:
       docker_username: ${{ secrets.OHAI_DOCKER_HUB_ID }}
@@ -20,7 +22,7 @@ jobs:
       docker_tag: nightly
       target_branches: "master,main"
       build_command: |
-        export AGENT_VERSION=`go run ./downloader.go -agent-version-latest -staging`
+        export AGENT_VERSION=$(go run ./downloader.go -agent-version-latest -staging)
         go run downloader.go -staging -override-latest
         export DOCKER_IMAGE_TAG=nightly
         ./docker-build.sh . --push
@@ -31,6 +33,7 @@ jobs:
       trivy_scan: true
   
   nightly-fips:
+    name: Nightly FIPS build
     uses: newrelic/coreint-automation/.github/workflows/reusable_nightly.yaml@v3
     secrets:
       docker_username: ${{ secrets.OHAI_DOCKER_HUB_ID }}
@@ -42,7 +45,7 @@ jobs:
       docker_tag: nightly
       target_branches: "master,main"
       build_command: |
-        export AGENT_VERSION=`go run ./downloader.go -agent-version-latest -staging`
+        export AGENT_VERSION=$(go run ./downloader.go -agent-version-latest -staging)
         go run downloader.go -staging -override-latest -bundle=bundle-fips.yml -outdir=out-fips
         export DOCKER_PLATFORMS=linux/amd64,linux/arm64
         export DOCKER_IMAGE_TAG=nightly
