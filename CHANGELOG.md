@@ -9,6 +9,14 @@ Unreleased section should follow [Release Toolkit](https://github.com/newrelic/r
 
 ## Unreleased
 
+## v3.2.86 - 2025-09-11
+
+### ⛓️ Dependencies
+- Updated newrelic/nri-cassandra to v2.15.0 - [Changelog 🔗](https://github.com/newrelic/nri-cassandra/releases/tag/v2.15.0)
+- Updated newrelic/nri-discovery-kubernetes to v1.13.2 - [Changelog 🔗](https://github.com/newrelic/nri-discovery-kubernetes/releases/tag/v1.13.2)
+- Updated newrelic/nri-kafka to v3.14.0 - [Changelog 🔗](https://github.com/newrelic/nri-kafka/releases/tag/v3.14.0)
+- Updated newrelic/nri-jmx to v3.10.0 - [Changelog 🔗](https://github.com/newrelic/nri-jmx/releases/tag/v3.10.0)
+
 ## v3.2.85 - 2025-09-02
 
 ### ⛓️ Dependencies
