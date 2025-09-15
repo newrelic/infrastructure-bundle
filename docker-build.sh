@@ -6,6 +6,10 @@ DOCKER_PLATFORMS=${DOCKER_PLATFORMS:-linux/amd64,linux/arm64,linux/arm}
 JRE_VERSION=${JRE_VERSION:-} # Blank will pull default version for alpine image
 DOCKER_IMAGE=${DOCKER_IMAGE:-newrelic/infrastructure-bundle}
 DOCKER_IMAGE_TAG=${DOCKER_IMAGE_TAG:-dev} # Overwritten by CI from the release tag
+OUTDIR=${OUTDIR:-out}
+BASE_IMAGE_NAME=${BASE_IMAGE_NAME:-newrelic/infrastructure}
+
+echo "base_image_name $BASE_IMAGE_NAME\n"
 
 # Get default AGENT_VERSION from downloader.go
 if [ -z "$AGENT_VERSION" ]; then
@@ -22,5 +26,7 @@ docker buildx build \
   --platform="${DOCKER_PLATFORMS}" \
   --build-arg agent_version="$AGENT_VERSION" \
   --build-arg jre_version="$JRE_VERSION" \
+  --build-arg out_dir="$OUTDIR"\
+  --build-arg base_image_name="$BASE_IMAGE_NAME" \
   -t "${DOCKER_IMAGE}:${DOCKER_IMAGE_TAG}" \
   "$@"
