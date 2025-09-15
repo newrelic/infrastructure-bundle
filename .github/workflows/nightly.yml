@@ -57,4 +57,3 @@ jobs:
       setup_go: true
       go_version_file: go.mod
       trivy_scan: true
-      
