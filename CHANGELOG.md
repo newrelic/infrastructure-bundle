@@ -9,7 +9,9 @@ Unreleased section should follow [Release Toolkit](https://github.com/newrelic/r
 
 ## Unreleased
 
-### enhancements
+## v3.3.0 - 2025-09-16
+
+### 🚀 Enhancements
 - Added support for a FIPS compatible infrastructure bundle image
 
 ## v3.2.86 - 2025-09-11
