@@ -9,6 +9,13 @@ Unreleased section should follow [Release Toolkit](https://github.com/newrelic/r
 
 ## Unreleased
 
+## v3.3.1 - 2025-09-18
+
+### ⛓️ Dependencies
+- Updated newrelic/nri-discovery-kubernetes to v1.13.3 - [Changelog 🔗](https://github.com/newrelic/nri-discovery-kubernetes/releases/tag/v1.13.3)
+- Updated newrelic/nri-mssql to v2.21.0 - [Changelog 🔗](https://github.com/newrelic/nri-mssql/releases/tag/v2.21.0)
+- Updated newrelic/infrastructure to v1.68.0 - [Changelog 🔗](https://github.com/newrelic/infrastructure-agent/releases/tag/1.68.0)
+
 ## v3.3.0 - 2025-09-16
 
 ### 🚀 Enhancements
