@@ -36,6 +36,7 @@ jobs:
         export DOCKER_PLATFORMS=linux/amd64,linux/arm64
         export OUTDIR=out-fips
         export BASE_IMAGE_NAME=newrelic/infrastructure-fips
+        export DOCKER_IMAGE=newrelic/infrastructure-bundle-fips
         ./docker-build.sh . --push
         if [[ "${{ github.event.release.prerelease }}" == "false" ]]; then
           export DOCKER_IMAGE_TAG=latest
