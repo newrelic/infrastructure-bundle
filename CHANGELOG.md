@@ -9,7 +9,9 @@ Unreleased section should follow [Release Toolkit](https://github.com/newrelic/r
 
 ## Unreleased
 
-### bugfix
+## v3.3.2 - 2025-09-19
+
+### 🐞 Bug fixes
 - Fixed publishing for FIPS pre releases and releases
 
 ## v3.3.1 - 2025-09-18
