@@ -35,7 +35,6 @@ jobs:
         go run downloader.go -bundle=bundle-fips.yml -outdir=out-fips
         export DOCKER_PLATFORMS=linux/amd64,linux/arm64
         export OUTDIR=out-fips
-        export BASE_IMAGE_NAME=newrelic/infrastructure-fips
         ./docker-build.sh . --push
         if [[ "${{ github.event.release.prerelease }}" == "false" ]]; then
           export DOCKER_IMAGE_TAG=latest
