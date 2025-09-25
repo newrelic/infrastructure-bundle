@@ -9,6 +9,12 @@ Unreleased section should follow [Release Toolkit](https://github.com/newrelic/r
 
 ## Unreleased
 
+## v3.3.3 - 2025-09-25
+
+### ⛓️ Dependencies
+- Updated newrelic/nri-discovery-kubernetes to v1.13.4 - [Changelog 🔗](https://github.com/newrelic/nri-discovery-kubernetes/releases/tag/v1.13.4)
+- Updated newrelic/nri-postgresql to v2.21.0 - [Changelog 🔗](https://github.com/newrelic/nri-postgresql/releases/tag/v2.21.0)
+
 ## v3.3.2 - 2025-09-19
 
 ### 🐞 Bug fixes
