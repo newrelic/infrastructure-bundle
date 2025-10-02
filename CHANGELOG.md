@@ -9,6 +9,12 @@ Unreleased section should follow [Release Toolkit](https://github.com/newrelic/r
 
 ## Unreleased
 
+## v3.3.4 - 2025-10-02
+
+### ⛓️ Dependencies
+- Updated newrelic/infrastructure to v1.69.0 - [Changelog 🔗](https://github.com/newrelic/infrastructure-agent/releases/tag/1.69.0)
+- Updated newrelic/nri-elasticsearch to v5.4.4 - [Changelog 🔗](https://github.com/newrelic/nri-elasticsearch/releases/tag/v5.4.4)
+
 ## v3.3.3 - 2025-09-25
 
 ### ⛓️ Dependencies
