@@ -16,7 +16,7 @@ jobs:
       DOCKER_IMAGE: newrelic/infrastructure-bundle
       DOCKER_IMAGE_TAG: ci
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
       - name: Set up Docker Buildx
@@ -49,7 +49,7 @@ jobs:
       BASE_IMAGE_NAME: newrelic/infrastructure-fips
       DOCKER_PLATFORMS: linux/amd64,linux/arm64
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
       - name: Set up Docker Buildx
