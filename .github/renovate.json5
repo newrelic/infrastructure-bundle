@@ -12,7 +12,8 @@
     {
       // Extract base agent image from bundle.yml.
       "fileMatch": [
-        "^bundle.yml$"
+        "^bundle.yml$",
+        "^bundle-fips.yml$"
       ],
       "depNameTemplate": "newrelic/infrastructure", // Defined directly since we only capture the version in the regex.
       "datasourceTemplate": "docker",
@@ -23,7 +24,8 @@
     {
       // Extract dependency name and version for integrations.
       "fileMatch": [
-        "^bundle.yml$"
+        "^bundle.yml$",
+        "^bundle-fips.yml$"
       ],
       // Dependency name (org/repo format) is created from the `integrationName` named capture group in the regex below.
       "depNameTemplate": "newrelic/{{{integrationName}}}",
