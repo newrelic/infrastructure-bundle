@@ -9,6 +9,14 @@ Unreleased section should follow [Release Toolkit](https://github.com/newrelic/r
 
 ## Unreleased
 
+## v3.3.12 - 2026-01-28
+
+### ⛓️ Dependencies
+- Updated newrelic/nri-mysql to v1.18.3 - [Changelog 🔗](https://github.com/newrelic/nri-mysql/releases/tag/v1.18.3)
+- Updated newrelic/nri-consul to v2.9.6 - [Changelog 🔗](https://github.com/newrelic/nri-consul/releases/tag/v2.9.6)
+- Updated newrelic/nri-discovery-kubernetes to v1.13.8 - [Changelog 🔗](https://github.com/newrelic/nri-discovery-kubernetes/releases/tag/v1.13.8)
+- Updated newrelic/infrastructure to v1.72.0 - [Changelog 🔗](https://github.com/newrelic/infrastructure-agent/releases/tag/1.72.0)
+
 ## v3.3.11 - 2026-01-22
 
 ### ⛓️ Dependencies
