@@ -70,7 +70,7 @@ integrations:
   - name: nri-rabbitmq
     version: v2.15.4
   - name: nri-redis
-    version: v1.12.7
+    version: v1.12.8
   - name: nrjmx
     version: v2.10.2
     url: https://download.newrelic.com/infrastructure_agent/binaries/linux/noarch/nrjmx_linux_{{.Version | trimv}}_noarch.tar.gz
