@@ -33,8 +33,26 @@ jobs:
         run: |
           # Test build, but not load, for all archs
           ./docker-build.sh .
-          # Build and load for amd64 only (for snyk)
+          # Build and load for amd64 only (for trivy)
           DOCKER_PLATFORMS=linux/amd64 ./docker-build.sh . --load
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@0.29.0
+        with:
+          image-ref: ${{ env.DOCKER_IMAGE }}:${{ env.DOCKER_IMAGE_TAG }}
+          format: sarif
+          output: trivy-results.sarif
+          ignore-unfixed: true
+          severity: "CRITICAL,HIGH"
+        env:
+          TRIVY_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-db
+          TRIVY_JAVA_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-java-db
+
+      - name: Upload Trivy scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: trivy-results.sarif
 
       - name: Check if CHANGELOG is valid
         uses: newrelic/release-toolkit/validate-markdown@v1
@@ -66,8 +84,27 @@ jobs:
         run: |
           # Test build, but not load, for all archs
           ./docker-build.sh .
-          # Build and load for amd64 only (for snyk)
+          # Build and load for amd64 only (for trivy)
           DOCKER_PLATFORMS=linux/amd64 ./docker-build.sh . --load
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@0.29.0
+        with:
+          image-ref: ${{ env.DOCKER_IMAGE }}:${{ env.DOCKER_IMAGE_TAG }}
+          format: sarif
+          output: trivy-results-fips.sarif
+          ignore-unfixed: true
+          severity: "CRITICAL,HIGH"
+        env:
+          TRIVY_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-db
+          TRIVY_JAVA_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-java-db
+
+      - name: Upload Trivy scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: trivy-results-fips.sarif
+          category: trivy-fips
 
       - name: Check if CHANGELOG is valid
         uses: newrelic/release-toolkit/validate-markdown@v1
