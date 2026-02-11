@@ -2,6 +2,8 @@ name: Security scan
 on:
   push:
     branches:
+      - master
+      - main
       - renovate/**
   pull_request:
 
@@ -28,16 +30,20 @@ jobs:
         run: |
           DOCKER_PLATFORMS=linux/amd64 ./docker-build.sh . --load
 
-      - name: Run Trivy in table mode
-        # Table output is only useful when running on a pull request or push.
-        if: contains(fromJSON('["push", "pull_request"]'), github.event_name)
+      - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@0.29.0
         with:
           image-ref: ${{ env.DOCKER_IMAGE }}:${{ env.DOCKER_IMAGE_TAG }}
-          format: table
-          exit-code: 1
+          format: sarif
+          output: trivy-results.sarif
           ignore-unfixed: true
           severity: "CRITICAL,HIGH"
         env:
           TRIVY_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-db
           TRIVY_JAVA_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-java-db
+
+      - name: Upload Trivy scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: trivy-results.sarif
