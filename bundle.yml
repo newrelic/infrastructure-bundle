@@ -36,7 +36,7 @@ integrations:
 #    stagingUrl: "" # Defaults to global `stagingUrl`.
 #    repo: "" # Defaults to global `repo`.
   - name: nri-apache
-    version: v1.15.5
+    version: v1.15.6
   - name: nri-cassandra
     version: v2.17.1
   - name: nri-consul
