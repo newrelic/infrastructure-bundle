@@ -1,0 +1,68 @@
+name: Security scan
+on:
+  pull_request:
+  schedule:
+    - cron: '0 0 * * *'
+  push:
+
+jobs:
+  build:
+    name: Build and scan image
+    runs-on: ubuntu-latest
+    env:
+      DOCKER_IMAGE: newrelic/infrastructure-bundle
+      DOCKER_IMAGE_TAG: ci
+    steps:
+      - uses: actions/checkout@v4
+      
+      # Environment setup
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Download integrations
+        run: go run downloader.go
+
+      - name: Build and load docker image
+        run: |
+          DOCKER_PLATFORMS=linux/amd64 ./docker-build.sh . --load
+
+      - name: Run Trivy Scan
+        uses: aquasecurity/trivy-action@0.29.0
+        id: trivy
+        with:
+          image-ref: ${{ env.DOCKER_IMAGE }}:${{ env.DOCKER_IMAGE_TAG }}
+          format: table
+          exit-code: 0 
+          ignore-unfixed: true
+          severity: "CRITICAL,HIGH"
+          output: "trivy-report.txt"
+
+      - name: Format Slack Message
+        id: format_message
+        run: |
+          # Check if the report has any lines beyond the table header
+          # Trivy tables usually have at least 3 lines of decoration even when empty
+          LINE_COUNT=$(wc -l < trivy-report.txt)
+          
+          if [ "$LINE_COUNT" -le 3 ]; then
+            MSG="*✅ Security Scan Passed*\nNo High or Critical vulnerabilities found for \`${{ env.DOCKER_IMAGE }}\`."
+          else
+            REPORT=$(cat trivy-report.txt | head -c 2500)
+            MSG="*🚨 Security Scan Issues Found*\nVulnerabilities detected in \`${{ env.DOCKER_IMAGE }}\`:\n\`\`\`$REPORT\`\`\`"
+          fi
+          
+          echo "SLACK_MESSAGE<<EOF" >> $GITHUB_OUTPUT
+          echo -e "$MSG" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Send Slack notification
+        uses: archive/github-actions-slack@master
+        with:
+          slack-bot-user-oauth-access-token: ${{ secrets.COREINT_SLACK_TOKEN }}
+          slack-channel: ${{ secrets.TEST_SLACK_CHANNEL }}
+          slack-text: ${{ steps.format_message.outputs.SLACK_MESSAGE }}
+          slack-optional-parse: full
