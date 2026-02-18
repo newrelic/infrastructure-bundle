@@ -33,8 +33,9 @@ jobs:
         run: |
           cat << 'EOF' > slack.tpl
           {{- range . -}}
+          {{- $target := .Target -}}
           {{- range .Vulnerabilities -}}
-          {{ .PkgName }} | {{ .VulnerabilityID }} | {{ .Severity }} | {{ .FixedVersion }}
+          {{ $target }} | {{ .PkgName }} | {{ .VulnerabilityID }} | {{ .Severity }} | {{ .FixedVersion }}
           {{ end -}}
           {{- end -}}
           EOF
@@ -57,18 +58,21 @@ jobs:
           sed -i '/^[[:space:]]*$/d' raw-report.txt
           
           if [ -s raw-report.txt ]; then
-             # Create the table header
-             HEADER="| Library | CVE ID | Severity | Fixed Version |\n|---|---|---|---|\n"
-             # Add table borders to the raw data
+             # Updated Header with "Integration/Target" column
+             HEADER="| Integration | Library | CVE ID | Severity | Fixed Version |\n|---|---|---|---|---|\n"
+             
+             # Wrap each line with pipes for Markdown table format
              BODY=$(sed 's/^/| /; s/$/ |/' raw-report.txt)
              
-             # Combine header and body
+             # Shorten the long paths to just the binary name (optional but recommended for Slack)
+             # This changes "var/db/.../bin/nri-mongodb" to just "nri-mongodb"
+             BODY=$(echo "$BODY" | sed 's|var/db/newrelic-infra/newrelic-integrations/bin/||g')
+             
              FULL_REPORT="${HEADER}${BODY}"
              
-             # Use a temporary file to handle the multi-line output safely
              echo "SLACK_MESSAGE<<EOF" >> $GITHUB_OUTPUT
              echo -e "*🚨 Security Scan Issues Found*" >> $GITHUB_OUTPUT
-             echo -e "Consolidated report for \`${{ env.DOCKER_IMAGE }}\`:" >> $GITHUB_OUTPUT
+             echo -e "Detailed report for \`${{ env.DOCKER_IMAGE }}\`:" >> $GITHUB_OUTPUT
              echo -e "\`\`\`" >> $GITHUB_OUTPUT
              echo -e "$FULL_REPORT" | head -c 3500 >> $GITHUB_OUTPUT
              echo -e "\`\`\`" >> $GITHUB_OUTPUT
