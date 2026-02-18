@@ -34,23 +34,38 @@ jobs:
         id: trivy
         with:
           image-ref: ${{ env.DOCKER_IMAGE }}:${{ env.DOCKER_IMAGE_TAG }}
-          format: 'table'
+          format: 'template'
+          # We use a compact, one-line-per-finding format to avoid YAML parsing errors
+          template: |
+            {{- range . -}}
+            {{- range .Vulnerabilities -}}
+            {{ .PkgName }} | {{ .VulnerabilityID }} | {{ .Severity }} | {{ .FixedVersion }}
+            {{ end -}}
+            {{- end -}}
           exit-code: 0 
-          ignore-unfixed: true # Shows only vulnerabilities with available fixes
+          ignore-unfixed: true
           severity: "CRITICAL,HIGH"
           output: "raw-report.txt"
 
       - name: Format Slack Message
         id: format_message
         run: |
-          # 1. Filter the report for headers and tables
-          # 2. 'cut -c 1-120' trims the long Title/URL columns to prevent Slack overflow
-          CLEAN_REPORT=$(grep -E "^[^ ]+ \(.+\)|^Total|^┌|^│|^├|^└" raw-report.txt | grep -v "VEX" | cut -c 1-120 || true)
+          # 1. Clean up empty lines
+          sed -i '/^[[:space:]]*$/d' raw-report.txt
           
-          if [[ "$CLEAN_REPORT" == *"CVE-"* ]]; then
-             MSG="*🚨 Security Scan Issues Found*\nVerified fixes available for \`${{ env.DOCKER_IMAGE }}\`:\n\`\`\`\n$(echo "$CLEAN_REPORT" | head -c 3500)\n\`\`\`"
+          # 2. Check if we have results
+          if [ -s raw-report.txt ]; then
+             # Construct one clean table header
+             HEADER="| Library | CVE ID | Severity | Fixed Version |\n|---|---|---|---|\n"
+             # Add a pipe to the start and end of each line from the report
+             BODY=$(sed 's/^/| /; s/$/ |/' raw-report.txt)
+             
+             FULL_TABLE="${HEADER}${BODY}"
+             
+             # Limit to 3500 chars for Slack
+             MSG="*🚨 Security Scan Issues Found*\nCombined report for \`${{ env.DOCKER_IMAGE }}\`:\n\`\`\`\n$(echo -e "$FULL_TABLE" | head -c 3500)\n\`\`\`"
           else
-             MSG="*✅ Security Scan Passed*\nNo High or Critical vulnerabilities (with available fixes) found for \`${{ env.DOCKER_IMAGE }}\`."
+             MSG="*✅ Security Scan Passed*\nNo High or Critical vulnerabilities found for \`${{ env.DOCKER_IMAGE }}\`."
           fi
           
           echo "SLACK_MESSAGE<<EOF" >> $GITHUB_OUTPUT
