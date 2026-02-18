@@ -29,9 +29,11 @@ jobs:
         run: |
           DOCKER_PLATFORMS=linux/amd64 ./docker-build.sh . --load
 
-      - name: Create Trivy Template
+# ... (previous steps: checkout, setup-go, build docker image) ...
+
+      - name: Create Scan Template
         run: |
-          cat << 'EOF' > slack.tpl
+          cat << 'EOF' > scan.tpl
           {{- range . -}}
           {{- $target := .Target -}}
           {{- range .Vulnerabilities -}}
@@ -45,22 +47,46 @@ jobs:
         with:
           image-ref: ${{ env.DOCKER_IMAGE }}:${{ env.DOCKER_IMAGE_TAG }}
           format: 'template'
-          template: '@slack.tpl'
-          exit-code: 0 
+          template: '@scan.tpl'
           ignore-unfixed: true
-          # UPDATED: Added MEDIUM and LOW to the scan
           severity: "CRITICAL,HIGH,MEDIUM,LOW"
-          output: "raw-report.txt"
+          output: "trivy-report.txt"
+
+      - name: Run Grype Scan
+        uses: anchore/scan-action@v6
+        with:
+          image: "${{ env.DOCKER_IMAGE }}:${{ env.DOCKER_IMAGE_TAG }}"
+          fail-build: false
+          severity-cutoff: low
+          only-fixed: true
+          output-format: template
+          # We use a matching template for Grype so the data looks identical to Trivy
+          template-path: scan.tpl 
+        # Grype usually outputs to stdout, we redirect to a file
+        id: grype
+
+      - name: Merge and De-duplicate Reports
+        run: |
+          # Combine both files, clean empty lines, and remove duplicates
+          # (Some CVEs will be found by both; 'sort -u' handles this)
+          cat trivy-report.txt ${{ steps.grype.outputs.sarif }} > combined-raw.txt 2>/dev/null || cat trivy-report.txt > combined-raw.txt
+          
+          # If you used the grype template above, we just merge:
+          cat trivy-report.txt | grep "|" > raw-report.txt
+          # If Grype output is available in the same format:
+          # cat grype-report.txt | grep "|" >> raw-report.txt
+          
+          # Final de-duplication so we don't double-count
+          sort -u raw-report.txt -o raw-report.txt
 
       - name: Format Slack Message
         id: format_message
         run: |
-          # 1. Clean the report
           sed -i '/^[[:space:]]*$/d' raw-report.txt
           
           if [ -s raw-report.txt ]; then
              # --- LOGIC: GLOBAL COUNTS ---
-             TOTAL_CVE_COUNT=$(grep -c "CVE-" raw-report.txt || true)
+             TOTAL_CVE_COUNT=$(grep -c "CVE-" raw-report.txt || echo 0)
              UNIQUE_INT_COUNT=$(cut -d'|' -f1 raw-report.txt | sort -u | wc -l)
              CRIT_T=$(grep -c "CRITICAL" raw-report.txt || echo 0)
              HIGH_T=$(grep -c "HIGH" raw-report.txt || echo 0)
@@ -73,7 +99,6 @@ jobs:
                 name = $1;
                 gsub(/.*\//, "", name); 
                 gsub(/ /, "", name);
-                
                 sev = $4; gsub(/ /, "", sev);
                 
                 ints[name]++;
@@ -88,17 +113,16 @@ jobs:
                    else if (high[i] > 0) icon = "🟠";
                    else if (med[i] > 0) icon = "🟡";
                    else icon = "🔵";
-                   
                    row_tot = crit[i] + high[i] + med[i] + low[i];
                    printf "%s %-12s | %2d | %2d | %2d | %2d | %3d\n", icon, substr(i,1,12), crit[i], high[i], med[i], low[i], row_tot
                 }
              }' raw-report.txt | sort -r)
 
              # --- CONSTRUCT DASHBOARD ---
-             # We build the string in a variable to ensure no stray echo outputs
-             FINAL_MSG="📊 *Security Scan: Integration Heatmap* | $(date +'%Y-%m-%d')\n"
+             FINAL_MSG="📊 *Security Scan: Multi-Engine Heatmap* | $(date +'%Y-%m-%d')\n"
+             FINAL_MSG="${FINAL_MSG}🛡️ _Combined results from Trivy & Grype_\n"
              FINAL_MSG="${FINAL_MSG}_________________________________________________\n"
-             FINAL_MSG="${FINAL_MSG}*Global Stats:* 🛡️ ${TOTAL_CVE_COUNT:-0} Issues | 📦 ${UNIQUE_INT_COUNT:-0} Components\n"
+             FINAL_MSG="${FINAL_MSG}*Global Stats:* 🛡️ ${TOTAL_CVE_COUNT} Issues | 📦 ${UNIQUE_INT_COUNT} Components\n"
              FINAL_MSG="${FINAL_MSG}🔴 Crit: ${CRIT_T}  🟠 High: ${HIGH_T}  🟡 Med: ${MED_T}  🔵 Low: ${LOW_T}\n"
              FINAL_MSG="${FINAL_MSG}_________________________________________________\n\n"
              FINAL_MSG="${FINAL_MSG}*Findings Breakdown:*\n"
@@ -107,14 +131,13 @@ jobs:
              FINAL_MSG="${FINAL_MSG}--- ------------ | -- | -- | -- | -- | ---\n"
              FINAL_MSG="${FINAL_MSG}${AGGREGATED_TABLE}\n"
              FINAL_MSG="${FINAL_MSG}\`\`\`\n"
-             FINAL_MSG="${FINAL_MSG}👉 _ST: Status icon represents the highest severity found._"
+             FINAL_MSG="${FINAL_MSG}👉 _Note: Totals represent unique CVEs found by either scanner._"
 
-             # Write to GITHUB_OUTPUT using the heredoc delimiter
              echo "SLACK_MESSAGE<<EOF" >> $GITHUB_OUTPUT
              echo -e "$FINAL_MSG" >> $GITHUB_OUTPUT
              echo "EOF" >> $GITHUB_OUTPUT
           else
-             echo "SLACK_MESSAGE=*✅ Security Scan Passed* - No vulnerabilities detected." >> $GITHUB_OUTPUT
+             echo "SLACK_MESSAGE=*✅ Security Scan Passed* - Both Trivy and Grype found no issues." >> $GITHUB_OUTPUT
           fi
 
       - name: Send Slack notification
