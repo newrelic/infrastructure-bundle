@@ -79,17 +79,17 @@ jobs:
       - name: Format Slack Message
         id: format_message
         run: |
-          # 1. Clean the report
+          # 1. Clean the report to ensure no empty lines
           sed -i '/^[[:space:]]*$/d' raw-report.txt
           
           if [ -s raw-report.txt ]; then
-             # --- LOGIC: GLOBAL COUNTS ---
-             TOTAL_CVE_COUNT=$(grep -c "CVE-" raw-report.txt || echo 0)
-             UNIQUE_INT_COUNT=$(cut -d'|' -f1 raw-report.txt | sort -u | wc -l)
-             CRIT_T=$(grep -c "CRITICAL" raw-report.txt || echo 0)
-             HIGH_T=$(grep -c "HIGH" raw-report.txt || echo 0)
-             MED_T=$(grep -c "MEDIUM" raw-report.txt || echo 0)
-             LOW_T=$(grep -c "LOW" raw-report.txt || echo 0)
+             # --- LOGIC: GLOBAL COUNTS (Fixed to prevent stray zeros) ---
+             TOTAL_CVE_COUNT=$(grep -c "CVE-" raw-report.txt || echo "0")
+             UNIQUE_INT_COUNT=$(cut -d'|' -f1 raw-report.txt | sort -u | wc -l | xargs)
+             CRIT_T=$(grep -c "CRITICAL" raw-report.txt || echo "0")
+             HIGH_T=$(grep -c "HIGH" raw-report.txt || echo "0")
+             MED_T=$(grep -c "MEDIUM" raw-report.txt || echo "0")
+             LOW_T=$(grep -c "LOW" raw-report.txt || echo "0")
 
              # --- LOGIC: PER-INTEGRATION AGGREGATION ---
              AGGREGATED_TABLE=$(awk -F'|' '
@@ -110,13 +110,12 @@ jobs:
                    else if (high[i] > 0) icon = "🟠";
                    else if (med[i] > 0) icon = "🟡";
                    else icon = "🔵";
-                   row_tot = crit[i] + high[i] + med[i] + low[i];
+                   row_tot = (crit[i]+0) + (high[i]+0) + (med[i]+0) + (low[i]+0);
                    printf "%s %-12s | %2d | %2d | %2d | %2d | %3d\n", icon, substr(i,1,12), crit[i], high[i], med[i], low[i], row_tot
                 }
              }' raw-report.txt | sort -r)
 
-             # --- CONSTRUCT ATTRACTIVE DASHBOARD ---
-             # Building the message string carefully to prevent stray characters
+             # --- CONSTRUCT DASHBOARD ---
              DASHBOARD="*🛡️ SECURITY SCAN REPORT* | \`$(date +'%Y-%m-%d')\`\n"
              DASHBOARD="${DASHBOARD}*Multi-Engine:* _Trivy & Grype Combined_\n"
              DASHBOARD="${DASHBOARD}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
@@ -133,7 +132,7 @@ jobs:
              DASHBOARD="${DASHBOARD}\`\`\`\n"
              DASHBOARD="${DASHBOARD}🔗 _Check GitHub Actions for more details._"
 
-             # Write to GITHUB_OUTPUT using a single clean block
+             # Final Output
              echo "SLACK_MESSAGE<<EOF" >> $GITHUB_OUTPUT
              echo -e "$DASHBOARD" >> $GITHUB_OUTPUT
              echo "EOF" >> $GITHUB_OUTPUT
