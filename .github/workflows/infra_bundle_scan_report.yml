@@ -36,7 +36,7 @@ jobs:
           image-ref: ${{ env.DOCKER_IMAGE }}:${{ env.DOCKER_IMAGE_TAG }}
           format: table
           exit-code: 0 
-          ignore-unfixed: true # CHANGED: Now shows vulnerabilities even if they aren't fixed yet
+          ignore-unfixed: true
           severity: "CRITICAL,HIGH"
           output: "raw-report.txt"
         env:
@@ -46,18 +46,26 @@ jobs:
       - name: Format Slack Message
         id: format_message
         run: |
-          # This captures every table header (Target), Total count, and Table row
-          # while ignoring the "VEX" and "OSS" marketing text.
+          # 1. Remove the VEX noise and keep headers/tables
           CLEAN_REPORT=$(grep -E "^[^ ]+ \(.+\)|^Total|^┌|^│|^├|^└" raw-report.txt | grep -v "VEX" || true)
           
-          # Check if we actually found any vulnerabilities in the report
-          if [[ "$CLEAN_REPORT" == *"Total: 0"* && ! "$CLEAN_REPORT" == *"Total: [1-9]"* ]]; then
-             MSG="*✅ Security Scan Passed*\nNo High or Critical vulnerabilities found for \`${{ env.DOCKER_IMAGE }}\`."
+          # 2. DEBUG: Print the filtered report to the GitHub log so we can see it
+          echo "--- DEBUG: Filtered Report Content ---"
+          echo "$CLEAN_REPORT"
+          echo "---------------------------------------"
+
+          # 3. CHECK: Does the report contain 'CVE-' or 'Total: [non-zero]'?
+          # This is much more reliable than checking for table borders.
+          if [[ "$CLEAN_REPORT" == *"CVE-"* ]]; then
+             echo "Status: Vulnerabilities detected."
+             # Limit to 3000 chars to avoid Slack rejecting the message
+             MSG="*🚨 Security Scan Issues Found*\nVulnerabilities detected in \`${{ env.DOCKER_IMAGE }}\`:\n\`\`\`\n$(echo "$CLEAN_REPORT" | head -c 3000)\n\`\`\`"
           else
-             # Use a larger character limit (3500) to fit more of the table
-             MSG="*🚨 Security Scan Issues Found*\n\`\`\`\n$(echo "$CLEAN_REPORT" | head -c 3500)\n\`\`\`"
+             echo "Status: No vulnerabilities found."
+             MSG="*✅ Security Scan Passed*\nNo High or Critical vulnerabilities found for \`${{ env.DOCKER_IMAGE }}\`."
           fi
           
+          # 4. Output to GitHub variable
           echo "SLACK_MESSAGE<<EOF" >> $GITHUB_OUTPUT
           echo -e "$MSG" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
