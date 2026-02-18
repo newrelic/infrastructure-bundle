@@ -54,31 +54,39 @@ jobs:
       - name: Format Slack Message
         id: format_message
         run: |
-          # Remove empty lines
+          # 1. Clean up empty lines
           sed -i '/^[[:space:]]*$/d' raw-report.txt
           
           if [ -s raw-report.txt ]; then
-             # Updated Header with "Integration/Target" column
+             # --- LOGIC FOR COUNTS ---
+             # Count unique integrations (first column of our template)
+             UNIQUE_INT_COUNT=$(cut -d'|' -f1 raw-report.txt | sort -u | wc -l)
+             # Count total CVE entries
+             TOTAL_CVE_COUNT=$(grep -c "CVE-" raw-report.txt)
+             # Count Critical vs High
+             CRIT_COUNT=$(grep -c "CRITICAL" raw-report.txt || echo 0)
+             HIGH_COUNT=$(grep -c "HIGH" raw-report.txt || echo 0)
+
+             # --- HEADER AND BODY ---
              HEADER="| Integration | Library | CVE ID | Severity | Fixed Version |\n|---|---|---|---|---|\n"
+             BODY=$(sed 's/^/| /; s/$/ |/' raw-report.txt | sed 's|var/db/newrelic-infra/newrelic-integrations/bin/||g')
              
-             # Wrap each line with pipes for Markdown table format
-             BODY=$(sed 's/^/| /; s/$/ |/' raw-report.txt)
-             
-             # Shorten the long paths to just the binary name (optional but recommended for Slack)
-             # This changes "var/db/.../bin/nri-mongodb" to just "nri-mongodb"
-             BODY=$(echo "$BODY" | sed 's|var/db/newrelic-infra/newrelic-integrations/bin/||g')
-             
-             FULL_REPORT="${HEADER}${BODY}"
-             
+             # --- CONSTRUCT SLACK MESSAGE ---
              echo "SLACK_MESSAGE<<EOF" >> $GITHUB_OUTPUT
-             echo -e "*🚨 Security Scan Issues Found*" >> $GITHUB_OUTPUT
-             echo -e "Detailed report for \`${{ env.DOCKER_IMAGE }}\`:" >> $GITHUB_OUTPUT
+             echo -e "*🚨 Security Vulnerabilities Detected*" >> $GITHUB_OUTPUT
+             echo -e "_________________________________________________" >> $GITHUB_OUTPUT
+             echo -e "*Summary:*" >> $GITHUB_OUTPUT
+             echo -e "• 📦 *Total Integrations Affected:* $UNIQUE_INT_COUNT" >> $GITHUB_OUTPUT
+             echo -e "• 🛡️ *Total CVEs Found:* $TOTAL_CVE_COUNT" >> $GITHUB_OUTPUT
+             echo -e "• 🔴 *Critical:* $CRIT_COUNT  |  🟠 *High:* $HIGH_COUNT" >> $GITHUB_OUTPUT
+             echo -e "_________________________________________________" >> $GITHUB_OUTPUT
              echo -e "\`\`\`" >> $GITHUB_OUTPUT
-             echo -e "$FULL_REPORT" | head -c 3500 >> $GITHUB_OUTPUT
+             echo -e "${HEADER}${BODY}" | head -c 3300 >> $GITHUB_OUTPUT
              echo -e "\`\`\`" >> $GITHUB_OUTPUT
+             echo -e "👉 _Check GitHub Actions logs for full exploit details._" >> $GITHUB_OUTPUT
              echo "EOF" >> $GITHUB_OUTPUT
           else
-             echo "SLACK_MESSAGE=*✅ Security Scan Passed*\nNo High or Critical vulnerabilities found." >> $GITHUB_OUTPUT
+             echo "SLACK_MESSAGE=*✅ Security Scan Passed*\nNo High or Critical vulnerabilities found for today's build." >> $GITHUB_OUTPUT
           fi
 
       - name: Send Slack notification
