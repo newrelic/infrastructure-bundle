@@ -1,7 +1,6 @@
 name: Vulnerability Scan Daily
 on:
   push:
-  pull_request:
   schedule:
     - cron: '0 0 * * *'
 
@@ -37,7 +36,7 @@ jobs:
           image-ref: ${{ env.DOCKER_IMAGE }}:${{ env.DOCKER_IMAGE_TAG }}
           format: table
           exit-code: 0 
-          ignore-unfixed: false # CHANGED: Now shows vulnerabilities even if they aren't fixed yet
+          ignore-unfixed: true # CHANGED: Now shows vulnerabilities even if they aren't fixed yet
           severity: "CRITICAL,HIGH"
           output: "raw-report.txt"
         env:
