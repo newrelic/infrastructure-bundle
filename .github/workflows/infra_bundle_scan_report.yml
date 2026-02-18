@@ -67,12 +67,10 @@ jobs:
              MED_T=$(grep -c "MEDIUM" raw-report.txt || echo 0)
              LOW_T=$(grep -c "LOW" raw-report.txt || echo 0)
 
-             # --- LOGIC: PER-INTEGRATION AGGREGATION ---
-             # Groups by component and assigns color based on highest severity
+             # --- LOGIC: PER-INTEGRATION AGGREGATION WITH ROW TOTALS ---
              AGGREGATED_TABLE=$(awk -F'|' '
              {
                 name = $1;
-                # Remove long paths if present, keep the filename
                 gsub(/.*\//, "", name); 
                 gsub(/ /, "", name);
                 
@@ -91,22 +89,25 @@ jobs:
                    else if (med[i] > 0) icon = "🟡";
                    else icon = "🔵";
                    
-                   printf "%s %-13s | %3d | %3d | %3d | %3d\n", icon, substr(i,1,13), crit[i], high[i], med[i], low[i]
+                   # Calculate row total for this specific integration
+                   row_tot = crit[i] + high[i] + med[i] + low[i];
+                   
+                   printf "%s %-12s | %2d | %2d | %2d | %2d | %3d\n", icon, substr(i,1,12), crit[i], high[i], med[i], low[i], row_tot
                 }
              }' raw-report.txt | sort -r)
 
              # --- CONSTRUCT DASHBOARD ---
              {
                echo "SLACK_MESSAGE<<EOF"
-               echo -e "📊 *Security Scan: Full Heatmap* | $(date +'%Y-%m-%d')"
+               echo -e "📊 *Security Scan: Integration Heatmap* | $(date +'%Y-%m-%d')"
                echo -e "_________________________________________________"
                echo -e "*Global Stats:* 🛡️ $TOTAL_CVE_COUNT Issues | 📦 $UNIQUE_INT_COUNT Components"
                echo -e "🔴 Crit: $CRIT_T  🟠 High: $HIGH_T  🟡 Med: $MED_T  🔵 Low: $LOW_T"
                echo -e "_________________________________________________"
                echo -e "\n*Findings Breakdown:*"
                echo -e "\`\`\`"
-               echo -e "ST  COMPONENT     | CRT | HIG | MED | LOW"
-               echo -e "--- ------------ | --- | --- | --- | ---"
+               echo -e "ST  INTEGRATION  | CR | HI | ME | LO | TOT"
+               echo -e "--- ------------ | -- | -- | -- | -- | ---"
                echo -e "$AGGREGATED_TABLE" | head -c 3500
                echo -e "\`\`\`"
                echo -e "👉 _ST: Status icon represents the highest severity found._"
