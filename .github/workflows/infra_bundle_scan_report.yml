@@ -54,30 +54,27 @@ jobs:
 
       - name: Run Grype Scan
         uses: anchore/scan-action@v6
+        id: grype
         with:
           image: "${{ env.DOCKER_IMAGE }}:${{ env.DOCKER_IMAGE_TAG }}"
           fail-build: false
           severity-cutoff: low
           only-fixed: true
-          output-format: template
-          # We use a matching template for Grype so the data looks identical to Trivy
-          template-path: scan.tpl 
-        # Grype usually outputs to stdout, we redirect to a file
-        id: grype
+          output-format: json # Use JSON for raw data
 
-      - name: Merge and De-duplicate Reports
+      - name: Convert Grype to Table Format & Merge
         run: |
-          # Combine both files, clean empty lines, and remove duplicates
-          # (Some CVEs will be found by both; 'sort -u' handles this)
-          cat trivy-report.txt ${{ steps.grype.outputs.sarif }} > combined-raw.txt 2>/dev/null || cat trivy-report.txt > combined-raw.txt
+          # 1. Use jq to convert Grype JSON to the same format: Target | Pkg | CVE | Severity | Fixed
+          # We use "any" for Fixed Version if not explicitly found to keep column count consistent
+          jq -r '.matches[] | "\(.artifact.locations[0].path) | \(.artifact.name) | \(.vulnerability.id) | \(.vulnerability.severity | ascii_upcase) | \(.vulnerability.fix.versions[0] // "n/a")"' ${{ steps.grype.outputs.json }} > grype-report.txt || touch grype-report.txt
+
+          # 2. Merge both reports
+          cat trivy-report.txt grype-report.txt > combined-raw.txt
           
-          # If you used the grype template above, we just merge:
-          cat trivy-report.txt | grep "|" > raw-report.txt
-          # If Grype output is available in the same format:
-          # cat grype-report.txt | grep "|" >> raw-report.txt
-          
-          # Final de-duplication so we don't double-count
-          sort -u raw-report.txt -o raw-report.txt
+          # 3. Clean up the paths and de-duplicate unique CVEs per integration
+          # This ensures that if both find the same CVE in the same binary, we only count it once
+          sed -i 's|var/db/newrelic-infra/newrelic-integrations/bin/||g' combined-raw.txt
+          sort -u combined-raw.txt -o raw-report.txt
 
       - name: Format Slack Message
         id: format_message
