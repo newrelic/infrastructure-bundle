@@ -83,14 +83,23 @@ jobs:
           sed -i '/^[[:space:]]*$/d' raw-report.txt
           
           if [ -s raw-report.txt ]; then
-             # --- LOGIC: GLOBAL COUNTS (Forced Integer Logic) ---
-             # We use $(()) to force these into pure numbers
-             TOTAL_CVE_COUNT=$(( $(grep -c "CVE-" raw-report.txt || echo 0) ))
-             UNIQUE_INT_COUNT=$(( $(cut -d'|' -f1 raw-report.txt | sort -u | wc -l || echo 0) ))
-             CRIT_T=$(( $(grep -c "CRITICAL" raw-report.txt || echo 0) ))
-             HIGH_T=$(( $(grep -c "HIGH" raw-report.txt || echo 0) ))
-             MED_T=$(( $(grep -c "MEDIUM" raw-report.txt || echo 0) ))
-             LOW_T=$(( $(grep -c "LOW" raw-report.txt || echo 0) ))
+             # --- LOGIC: GLOBAL COUNTS (Strictly Cleaned) ---
+             # We use head -n 1 to ensure only one line is grabbed
+             # We use sed to strip any non-numeric characters
+             TOTAL_CVE_COUNT=$(grep -c "CVE-" raw-report.txt | head -n 1 | sed 's/[^0-9]//g')
+             UNIQUE_INT_COUNT=$(cut -d'|' -f1 raw-report.txt | sort -u | wc -l | head -n 1 | sed 's/[^0-9]//g')
+             CRIT_T=$(grep -c "CRITICAL" raw-report.txt | head -n 1 | sed 's/[^0-9]//g')
+             HIGH_T=$(grep -c "HIGH" raw-report.txt | head -n 1 | sed 's/[^0-9]//g')
+             MED_T=$(grep -c "MEDIUM" raw-report.txt | head -n 1 | sed 's/[^0-9]//g')
+             LOW_T=$(grep -c "LOW" raw-report.txt | head -n 1 | sed 's/[^0-9]//g')
+
+             # Fallback to 0 if variables are empty
+             TOTAL_CVE_COUNT=${TOTAL_CVE_COUNT:-0}
+             UNIQUE_INT_COUNT=${UNIQUE_INT_COUNT:-0}
+             CRIT_T=${CRIT_T:-0}
+             HIGH_T=${HIGH_T:-0}
+             MED_T=${MED_T:-0}
+             LOW_T=${LOW_T:-0}
 
              # --- LOGIC: PER-INTEGRATION AGGREGATION ---
              AGGREGATED_TABLE=$(awk -F'|' '
@@ -117,9 +126,6 @@ jobs:
              }' raw-report.txt | sort -r)
 
              # --- CONSTRUCT DASHBOARD ---
-             # We remove the backticks around the 0 if it still causes issues, 
-             # and use a clean printf-style construction.
-             
              {
                echo "SLACK_MESSAGE<<EOF"
                echo -e "*🛡️ SECURITY SCAN REPORT* | \`$(date +'%Y-%m-%d')\`"
