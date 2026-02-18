@@ -79,6 +79,7 @@ jobs:
       - name: Format Slack Message
         id: format_message
         run: |
+          # 1. Clean the report
           sed -i '/^[[:space:]]*$/d' raw-report.txt
           
           if [ -s raw-report.txt ]; then
@@ -94,8 +95,7 @@ jobs:
              AGGREGATED_TABLE=$(awk -F'|' '
              {
                 name = $1;
-                gsub(/.*\//, "", name); 
-                gsub(/ /, "", name);
+                gsub(/.*\//, "", name); gsub(/ /, "", name);
                 sev = $4; gsub(/ /, "", sev);
                 
                 ints[name]++;
@@ -115,26 +115,29 @@ jobs:
                 }
              }' raw-report.txt | sort -r)
 
-             # --- CONSTRUCT DASHBOARD ---
-             FINAL_MSG="📊 *Security Scan: Multi-Engine Heatmap* | $(date +'%Y-%m-%d')\n"
-             FINAL_MSG="${FINAL_MSG}🛡️ _Combined results from Trivy & Grype_\n"
-             FINAL_MSG="${FINAL_MSG}_________________________________________________\n"
-             FINAL_MSG="${FINAL_MSG}*Global Stats:* 🛡️ ${TOTAL_CVE_COUNT} Issues | 📦 ${UNIQUE_INT_COUNT} Components\n"
-             FINAL_MSG="${FINAL_MSG}🔴 Crit: ${CRIT_T}  🟠 High: ${HIGH_T}  🟡 Med: ${MED_T}  🔵 Low: ${LOW_T}\n"
-             FINAL_MSG="${FINAL_MSG}_________________________________________________\n\n"
-             FINAL_MSG="${FINAL_MSG}*Findings Breakdown:*\n"
-             FINAL_MSG="${FINAL_MSG}\`\`\`\n"
-             FINAL_MSG="${FINAL_MSG}ST  INTEGRATION  | CR | HI | ME | LO | TOT\n"
-             FINAL_MSG="${FINAL_MSG}--- ------------ | -- | -- | -- | -- | ---\n"
-             FINAL_MSG="${FINAL_MSG}${AGGREGATED_TABLE}\n"
-             FINAL_MSG="${FINAL_MSG}\`\`\`\n"
-             FINAL_MSG="${FINAL_MSG}👉 _Note: Totals represent unique CVEs found by either scanner._"
+             # --- CONSTRUCT ATTRACTIVE DASHBOARD ---
+             # We use a single string to avoid stray '0' outputs
+             DASHBOARD="*🛡️ SECURITY SCAN REPORT* | \`$(date +'%Y-%m-%d')\`\n"
+             DASHBOARD="${DASHBOARD}*Multi-Engine:* _Trivy & Grype Combined_\n"
+             DASHBOARD="${DASHBOARD}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+             DASHBOARD="${DASHBOARD}*📊 OVERALL POSTURE*\n"
+             DASHBOARD="${DASHBOARD}• *Total Issues:* \`${TOTAL_CVE_COUNT}\` findings across \`${UNIQUE_INT_COUNT}\` components\n"
+             DASHBOARD="${DASHBOARD}• *Risk Levels:* 🔴 \`${CRIT_T}\` Crit  |  🟠 \`${HIGH_T}\` High  |  🟡 \`${MED_T}\` Med  |  🔵 \`${LOW_T}\` Low\n"
+             DASHBOARD="${DASHBOARD}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n"
+             DASHBOARD="${DASHBOARD}*🔎 FINDINGS BREAKDOWN:*\n"
+             DASHBOARD="${DASHBOARD}\`\`\`\n"
+             DASHBOARD="${DASHBOARD}ST  INTEGRATION  | CR | HI | ME | LO | TOT\n"
+             DASHBOARD="${DASHBOARD}--- ------------ | -- | -- | -- | -- | ---\n"
+             DASHBOARD="${DASHBOARD}${AGGREGATED_TABLE}\n"
+             DASHBOARD="${DASHBOARD}\`\`\`\n"
+             DASHBOARD="${DASHBOARD}👉 _ST: Highest severity found. Table excludes non-fixed issues._"
 
+             # Write to GITHUB_OUTPUT
              echo "SLACK_MESSAGE<<EOF" >> $GITHUB_OUTPUT
-             echo -e "$FINAL_MSG" >> $GITHUB_OUTPUT
+             echo -e "$DASHBOARD" >> $GITHUB_OUTPUT
              echo "EOF" >> $GITHUB_OUTPUT
           else
-             echo "SLACK_MESSAGE=*✅ Security Scan Passed* - Both Trivy and Grype found no issues." >> $GITHUB_OUTPUT
+             echo "SLACK_MESSAGE=*✅ SECURITY SCAN PASSED* - No fixable issues detected by Trivy or Grype." >> $GITHUB_OUTPUT
           fi
 
       - name: Send Slack notification
