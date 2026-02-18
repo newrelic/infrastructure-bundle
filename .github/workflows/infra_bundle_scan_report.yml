@@ -1,6 +1,5 @@
 name: Vulnerability Scan Daily
 on:
-  push:
   schedule:
     - cron: '0 0 * * *'
 
@@ -153,6 +152,6 @@ jobs:
         uses: archive/github-actions-slack@master
         with:
           slack-bot-user-oauth-access-token: ${{ secrets.COREINT_SLACK_TOKEN }}
-          slack-channel: ${{ secrets.TEST_SLACK_CHANNEL }}
+          slack-channel: ${{ secrets.COREINT_SLACK_CHANNEL }}
           slack-text: ${{ steps.format_message.outputs.SLACK_MESSAGE }}
           slack-optional-parse: full
