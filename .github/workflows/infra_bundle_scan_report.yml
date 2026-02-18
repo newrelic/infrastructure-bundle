@@ -1,9 +1,9 @@
-name: Security scan
+name: Vulnerability Scan Daily
 on:
+  push:
   pull_request:
   schedule:
     - cron: '0 0 * * *'
-  push:
 
 jobs:
   build:
@@ -12,10 +12,10 @@ jobs:
     env:
       DOCKER_IMAGE: newrelic/infrastructure-bundle
       DOCKER_IMAGE_TAG: ci
+      TRIVY_DISABLE_VEX_NOTICE: "true"
     steps:
       - uses: actions/checkout@v4
       
-      # Environment setup
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
       - name: Set up Docker Buildx
@@ -37,22 +37,26 @@ jobs:
           image-ref: ${{ env.DOCKER_IMAGE }}:${{ env.DOCKER_IMAGE_TAG }}
           format: table
           exit-code: 0 
-          ignore-unfixed: true
+          ignore-unfixed: false # CHANGED: Now shows vulnerabilities even if they aren't fixed yet
           severity: "CRITICAL,HIGH"
-          output: "trivy-report.txt"
+          output: "raw-report.txt"
+        env:
+          TRIVY_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-db
+          TRIVY_JAVA_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-java-db
 
       - name: Format Slack Message
         id: format_message
         run: |
-          # Check if the report has any lines beyond the table header
-          # Trivy tables usually have at least 3 lines of decoration even when empty
-          LINE_COUNT=$(wc -l < trivy-report.txt)
+          # This captures every table header (Target), Total count, and Table row
+          # while ignoring the "VEX" and "OSS" marketing text.
+          CLEAN_REPORT=$(grep -E "^[^ ]+ \(.+\)|^Total|^┌|^│|^├|^└" raw-report.txt | grep -v "VEX" || true)
           
-          if [ "$LINE_COUNT" -le 3 ]; then
-            MSG="*✅ Security Scan Passed*\nNo High or Critical vulnerabilities found for \`${{ env.DOCKER_IMAGE }}\`."
+          # Check if we actually found any vulnerabilities in the report
+          if [[ "$CLEAN_REPORT" == *"Total: 0"* && ! "$CLEAN_REPORT" == *"Total: [1-9]"* ]]; then
+             MSG="*✅ Security Scan Passed*\nNo High or Critical vulnerabilities found for \`${{ env.DOCKER_IMAGE }}\`."
           else
-            REPORT=$(cat trivy-report.txt | head -c 2500)
-            MSG="*🚨 Security Scan Issues Found*\nVulnerabilities detected in \`${{ env.DOCKER_IMAGE }}\`:\n\`\`\`$REPORT\`\`\`"
+             # Use a larger character limit (3500) to fit more of the table
+             MSG="*🚨 Security Scan Issues Found*\n\`\`\`\n$(echo "$CLEAN_REPORT" | head -c 3500)\n\`\`\`"
           fi
           
           echo "SLACK_MESSAGE<<EOF" >> $GITHUB_OUTPUT
