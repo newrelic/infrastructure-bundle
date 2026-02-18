@@ -1,8 +1,8 @@
 name: Vulnerability Scan Daily
 on:
-  push:      # Triggered on every push for your testing
+  push:
   schedule:
-    - cron: '0 0 * * *' # Daily at midnight UTC
+    - cron: '0 0 * * *'
 
 jobs:
   build:
@@ -29,19 +29,22 @@ jobs:
         run: |
           DOCKER_PLATFORMS=linux/amd64 ./docker-build.sh . --load
 
+      - name: Create Trivy Template
+        run: |
+          cat << 'EOF' > slack.tpl
+          {{- range . -}}
+          {{- range .Vulnerabilities -}}
+          {{ .PkgName }} | {{ .VulnerabilityID }} | {{ .Severity }} | {{ .FixedVersion }}
+          {{ end -}}
+          {{- end -}}
+          EOF
+
       - name: Run Trivy Scan
         uses: aquasecurity/trivy-action@0.29.0
-        id: trivy
         with:
           image-ref: ${{ env.DOCKER_IMAGE }}:${{ env.DOCKER_IMAGE_TAG }}
           format: 'template'
-          # We use a compact, one-line-per-finding format to avoid YAML parsing errors
-          template: |
-            {{- range . -}}
-            {{- range .Vulnerabilities -}}
-            {{ .PkgName }} | {{ .VulnerabilityID }} | {{ .Severity }} | {{ .FixedVersion }}
-            {{ end -}}
-            {{- end -}}
+          template: '@slack.tpl' # The @ symbol tells Trivy to read the file
           exit-code: 0 
           ignore-unfixed: true
           severity: "CRITICAL,HIGH"
@@ -50,32 +53,34 @@ jobs:
       - name: Format Slack Message
         id: format_message
         run: |
-          # 1. Clean up empty lines
+          # Remove empty lines
           sed -i '/^[[:space:]]*$/d' raw-report.txt
           
-          # 2. Check if we have results
           if [ -s raw-report.txt ]; then
-             # Construct one clean table header
+             # Create the table header
              HEADER="| Library | CVE ID | Severity | Fixed Version |\n|---|---|---|---|\n"
-             # Add a pipe to the start and end of each line from the report
+             # Add table borders to the raw data
              BODY=$(sed 's/^/| /; s/$/ |/' raw-report.txt)
              
-             FULL_TABLE="${HEADER}${BODY}"
+             # Combine header and body
+             FULL_REPORT="${HEADER}${BODY}"
              
-             # Limit to 3500 chars for Slack
-             MSG="*🚨 Security Scan Issues Found*\nCombined report for \`${{ env.DOCKER_IMAGE }}\`:\n\`\`\`\n$(echo -e "$FULL_TABLE" | head -c 3500)\n\`\`\`"
+             # Use a temporary file to handle the multi-line output safely
+             echo "SLACK_MESSAGE<<EOF" >> $GITHUB_OUTPUT
+             echo -e "*🚨 Security Scan Issues Found*" >> $GITHUB_OUTPUT
+             echo -e "Consolidated report for \`${{ env.DOCKER_IMAGE }}\`:" >> $GITHUB_OUTPUT
+             echo -e "\`\`\`" >> $GITHUB_OUTPUT
+             echo -e "$FULL_REPORT" | head -c 3500 >> $GITHUB_OUTPUT
+             echo -e "\`\`\`" >> $GITHUB_OUTPUT
+             echo "EOF" >> $GITHUB_OUTPUT
           else
-             MSG="*✅ Security Scan Passed*\nNo High or Critical vulnerabilities found for \`${{ env.DOCKER_IMAGE }}\`."
+             echo "SLACK_MESSAGE=*✅ Security Scan Passed*\nNo High or Critical vulnerabilities found." >> $GITHUB_OUTPUT
           fi
-          
-          echo "SLACK_MESSAGE<<EOF" >> $GITHUB_OUTPUT
-          echo -e "$MSG" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
 
       - name: Send Slack notification
         uses: archive/github-actions-slack@master
         with:
           slack-bot-user-oauth-access-token: ${{ secrets.COREINT_SLACK_TOKEN }}
-          slack-channel: ${{ secrets.TEST_SLACK_CHANNEL }} # Using your Test Channel secret
+          slack-channel: ${{ secrets.TEST_SLACK_CHANNEL }}
           slack-text: ${{ steps.format_message.outputs.SLACK_MESSAGE }}
           slack-optional-parse: full
