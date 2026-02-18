@@ -60,7 +60,7 @@ jobs:
           
           if [ -s raw-report.txt ]; then
              # --- LOGIC: GLOBAL COUNTS ---
-             TOTAL_CVE_COUNT=$(grep -c "CVE-" raw-report.txt || echo 0)
+             TOTAL_CVE_COUNT=$(grep -c "CVE-" raw-report.txt || true)
              UNIQUE_INT_COUNT=$(cut -d'|' -f1 raw-report.txt | sort -u | wc -l)
              CRIT_T=$(grep -c "CRITICAL" raw-report.txt || echo 0)
              HIGH_T=$(grep -c "HIGH" raw-report.txt || echo 0)
@@ -94,24 +94,25 @@ jobs:
                 }
              }' raw-report.txt | sort -r)
 
-             # --- CONSTRUCT DASHBOARD (Cleaned to remove stray 0) ---
-             {
-               echo "SLACK_MESSAGE<<EOF"
-               echo -e "📊 *Security Scan: Integration Heatmap* | $(date +'%Y-%m-%d')"
-               echo -e "_________________________________________________"
-               echo -e "*Global Stats:* 🛡️ $TOTAL_CVE_COUNT Issues | 📦 $UNIQUE_INT_COUNT Components"
-               echo -e "🔴 Crit: $CRIT_T  🟠 High: $HIGH_T  🟡 Med: $MED_T  🔵 Low: $LOW_T"
-               echo -e "_________________________________________________"
-               echo -e "\n*Findings Breakdown:*"
-               echo -e "\`\`\`"
-               echo -e "ST  INTEGRATION  | CR | HI | ME | LO | TOT"
-               echo -e "--- ------------ | -- | -- | -- | -- | ---"
-               # Use echo to strip potential trailing newlines from awk output
-               echo "$AGGREGATED_TABLE" | head -c 3500
-               echo -e "\`\`\`"
-               echo -n "👉 _ST: Status icon represents the highest severity found._"
-               echo -e "\nEOF"
-             } >> $GITHUB_OUTPUT
+             # --- CONSTRUCT DASHBOARD ---
+             # We build the string in a variable to ensure no stray echo outputs
+             FINAL_MSG="📊 *Security Scan: Integration Heatmap* | $(date +'%Y-%m-%d')\n"
+             FINAL_MSG="${FINAL_MSG}_________________________________________________\n"
+             FINAL_MSG="${FINAL_MSG}*Global Stats:* 🛡️ ${TOTAL_CVE_COUNT:-0} Issues | 📦 ${UNIQUE_INT_COUNT:-0} Components\n"
+             FINAL_MSG="${FINAL_MSG}🔴 Crit: ${CRIT_T}  🟠 High: ${HIGH_T}  🟡 Med: ${MED_T}  🔵 Low: ${LOW_T}\n"
+             FINAL_MSG="${FINAL_MSG}_________________________________________________\n\n"
+             FINAL_MSG="${FINAL_MSG}*Findings Breakdown:*\n"
+             FINAL_MSG="${FINAL_MSG}\`\`\`\n"
+             FINAL_MSG="${FINAL_MSG}ST  INTEGRATION  | CR | HI | ME | LO | TOT\n"
+             FINAL_MSG="${FINAL_MSG}--- ------------ | -- | -- | -- | -- | ---\n"
+             FINAL_MSG="${FINAL_MSG}${AGGREGATED_TABLE}\n"
+             FINAL_MSG="${FINAL_MSG}\`\`\`\n"
+             FINAL_MSG="${FINAL_MSG}👉 _ST: Status icon represents the highest severity found._"
+
+             # Write to GITHUB_OUTPUT using the heredoc delimiter
+             echo "SLACK_MESSAGE<<EOF" >> $GITHUB_OUTPUT
+             echo -e "$FINAL_MSG" >> $GITHUB_OUTPUT
+             echo "EOF" >> $GITHUB_OUTPUT
           else
              echo "SLACK_MESSAGE=*✅ Security Scan Passed* - No vulnerabilities detected." >> $GITHUB_OUTPUT
           fi
