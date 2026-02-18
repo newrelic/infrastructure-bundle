@@ -79,17 +79,18 @@ jobs:
       - name: Format Slack Message
         id: format_message
         run: |
-          # 1. Clean the report to ensure no empty lines
+          # 1. Clean the report
           sed -i '/^[[:space:]]*$/d' raw-report.txt
           
           if [ -s raw-report.txt ]; then
-             # --- LOGIC: GLOBAL COUNTS (Fixed to prevent stray zeros) ---
-             TOTAL_CVE_COUNT=$(grep -c "CVE-" raw-report.txt || echo "0")
-             UNIQUE_INT_COUNT=$(cut -d'|' -f1 raw-report.txt | sort -u | wc -l | xargs)
-             CRIT_T=$(grep -c "CRITICAL" raw-report.txt || echo "0")
-             HIGH_T=$(grep -c "HIGH" raw-report.txt || echo "0")
-             MED_T=$(grep -c "MEDIUM" raw-report.txt || echo "0")
-             LOW_T=$(grep -c "LOW" raw-report.txt || echo "0")
+             # --- LOGIC: GLOBAL COUNTS (Forced Integer Logic) ---
+             # We use $(()) to force these into pure numbers
+             TOTAL_CVE_COUNT=$(( $(grep -c "CVE-" raw-report.txt || echo 0) ))
+             UNIQUE_INT_COUNT=$(( $(cut -d'|' -f1 raw-report.txt | sort -u | wc -l || echo 0) ))
+             CRIT_T=$(( $(grep -c "CRITICAL" raw-report.txt || echo 0) ))
+             HIGH_T=$(( $(grep -c "HIGH" raw-report.txt || echo 0) ))
+             MED_T=$(( $(grep -c "MEDIUM" raw-report.txt || echo 0) ))
+             LOW_T=$(( $(grep -c "LOW" raw-report.txt || echo 0) ))
 
              # --- LOGIC: PER-INTEGRATION AGGREGATION ---
              AGGREGATED_TABLE=$(awk -F'|' '
@@ -116,26 +117,28 @@ jobs:
              }' raw-report.txt | sort -r)
 
              # --- CONSTRUCT DASHBOARD ---
-             DASHBOARD="*🛡️ SECURITY SCAN REPORT* | \`$(date +'%Y-%m-%d')\`\n"
-             DASHBOARD="${DASHBOARD}*Multi-Engine:* _Trivy & Grype Combined_\n"
-             DASHBOARD="${DASHBOARD}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
-             DASHBOARD="${DASHBOARD}*📊 OVERALL POSTURE*\n"
-             DASHBOARD="${DASHBOARD}• *Total Issues:* \`${TOTAL_CVE_COUNT}\` findings across \`${UNIQUE_INT_COUNT}\` components\n"
-             DASHBOARD="${DASHBOARD}• *Critical:* 🔴 \`${CRIT_T}\`  |  *High:* 🟠 \`${HIGH_T}\` \n"
-             DASHBOARD="${DASHBOARD}• *Medium:* 🟡 \`${MED_T}\`  |  *Low:* 🔵 \`${LOW_T}\` \n"
-             DASHBOARD="${DASHBOARD}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n"
-             DASHBOARD="${DASHBOARD}*🔎 FINDINGS BREAKDOWN:*\n"
-             DASHBOARD="${DASHBOARD}\`\`\`\n"
-             DASHBOARD="${DASHBOARD}ST  INTEGRATION  | CR | HI | ME | LO | TOT\n"
-             DASHBOARD="${DASHBOARD}--- ------------ | -- | -- | -- | -- | ---\n"
-             DASHBOARD="${DASHBOARD}${AGGREGATED_TABLE}\n"
-             DASHBOARD="${DASHBOARD}\`\`\`\n"
-             DASHBOARD="${DASHBOARD}🔗 _Check GitHub Actions for more details._"
-
-             # Final Output
-             echo "SLACK_MESSAGE<<EOF" >> $GITHUB_OUTPUT
-             echo -e "$DASHBOARD" >> $GITHUB_OUTPUT
-             echo "EOF" >> $GITHUB_OUTPUT
+             # We remove the backticks around the 0 if it still causes issues, 
+             # and use a clean printf-style construction.
+             
+             {
+               echo "SLACK_MESSAGE<<EOF"
+               echo -e "*🛡️ SECURITY SCAN REPORT* | \`$(date +'%Y-%m-%d')\`"
+               echo -e "*Multi-Engine:* _Trivy & Grype Combined_"
+               echo -e "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+               echo -e "*📊 OVERALL POSTURE*"
+               echo -e "• *Total Issues:* \`$TOTAL_CVE_COUNT\` findings across \`$UNIQUE_INT_COUNT\` components"
+               echo -e "• *Critical:* 🔴 \`$CRIT_T\`  |  *High:* 🟠 \`$HIGH_T\`"
+               echo -e "• *Medium:* 🟡 \`$MED_T\`  |  *Low:* 🔵 \`$LOW_T\`"
+               echo -e "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+               echo -e "*🔎 FINDINGS BREAKDOWN:*"
+               echo -e "\`\`\`"
+               echo -e "ST  INTEGRATION  | CR | HI | ME | LO | TOT"
+               echo -e "--- ------------ | -- | -- | -- | -- | ---"
+               echo -e "$AGGREGATED_TABLE"
+               echo -e "\`\`\`"
+               echo -e "🔗 _Check GitHub Actions for more details._"
+               echo "EOF"
+             } >> $GITHUB_OUTPUT
           else
              echo "SLACK_MESSAGE=*✅ SECURITY SCAN PASSED* - No issues detected." >> $GITHUB_OUTPUT
           fi
