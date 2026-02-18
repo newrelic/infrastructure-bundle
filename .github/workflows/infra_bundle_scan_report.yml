@@ -60,7 +60,7 @@ jobs:
           
           if [ -s raw-report.txt ]; then
              # --- LOGIC: GLOBAL COUNTS ---
-             TOTAL_CVE_COUNT=$(grep -c "CVE-" raw-report.txt)
+             TOTAL_CVE_COUNT=$(grep -c "CVE-" raw-report.txt || echo 0)
              UNIQUE_INT_COUNT=$(cut -d'|' -f1 raw-report.txt | sort -u | wc -l)
              CRIT_T=$(grep -c "CRITICAL" raw-report.txt || echo 0)
              HIGH_T=$(grep -c "HIGH" raw-report.txt || echo 0)
@@ -68,15 +68,15 @@ jobs:
              LOW_T=$(grep -c "LOW" raw-report.txt || echo 0)
 
              # --- LOGIC: PER-INTEGRATION AGGREGATION ---
-             # Groups by Integration and counts each severity level
+             # Groups by component and assigns color based on highest severity
              AGGREGATED_TABLE=$(awk -F'|' '
              {
                 name = $1;
-                gsub(/var\/db\/newrelic-infra\/newrelic-integrations\/bin\//, "", name);
+                # Remove long paths if present, keep the filename
+                gsub(/.*\//, "", name); 
                 gsub(/ /, "", name);
                 
-                sev = $4;
-                gsub(/ /, "", sev);
+                sev = $4; gsub(/ /, "", sev);
                 
                 ints[name]++;
                 if (sev == "CRITICAL") crit[name]++;
@@ -86,27 +86,30 @@ jobs:
              }
              END {
                 for (i in ints) {
-                   # If an integration has a Critical, prefix with a red dot
-                   prefix = (crit[i] > 0) ? "🔴" : "  ";
-                   printf "%s %-13s | %3d | %3d | %3d | %3d\n", prefix, substr(i,1,13), crit[i], high[i], med[i], low[i]
+                   if (crit[i] > 0) icon = "🔴";
+                   else if (high[i] > 0) icon = "🟠";
+                   else if (med[i] > 0) icon = "🟡";
+                   else icon = "🔵";
+                   
+                   printf "%s %-13s | %3d | %3d | %3d | %3d\n", icon, substr(i,1,13), crit[i], high[i], med[i], low[i]
                 }
-             }' raw-report.txt | sort)
+             }' raw-report.txt | sort -r)
 
              # --- CONSTRUCT DASHBOARD ---
              {
                echo "SLACK_MESSAGE<<EOF"
-               echo -e "📊 *Integration Security Heatmap* | $(date +'%Y-%m-%d')"
+               echo -e "📊 *Security Scan: Full Heatmap* | $(date +'%Y-%m-%d')"
                echo -e "_________________________________________________"
-               echo -e "*Global Stats:* 🛡️ $TOTAL_CVE_COUNT Issues across 📦 $UNIQUE_INT_COUNT Integrations"
+               echo -e "*Global Stats:* 🛡️ $TOTAL_CVE_COUNT Issues | 📦 $UNIQUE_INT_COUNT Components"
                echo -e "🔴 Crit: $CRIT_T  🟠 High: $HIGH_T  🟡 Med: $MED_T  🔵 Low: $LOW_T"
                echo -e "_________________________________________________"
-               echo -e "\n*Findings Breakdown (Counts per Integration):*"
+               echo -e "\n*Findings Breakdown:*"
                echo -e "\`\`\`"
-               echo -e "   INTEGRATION  | CRT | HIG | MED | LOW"
-               echo -e "--------------- | --- | --- | --- | ---"
-               echo -e "$AGGREGATED_TABLE"
+               echo -e "ST  COMPONENT     | CRT | HIG | MED | LOW"
+               echo -e "--- ------------ | --- | --- | --- | ---"
+               echo -e "$AGGREGATED_TABLE" | head -c 3500
                echo -e "\`\`\`"
-               echo -e "👉 _Values show total 'fixed' vulnerabilities available._"
+               echo -e "👉 _ST: Status icon represents the highest severity found._"
                echo "EOF"
              } >> $GITHUB_OUTPUT
           else
