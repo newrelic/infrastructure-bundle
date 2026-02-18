@@ -67,7 +67,7 @@ jobs:
              MED_T=$(grep -c "MEDIUM" raw-report.txt || echo 0)
              LOW_T=$(grep -c "LOW" raw-report.txt || echo 0)
 
-             # --- LOGIC: PER-INTEGRATION AGGREGATION WITH ROW TOTALS ---
+             # --- LOGIC: PER-INTEGRATION AGGREGATION ---
              AGGREGATED_TABLE=$(awk -F'|' '
              {
                 name = $1;
@@ -89,14 +89,12 @@ jobs:
                    else if (med[i] > 0) icon = "🟡";
                    else icon = "🔵";
                    
-                   # Calculate row total for this specific integration
                    row_tot = crit[i] + high[i] + med[i] + low[i];
-                   
                    printf "%s %-12s | %2d | %2d | %2d | %2d | %3d\n", icon, substr(i,1,12), crit[i], high[i], med[i], low[i], row_tot
                 }
              }' raw-report.txt | sort -r)
 
-             # --- CONSTRUCT DASHBOARD ---
+             # --- CONSTRUCT DASHBOARD (Cleaned to remove stray 0) ---
              {
                echo "SLACK_MESSAGE<<EOF"
                echo -e "📊 *Security Scan: Integration Heatmap* | $(date +'%Y-%m-%d')"
@@ -108,10 +106,11 @@ jobs:
                echo -e "\`\`\`"
                echo -e "ST  INTEGRATION  | CR | HI | ME | LO | TOT"
                echo -e "--- ------------ | -- | -- | -- | -- | ---"
-               echo -e "$AGGREGATED_TABLE" | head -c 3500
+               # Use echo to strip potential trailing newlines from awk output
+               echo "$AGGREGATED_TABLE" | head -c 3500
                echo -e "\`\`\`"
-               echo -e "👉 _ST: Status icon represents the highest severity found._"
-               echo "EOF"
+               echo -n "👉 _ST: Status icon represents the highest severity found._"
+               echo -e "\nEOF"
              } >> $GITHUB_OUTPUT
           else
              echo "SLACK_MESSAGE=*✅ Security Scan Passed* - No vulnerabilities detected." >> $GITHUB_OUTPUT
