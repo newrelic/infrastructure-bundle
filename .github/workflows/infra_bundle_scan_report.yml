@@ -116,13 +116,14 @@ jobs:
              }' raw-report.txt | sort -r)
 
              # --- CONSTRUCT ATTRACTIVE DASHBOARD ---
-             # We use a single string to avoid stray '0' outputs
+             # Building the message string carefully to prevent stray characters
              DASHBOARD="*🛡️ SECURITY SCAN REPORT* | \`$(date +'%Y-%m-%d')\`\n"
              DASHBOARD="${DASHBOARD}*Multi-Engine:* _Trivy & Grype Combined_\n"
              DASHBOARD="${DASHBOARD}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
              DASHBOARD="${DASHBOARD}*📊 OVERALL POSTURE*\n"
              DASHBOARD="${DASHBOARD}• *Total Issues:* \`${TOTAL_CVE_COUNT}\` findings across \`${UNIQUE_INT_COUNT}\` components\n"
-             DASHBOARD="${DASHBOARD}• *Risk Levels:* 🔴 \`${CRIT_T}\` Crit  |  🟠 \`${HIGH_T}\` High  |  🟡 \`${MED_T}\` Med  |  🔵 \`${LOW_T}\` Low\n"
+             DASHBOARD="${DASHBOARD}• *Critical:* 🔴 \`${CRIT_T}\`  |  *High:* 🟠 \`${HIGH_T}\` \n"
+             DASHBOARD="${DASHBOARD}• *Medium:* 🟡 \`${MED_T}\`  |  *Low:* 🔵 \`${LOW_T}\` \n"
              DASHBOARD="${DASHBOARD}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n"
              DASHBOARD="${DASHBOARD}*🔎 FINDINGS BREAKDOWN:*\n"
              DASHBOARD="${DASHBOARD}\`\`\`\n"
@@ -130,14 +131,14 @@ jobs:
              DASHBOARD="${DASHBOARD}--- ------------ | -- | -- | -- | -- | ---\n"
              DASHBOARD="${DASHBOARD}${AGGREGATED_TABLE}\n"
              DASHBOARD="${DASHBOARD}\`\`\`\n"
-             DASHBOARD="${DASHBOARD}👉 _ST: Highest severity found. Table excludes non-fixed issues._"
+             DASHBOARD="${DASHBOARD}🔗 _Check GitHub Actions for more details._"
 
-             # Write to GITHUB_OUTPUT
+             # Write to GITHUB_OUTPUT using a single clean block
              echo "SLACK_MESSAGE<<EOF" >> $GITHUB_OUTPUT
              echo -e "$DASHBOARD" >> $GITHUB_OUTPUT
              echo "EOF" >> $GITHUB_OUTPUT
           else
-             echo "SLACK_MESSAGE=*✅ SECURITY SCAN PASSED* - No fixable issues detected by Trivy or Grype." >> $GITHUB_OUTPUT
+             echo "SLACK_MESSAGE=*✅ SECURITY SCAN PASSED* - No issues detected." >> $GITHUB_OUTPUT
           fi
 
       - name: Send Slack notification
