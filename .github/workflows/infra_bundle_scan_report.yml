@@ -34,38 +34,38 @@ jobs:
         id: trivy
         with:
           image-ref: ${{ env.DOCKER_IMAGE }}:${{ env.DOCKER_IMAGE_TAG }}
-          format: table
+          # We use a custom template to keep the text small
+          format: 'template'
+          template: |
+            {{- range . }}
+            Target: {{ .Target }}
+            {{- if (eq (len .Vulnerabilities) 0) }}
+            No vulnerabilities found.
+            {{- else }}
+            | ID | Severity | Library | Fixed In |
+            |----|----------|---------|----------|
+            {{- range .Vulnerabilities }}
+            | {{ .VulnerabilityID }} | {{ .Severity }} | {{ .PkgName }} | {{ .FixedVersion }} |
+            {{- end }}
+            {{- end }}
+            {{ end }}
           exit-code: 0 
-          ignore-unfixed: true
+          ignore-unfixed: true 
           severity: "CRITICAL,HIGH"
           output: "raw-report.txt"
-        env:
-          TRIVY_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-db
-          TRIVY_JAVA_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-java-db
 
       - name: Format Slack Message
         id: format_message
         run: |
-          # 1. Remove the VEX noise and keep headers/tables
-          CLEAN_REPORT=$(grep -E "^[^ ]+ \(.+\)|^Total|^┌|^│|^├|^└" raw-report.txt | grep -v "VEX" || true)
-          
-          # 2. DEBUG: Print the filtered report to the GitHub log so we can see it
-          echo "--- DEBUG: Filtered Report Content ---"
-          echo "$CLEAN_REPORT"
-          echo "---------------------------------------"
-
-          # 3. CHECK: Does the report contain 'CVE-' or 'Total: [non-zero]'?
-          # This is much more reliable than checking for table borders.
-          if [[ "$CLEAN_REPORT" == *"CVE-"* ]]; then
-             echo "Status: Vulnerabilities detected."
-             # Limit to 3000 chars to avoid Slack rejecting the message
-             MSG="*🚨 Security Scan Issues Found*\nVulnerabilities detected in \`${{ env.DOCKER_IMAGE }}\`:\n\`\`\`\n$(echo "$CLEAN_REPORT" | head -c 3000)\n\`\`\`"
+          # 1. Check if the report contains a CVE
+          if grep -q "CVE-" raw-report.txt; then
+             # Clean up empty lines and get the content
+             REPORT_CONTENT=$(cat raw-report.txt | sed '/^[[:space:]]*$/d' | head -c 3500)
+             MSG="*🚨 Security Scan Issues Found*\nVulnerabilities detected in \`${{ env.DOCKER_IMAGE }}\`:\n\`\`\`\n$REPORT_CONTENT\n\`\`\`"
           else
-             echo "Status: No vulnerabilities found."
              MSG="*✅ Security Scan Passed*\nNo High or Critical vulnerabilities found for \`${{ env.DOCKER_IMAGE }}\`."
           fi
           
-          # 4. Output to GitHub variable
           echo "SLACK_MESSAGE<<EOF" >> $GITHUB_OUTPUT
           echo -e "$MSG" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
