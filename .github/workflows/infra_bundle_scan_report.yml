@@ -1,0 +1,157 @@
+name: Vulnerability Scan Daily
+on:
+  schedule:
+    - cron: '0 0 * * *'
+
+jobs:
+  build:
+    name: Build and scan image
+    runs-on: ubuntu-latest
+    env:
+      DOCKER_IMAGE: newrelic/infrastructure-bundle
+      DOCKER_IMAGE_TAG: ci
+      TRIVY_DISABLE_VEX_NOTICE: "true"
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Download integrations
+        run: go run downloader.go
+
+      - name: Build and load docker image
+        run: |
+          DOCKER_PLATFORMS=linux/amd64 ./docker-build.sh . --load
+
+# ... (previous steps: checkout, setup-go, build docker image) ...
+
+      - name: Create Scan Template
+        run: |
+          cat << 'EOF' > scan.tpl
+          {{- range . -}}
+          {{- $target := .Target -}}
+          {{- range .Vulnerabilities -}}
+          {{ $target }} | {{ .PkgName }} | {{ .VulnerabilityID }} | {{ .Severity }} | {{ .FixedVersion }}
+          {{ end -}}
+          {{- end -}}
+          EOF
+
+      - name: Run Trivy Scan
+        uses: aquasecurity/trivy-action@0.29.0
+        with:
+          image-ref: ${{ env.DOCKER_IMAGE }}:${{ env.DOCKER_IMAGE_TAG }}
+          format: 'template'
+          template: '@scan.tpl'
+          ignore-unfixed: true
+          severity: "CRITICAL,HIGH,MEDIUM,LOW"
+          output: "trivy-report.txt"
+
+      - name: Run Grype Scan
+        uses: anchore/scan-action@v6
+        id: grype
+        with:
+          image: "${{ env.DOCKER_IMAGE }}:${{ env.DOCKER_IMAGE_TAG }}"
+          fail-build: false
+          severity-cutoff: low
+          only-fixed: true
+          output-format: json # Use JSON for raw data
+
+      - name: Convert Grype to Table Format & Merge
+        run: |
+          # 1. Use jq to convert Grype JSON to the same format: Target | Pkg | CVE | Severity | Fixed
+          # We use "any" for Fixed Version if not explicitly found to keep column count consistent
+          jq -r '.matches[] | "\(.artifact.locations[0].path) | \(.artifact.name) | \(.vulnerability.id) | \(.vulnerability.severity | ascii_upcase) | \(.vulnerability.fix.versions[0] // "n/a")"' ${{ steps.grype.outputs.json }} > grype-report.txt || touch grype-report.txt
+
+          # 2. Merge both reports
+          cat trivy-report.txt grype-report.txt > combined-raw.txt
+          
+          # 3. Clean up the paths and de-duplicate unique CVEs per integration
+          # This ensures that if both find the same CVE in the same binary, we only count it once
+          sed -i 's|var/db/newrelic-infra/newrelic-integrations/bin/||g' combined-raw.txt
+          sort -u combined-raw.txt -o raw-report.txt
+
+      - name: Format Slack Message
+        id: format_message
+        run: |
+          # 1. Clean the report
+          sed -i '/^[[:space:]]*$/d' raw-report.txt
+          
+          if [ -s raw-report.txt ]; then
+             # --- LOGIC: GLOBAL COUNTS (Strictly Cleaned) ---
+             # We use head -n 1 to ensure only one line is grabbed
+             # We use sed to strip any non-numeric characters
+             TOTAL_CVE_COUNT=$(grep -c "CVE-" raw-report.txt | head -n 1 | sed 's/[^0-9]//g')
+             UNIQUE_INT_COUNT=$(cut -d'|' -f1 raw-report.txt | sort -u | wc -l | head -n 1 | sed 's/[^0-9]//g')
+             CRIT_T=$(grep -c "CRITICAL" raw-report.txt | head -n 1 | sed 's/[^0-9]//g')
+             HIGH_T=$(grep -c "HIGH" raw-report.txt | head -n 1 | sed 's/[^0-9]//g')
+             MED_T=$(grep -c "MEDIUM" raw-report.txt | head -n 1 | sed 's/[^0-9]//g')
+             LOW_T=$(grep -c "LOW" raw-report.txt | head -n 1 | sed 's/[^0-9]//g')
+
+             # Fallback to 0 if variables are empty
+             TOTAL_CVE_COUNT=${TOTAL_CVE_COUNT:-0}
+             UNIQUE_INT_COUNT=${UNIQUE_INT_COUNT:-0}
+             CRIT_T=${CRIT_T:-0}
+             HIGH_T=${HIGH_T:-0}
+             MED_T=${MED_T:-0}
+             LOW_T=${LOW_T:-0}
+
+             # --- LOGIC: PER-INTEGRATION AGGREGATION ---
+             AGGREGATED_TABLE=$(awk -F'|' '
+             {
+                name = $1;
+                gsub(/.*\//, "", name); gsub(/ /, "", name);
+                sev = $4; gsub(/ /, "", sev);
+                
+                ints[name]++;
+                if (sev == "CRITICAL") crit[name]++;
+                else if (sev == "HIGH") high[name]++;
+                else if (sev == "MEDIUM") med[name]++;
+                else if (sev == "LOW") low[name]++;
+             }
+             END {
+                for (i in ints) {
+                   if (crit[i] > 0) icon = "🔴";
+                   else if (high[i] > 0) icon = "🟠";
+                   else if (med[i] > 0) icon = "🟡";
+                   else icon = "🔵";
+                   row_tot = (crit[i]+0) + (high[i]+0) + (med[i]+0) + (low[i]+0);
+                   printf "%s %-12s | %2d | %2d | %2d | %2d | %3d\n", icon, substr(i,1,12), crit[i], high[i], med[i], low[i], row_tot
+                }
+             }' raw-report.txt | sort -r)
+
+             # --- CONSTRUCT DASHBOARD ---
+             {
+               echo "SLACK_MESSAGE<<EOF"
+               echo -e "*🛡️ SECURITY SCAN REPORT* | \`$(date +'%Y-%m-%d')\`"
+               echo -e "*Multi-Engine:* _Trivy & Grype Combined_"
+               echo -e "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+               echo -e "*📊 OVERALL POSTURE*"
+               echo -e "• *Total Issues:* \`$TOTAL_CVE_COUNT\` findings across \`$UNIQUE_INT_COUNT\` components"
+               echo -e "• *Critical:* 🔴 \`$CRIT_T\`  |  *High:* 🟠 \`$HIGH_T\`"
+               echo -e "• *Medium:* 🟡 \`$MED_T\`  |  *Low:* 🔵 \`$LOW_T\`"
+               echo -e "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+               echo -e "*🔎 FINDINGS BREAKDOWN:*"
+               echo -e "\`\`\`"
+               echo -e "ST  INTEGRATION  | CR | HI | ME | LO | TOT"
+               echo -e "--- ------------ | -- | -- | -- | -- | ---"
+               echo -e "$AGGREGATED_TABLE"
+               echo -e "\`\`\`"
+               echo -e "🔗 _Check GitHub Actions for more details._"
+               echo "EOF"
+             } >> $GITHUB_OUTPUT
+          else
+             echo "SLACK_MESSAGE=*✅ SECURITY SCAN PASSED* - No issues detected." >> $GITHUB_OUTPUT
+          fi
+
+      - name: Send Slack notification
+        uses: archive/github-actions-slack@master
+        with:
+          slack-bot-user-oauth-access-token: ${{ secrets.COREINT_SLACK_TOKEN }}
+          slack-channel: ${{ secrets.COREINT_SLACK_CHANNEL }}
+          slack-text: ${{ steps.format_message.outputs.SLACK_MESSAGE }}
+          slack-optional-parse: full

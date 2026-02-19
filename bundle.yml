@@ -1,6 +1,6 @@
 # Version of the base agent image to use (`newrelic/infrastructure).
 # This is used by the `docker-build.sh` wrapper if AGENT_VERSION is not set
-agentVersion: 1.72.2
+agentVersion: 1.72.4
 
 # url, stagingUrl, and repo fields are compiled as templates. The `trimv` helper function can be used to remove the leading v
 # from a version string.
@@ -36,41 +36,41 @@ integrations:
 #    stagingUrl: "" # Defaults to global `stagingUrl`.
 #    repo: "" # Defaults to global `repo`.
   - name: nri-apache
-    version: v1.15.5
+    version: v1.15.6
   - name: nri-cassandra
-    version: v2.17.0
+    version: v2.17.1
   - name: nri-consul
-    version: v2.9.7
+    version: v2.9.8
   - name: nri-couchbase
     version: v2.8.5
   - name: nri-elasticsearch
-    version: v6.0.1
+    version: v6.0.2
   - name: nri-f5
     version: v2.9.3
   - name: nri-haproxy
-    version: v3.2.5
+    version: v3.2.7
   - name: nri-jmx
-    version: v3.11.3
+    version: v3.11.4
     testFiles:
       - /opt/newrelic-infra/newrelic-integrations/bin/nri-jmx
   - name: nri-kafka
-    version: v3.16.1
+    version: v3.16.2
   - name: nri-memcached
     version: v2.7.5
   - name: nri-mongodb
-    version: v2.10.2
+    version: v2.11.0
   - name: nri-mysql
-    version: v1.18.4
+    version: v1.19.0
   - name: nri-nagios
     version: v2.11.5
   - name: nri-nginx
     version: v3.6.5
   - name: nri-postgresql
-    version: v2.23.0
+    version: v2.25.0
   - name: nri-rabbitmq
     version: v2.15.5
   - name: nri-redis
-    version: v1.12.8
+    version: v1.12.10
   - name: nrjmx
     version: v2.10.2
     url: https://download.newrelic.com/infrastructure_agent/binaries/linux/noarch/nrjmx_linux_{{.Version | trimv}}_noarch.tar.gz
@@ -87,4 +87,4 @@ integrations:
     testFiles:
       - /var/db/newrelic-infra/nri-discovery-kubernetes
   - name: nri-mssql
-    version: v2.26.0
+    version: v2.27.0
