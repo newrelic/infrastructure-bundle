@@ -4,6 +4,8 @@ on:
     branches:
       - renovate/**
   pull_request:
+  schedule:
+    - cron: "14 3 * * *" # Daily at 3:14 AM
 
 jobs:
   build:
