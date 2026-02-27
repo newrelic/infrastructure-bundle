@@ -52,7 +52,7 @@ jobs:
           output: "trivy-report.txt"
 
       - name: Run Grype Scan
-        uses: anchore/scan-action@v6
+        uses: anchore/scan-action@v7
         id: grype
         with:
           image: "${{ env.DOCKER_IMAGE }}:${{ env.DOCKER_IMAGE_TAG }}"
