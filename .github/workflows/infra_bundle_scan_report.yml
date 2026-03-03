@@ -157,8 +157,8 @@ jobs:
              # Calculate total as sum of all severities
              TOTAL_CVE_COUNT=$((CRIT_T + HIGH_T + MED_T + LOW_T))
              
-             # Count unique components (filter out empty lines)
-             UNIQUE_INT_COUNT=$(cut -d'|' -f1 raw-report.txt | sed 's/^[[:space:]]*//;s/[[:space:]]*$//' | grep -v '^$' | sort -u | wc -l | sed 's/[^0-9]//g')
+             # Count unique components with same normalization as aggregated table
+             UNIQUE_INT_COUNT=$(cut -d'|' -f1 raw-report.txt | sed 's|.*/||;s/ //g' | grep -v '^$' | sort -u | wc -l | sed 's/[^0-9]//g')
              UNIQUE_INT_COUNT=${UNIQUE_INT_COUNT:-0}
 
              # --- LOGIC: PER-INTEGRATION AGGREGATION ---
@@ -234,8 +234,8 @@ jobs:
              # Calculate total as sum of all severities
              TOTAL_CVE_COUNT=$((CRIT_T + HIGH_T + MED_T + LOW_T))
              
-             # Count unique components (filter out empty lines)
-             UNIQUE_INT_COUNT=$(cut -d'|' -f1 raw-report.txt | sed 's/^[[:space:]]*//;s/[[:space:]]*$//' | grep -v '^$' | sort -u | wc -l | sed 's/[^0-9]//g')
+             # Count unique components with same normalization as aggregated table
+             UNIQUE_INT_COUNT=$(cut -d'|' -f1 raw-report.txt | sed 's|.*/||;s/ //g' | grep -v '^$' | sort -u | wc -l | sed 's/[^0-9]//g')
              UNIQUE_INT_COUNT=${UNIQUE_INT_COUNT:-0}
 
              echo "📊 OVERALL POSTURE:"
