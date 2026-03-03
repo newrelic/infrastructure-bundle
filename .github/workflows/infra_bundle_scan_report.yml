@@ -202,7 +202,8 @@ jobs:
                echo -e "--- ------------ | -- | -- | -- | -- | ---"
                echo -e "$AGGREGATED_TABLE"
                echo -e "\`\`\`"
-               echo -e "🔗 _Please find the <https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|GitHub Actions workflow run> for more details._"
+               echo -e "🔗 _Please find the GitHub Actions workflow run for more details:_"
+               echo -e "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
                echo "EOF"
              } >> $GITHUB_OUTPUT
           else
