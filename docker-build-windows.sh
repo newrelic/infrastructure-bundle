@@ -21,6 +21,9 @@ if [ -z "$AGENT_VERSION" ]; then
     fi
 fi
 
+# Base image tag format: {version}-{windows_version}  e.g. 1.72.6-ltsc2019
+BASE_IMAGE_TAG="${AGENT_VERSION}-${WINDOWS_VERSION}"
+
 echo "Building Windows image for ${WINDOWS_VERSION} with agent_version=${AGENT_VERSION}"
 
 # Parse --push from args since plain `docker build` does not support it (unlike buildx)
@@ -34,8 +37,7 @@ done
 FULL_TAG="${DOCKER_IMAGE}:${DOCKER_IMAGE_TAG}-servercore-${WINDOWS_VERSION}"
 
 docker build \
-  --build-arg agent_version="${AGENT_VERSION}" \
-  --build-arg windows_version="${WINDOWS_VERSION}" \
+  --build-arg base_image_tag="${BASE_IMAGE_TAG}" \
   --build-arg base_image_name="${BASE_IMAGE_NAME}" \
   -t "${FULL_TAG}" \
   -f Dockerfile.windows .
