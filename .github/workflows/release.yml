@@ -52,7 +52,7 @@ jobs:
 
   container-release-windows-2019:
     name: Release Windows 2019 image
-    runs-on: windows-2019
+    runs-on: windows-2022
     steps:
       - uses: actions/checkout@v4
       - name: Switch to Windows containers

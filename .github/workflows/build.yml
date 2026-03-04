@@ -74,7 +74,7 @@ jobs:
 
   build-windows-2019:
     name: Build Windows 2019 image
-    runs-on: windows-2019
+    runs-on: windows-2022
     env:
       DOCKER_IMAGE: newrelic/infrastructure-bundle
       DOCKER_IMAGE_TAG: ci
