@@ -64,7 +64,14 @@ jobs:
       - uses: actions/checkout@v4
       - name: Switch to Windows containers
         run: |
-          & "$Env:ProgramFiles\Docker\Docker\DockerCli.exe" -SwitchWindowsEngine
+          Stop-Service docker -Force
+          $configPath = "$env:ProgramData\docker\config\daemon.json"
+          if (-not (Test-Path (Split-Path $configPath))) {
+            New-Item -ItemType Directory -Force -Path (Split-Path $configPath) | Out-Null
+          }
+          Set-Content -Path $configPath -Value '{"experimental":true}'
+          Start-Service docker
+          Start-Sleep 5
         shell: pwsh
       - uses: actions/setup-go@v5
         with:
@@ -88,7 +95,14 @@ jobs:
       - uses: actions/checkout@v4
       - name: Switch to Windows containers
         run: |
-          & "$Env:ProgramFiles\Docker\Docker\DockerCli.exe" -SwitchWindowsEngine
+          Stop-Service docker -Force
+          $configPath = "$env:ProgramData\docker\config\daemon.json"
+          if (-not (Test-Path (Split-Path $configPath))) {
+            New-Item -ItemType Directory -Force -Path (Split-Path $configPath) | Out-Null
+          }
+          Set-Content -Path $configPath -Value '{"experimental":true}'
+          Start-Service docker
+          Start-Sleep 5
         shell: pwsh
       - uses: actions/setup-go@v5
         with:
