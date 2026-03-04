@@ -38,7 +38,7 @@ jobs:
 
       - name: Check if CHANGELOG is valid
         uses: newrelic/release-toolkit/validate-markdown@v1
-  
+
   build-fips:
     name: Build fips and scan image
     runs-on: ubuntu-latest
@@ -71,3 +71,43 @@ jobs:
 
       - name: Check if CHANGELOG is valid
         uses: newrelic/release-toolkit/validate-markdown@v1
+
+  build-windows-2019:
+    name: Build Windows 2019 image
+    runs-on: windows-2019
+    env:
+      DOCKER_IMAGE: newrelic/infrastructure-bundle
+      DOCKER_IMAGE_TAG: ci
+      WINDOWS_VERSION: ltsc2019
+    steps:
+      - uses: actions/checkout@v4
+      - name: Switch to Windows containers
+        run: |
+          & "$Env:ProgramFiles\Docker\Docker\DockerCli.exe" -SwitchWindowsEngine
+        shell: pwsh
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Build Windows 2019 image
+        shell: bash
+        run: ./docker-build-windows.sh
+
+  build-windows-2022:
+    name: Build Windows 2022 image
+    runs-on: windows-2022
+    env:
+      DOCKER_IMAGE: newrelic/infrastructure-bundle
+      DOCKER_IMAGE_TAG: ci
+      WINDOWS_VERSION: ltsc2022
+    steps:
+      - uses: actions/checkout@v4
+      - name: Switch to Windows containers
+        run: |
+          & "$Env:ProgramFiles\Docker\Docker\DockerCli.exe" -SwitchWindowsEngine
+        shell: pwsh
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Build Windows 2022 image
+        shell: bash
+        run: ./docker-build-windows.sh

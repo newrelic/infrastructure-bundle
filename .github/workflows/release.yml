@@ -9,7 +9,7 @@ jobs:
     with:
       original_repo_name: 'newrelic/infrastructure-bundle'
       docker_image_name: 'newrelic/infrastructure-bundle'
-      
+
       release_command_sh: |
         go run downloader.go
         ./docker-build.sh . --push
@@ -17,7 +17,7 @@ jobs:
           export DOCKER_IMAGE_TAG=latest
           ./docker-build.sh . --push
         fi
-    
+
     secrets:
       docker_username: ${{ secrets.OHAI_DOCKER_HUB_ID }}
       docker_password: ${{ secrets.OHAI_DOCKER_HUB_PASSWORD }}
@@ -30,7 +30,7 @@ jobs:
     with:
       original_repo_name: 'newrelic/infrastructure-bundle'
       docker_image_name: 'newrelic/infrastructure-bundle-fips'
-      
+
       release_command_sh: |
         go run downloader.go -bundle=bundle-fips.yml -outdir=out-fips
         export DOCKER_PLATFORMS=linux/amd64,linux/arm64
@@ -42,10 +42,92 @@ jobs:
           export DOCKER_IMAGE_TAG=latest
           ./docker-build.sh . --push
         fi
-    
+
     secrets:
       docker_username: ${{ secrets.OHAI_DOCKER_HUB_ID }}
       docker_password: ${{ secrets.OHAI_DOCKER_HUB_PASSWORD }}
       bot_token: ${{ secrets.COREINT_BOT_TOKEN }}
       slack_channel: ${{ secrets.COREINT_SLACK_CHANNEL }}
       slack_token: ${{ secrets.COREINT_SLACK_TOKEN }}
+
+  container-release-windows-2019:
+    name: Release Windows 2019 image
+    runs-on: windows-2019
+    steps:
+      - uses: actions/checkout@v4
+      - name: Switch to Windows containers
+        run: |
+          & "$Env:ProgramFiles\Docker\Docker\DockerCli.exe" -SwitchWindowsEngine
+        shell: pwsh
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.OHAI_DOCKER_HUB_ID }}
+          password: ${{ secrets.OHAI_DOCKER_HUB_PASSWORD }}
+      - name: Set release tag
+        id: release_tag
+        shell: bash
+        run: |
+          TAG="${{ github.event.release.tag_name }}"
+          TAG="${TAG#v}"
+          if [[ "${{ github.event.release.prerelease }}" == "true" ]]; then
+            TAG="${TAG}-rc"
+          fi
+          echo "tag=${TAG}" >> $GITHUB_OUTPUT
+      - name: Build and push Windows 2019 image
+        shell: bash
+        env:
+          DOCKER_IMAGE: newrelic/infrastructure-bundle
+          DOCKER_IMAGE_TAG: ${{ steps.release_tag.outputs.tag }}
+          WINDOWS_VERSION: ltsc2019
+        run: ./docker-build-windows.sh --push
+      - name: Push latest tag for Windows 2019
+        if: ${{ github.event.release.prerelease == false }}
+        shell: bash
+        run: |
+          docker tag "newrelic/infrastructure-bundle:${{ steps.release_tag.outputs.tag }}-servercore-ltsc2019" \
+                     "newrelic/infrastructure-bundle:latest-servercore-ltsc2019"
+          docker push "newrelic/infrastructure-bundle:latest-servercore-ltsc2019"
+
+  container-release-windows-2022:
+    name: Release Windows 2022 image
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+      - name: Switch to Windows containers
+        run: |
+          & "$Env:ProgramFiles\Docker\Docker\DockerCli.exe" -SwitchWindowsEngine
+        shell: pwsh
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.OHAI_DOCKER_HUB_ID }}
+          password: ${{ secrets.OHAI_DOCKER_HUB_PASSWORD }}
+      - name: Set release tag
+        id: release_tag
+        shell: bash
+        run: |
+          TAG="${{ github.event.release.tag_name }}"
+          TAG="${TAG#v}"
+          if [[ "${{ github.event.release.prerelease }}" == "true" ]]; then
+            TAG="${TAG}-rc"
+          fi
+          echo "tag=${TAG}" >> $GITHUB_OUTPUT
+      - name: Build and push Windows 2022 image
+        shell: bash
+        env:
+          DOCKER_IMAGE: newrelic/infrastructure-bundle
+          DOCKER_IMAGE_TAG: ${{ steps.release_tag.outputs.tag }}
+          WINDOWS_VERSION: ltsc2022
+        run: ./docker-build-windows.sh --push
+      - name: Push latest tag for Windows 2022
+        if: ${{ github.event.release.prerelease == false }}
+        shell: bash
+        run: |
+          docker tag "newrelic/infrastructure-bundle:${{ steps.release_tag.outputs.tag }}-servercore-ltsc2022" \
+                     "newrelic/infrastructure-bundle:latest-servercore-ltsc2022"
+          docker push "newrelic/infrastructure-bundle:latest-servercore-ltsc2022"

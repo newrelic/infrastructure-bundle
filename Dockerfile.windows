@@ -1,0 +1,5 @@
+ARG agent_version=latest
+ARG windows_version=ltsc2019
+ARG base_image_name=newrelic/infrastructure-windows
+
+FROM ${base_image_name}:${agent_version}-servercore-${windows_version}

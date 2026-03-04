@@ -30,7 +30,7 @@ jobs:
       setup_go: true
       go_version_file: go.mod
       trivy_scan: true
-  
+
   nightly-fips:
     name: Nightly FIPS build
     uses: newrelic/coreint-automation/.github/workflows/reusable_nightly.yaml@v3
@@ -56,3 +56,51 @@ jobs:
       setup_go: true
       go_version_file: go.mod
       trivy_scan: true
+
+  nightly-windows-2019:
+    name: Nightly Windows 2019 build
+    runs-on: windows-2019
+    steps:
+      - uses: actions/checkout@v4
+      - name: Switch to Windows containers
+        run: |
+          & "$Env:ProgramFiles\Docker\Docker\DockerCli.exe" -SwitchWindowsEngine
+        shell: pwsh
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.OHAI_DOCKER_HUB_ID }}
+          password: ${{ secrets.OHAI_DOCKER_HUB_PASSWORD }}
+      - name: Build and push nightly Windows 2019 image
+        shell: bash
+        env:
+          DOCKER_IMAGE: newrelic/infrastructure-bundle
+          DOCKER_IMAGE_TAG: nightly
+          WINDOWS_VERSION: ltsc2019
+        run: ./docker-build-windows.sh --push
+
+  nightly-windows-2022:
+    name: Nightly Windows 2022 build
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+      - name: Switch to Windows containers
+        run: |
+          & "$Env:ProgramFiles\Docker\Docker\DockerCli.exe" -SwitchWindowsEngine
+        shell: pwsh
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.OHAI_DOCKER_HUB_ID }}
+          password: ${{ secrets.OHAI_DOCKER_HUB_PASSWORD }}
+      - name: Build and push nightly Windows 2022 image
+        shell: bash
+        env:
+          DOCKER_IMAGE: newrelic/infrastructure-bundle
+          DOCKER_IMAGE_TAG: nightly
+          WINDOWS_VERSION: ltsc2022
+        run: ./docker-build-windows.sh --push
