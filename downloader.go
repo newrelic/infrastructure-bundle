@@ -1,10 +1,12 @@
 package main
 
 import (
+	"archive/zip"
 	"bytes"
 	"context"
 	"flag"
 	"fmt"
+	"io"
 	"io/fs"
 	"log"
 	"net/http"
@@ -12,6 +14,7 @@ import (
 	"os/exec"
 	"path"
 	"path/filepath"
+	"runtime"
 	"sort"
 	"strings"
 	"sync"
@@ -64,7 +67,14 @@ func main() {
 	checkLatest := flag.Bool("check-latest", false, "check for new versions and exit")
 	flag.Parse()
 
+	isWindows := false
+	if runtime.GOOS == "windows" {
+		isWindows = true
+		fmt.Println("Running on windows...")
+	}
+
 	bundleFile, err := os.Open(*bfname)
+	fmt.Println("zzzbundleFile", bundleFile)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -96,7 +106,7 @@ func main() {
 	if err := conf.expand(*staging, *overrideLatest || *checkLatest); err != nil {
 		log.Fatal(err)
 	}
-
+	fmt.Print("%=v\n", conf)
 	// Print new versions and exit.
 	if *checkLatest {
 		conf.printUpdates()
@@ -134,7 +144,7 @@ func main() {
 	wg.Wait()
 
 	log.Printf("Preparing tree for install...")
-	if err := prepareTree(*outdir); err != nil {
+	if err := prepareTree(*outdir, isWindows); err != nil {
 		log.Fatal(err)
 	}
 
@@ -355,6 +365,25 @@ func (i *integration) download(outdir string) error {
 		}
 
 		log.Printf("Downloading and extracting %s (%s)", i.Name, arch)
+
+		isZip := false
+		if strings.HasSuffix(strings.ToLower(url), ".zip") {
+			isZip = true
+			err = extractZip(response.Body, destination)
+		} else {
+			err = extractTarGz(response.Body, destination)
+		}
+
+		if err != nil {
+			extension := ""
+			if isZip {
+				extension = ".zip"
+			} else {
+				extension = ".tar.gz"
+			}
+			return fmt.Errorf("failed to extract %s file: %w", extension, err)
+		}
+
 		// Invoke tar externally with pipe (simplifies code).
 		cmd := exec.Command("tar", "-xz")
 		cmd.Dir = destination
@@ -368,6 +397,78 @@ func (i *integration) download(outdir string) error {
 	}
 
 	return nil
+}
+
+func extractZip(body io.Reader, destination string) error {
+	tmpFile, err := os.CreateTemp("", "download-*.zip")
+
+	if err != nil {
+		return fmt.Errorf("failed to create temp file: %w", err)
+	}
+
+	defer os.Remove(tmpFile.Name())
+	defer tmpFile.Close()
+
+	if _, err := io.Copy(tmpFile, body); err != nil {
+		return fmt.Errorf("failed to save zip content : %w", err)
+	}
+
+	reader, err := zip.OpenReader(tmpFile.Name())
+	if err != nil {
+		return fmt.Errorf("failed to open zip: %w", err)
+	}
+	defer reader.Close()
+
+	for _, file := range reader.File {
+		err := extractZipFile(file, destination)
+		if err != nil {
+			return fmt.Errorf("failed to extract %s: %w", file.Name, err)
+		}
+	}
+
+	return nil
+}
+
+func extractZipFile(file *zip.File, destination string) error {
+	path := filepath.Join(destination, file.Name)
+
+	//Check for ZipSlip. More Info: https://snyk.io/research/zip-slip-vulnerability
+	if !strings.HasPrefix(path, filepath.Clean(destination)+string(os.PathSeparator)) {
+		return fmt.Errorf(">invalid file path: %s", path)
+	}
+
+	if file.FileInfo().IsDir() {
+		return os.MkdirAll(path, file.Mode())
+	}
+
+	if err := os.MkdirAll(filepath.Dir(path), 0755); err != nil {
+		return err
+	}
+
+	dst, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, file.Mode())
+	if err != nil {
+		return err
+	}
+	defer dst.Close()
+
+	src, err := file.Open()
+	if err != nil {
+		return err
+	}
+	defer src.Close()
+
+	_, err = io.Copy(dst, src)
+	return err
+}
+
+func extractTarGz(body io.Reader, destination string) error {
+	cmd := exec.Command("tar", "-xz")
+	cmd.Dir = destination
+	cmd.Stdin = body
+	cmd.Stdout = os.Stderr
+	cmd.Stderr = os.Stderr
+
+	return cmd.Run()
 }
 
 // overrideVersion fetches the tag name of the latest release (or prerelease) from Github
@@ -458,7 +559,7 @@ func oauthClientFromEnv() *http.Client {
 }
 
 // prepareTree cleans up *.sample and windows-related files
-func prepareTree(outdir string) error {
+func prepareTree(outdir string, isWindows bool) error {
 	return filepath.Walk(outdir, func(path string, info fs.FileInfo, err error) error {
 		if info.IsDir() {
 			return nil // Continue
@@ -468,7 +569,14 @@ func prepareTree(outdir string) error {
 			return os.Remove(path)
 		}
 
-		for _, pattern := range []string{"-win-", "README", "CHANGELOG", "LICENSE"} {
+		platformToRemove := ""
+		if isWindows {
+			platformToRemove = "-linux-"
+		} else {
+			platformToRemove = "-win-"
+		}
+
+		for _, pattern := range []string{platformToRemove, "README", "CHANGELOG", "LICENSE"} {
 			if strings.Contains(info.Name(), pattern) {
 				return os.Remove(path)
 			}
