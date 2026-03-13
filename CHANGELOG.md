@@ -9,6 +9,12 @@ Unreleased section should follow [Release Toolkit](https://github.com/newrelic/r
 
 ## Unreleased
 
+## v3.3.18 - 2026-03-13
+
+### ⛓️ Dependencies
+- Updated newrelic/infrastructure to v1.72.8 - [Changelog 🔗](https://github.com/newrelic/infrastructure-agent/releases/tag/1.72.8)
+- Updated newrelic/nri-mssql to v2.27.1 - [Changelog 🔗](https://github.com/newrelic/nri-mssql/releases/tag/v2.27.1)
+
 ## v3.3.17 - 2026-03-06
 
 ### ⛓️ Dependencies
