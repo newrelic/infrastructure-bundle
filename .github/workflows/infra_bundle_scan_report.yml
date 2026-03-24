@@ -1,5 +1,6 @@
 name: Vulnerability Scan Daily
 on:
+  workflow_dispatch:
   schedule:
     - cron: '0 0 * * *'
 
@@ -129,9 +130,29 @@ jobs:
           cat trivy-report.txt grype-report.txt trivy-k8s-events-forwarder.txt grype-k8s-events-forwarder.txt trivy-nri-forwarder.txt grype-nri-forwarder.txt > combined-raw.txt
           
           # 3. Clean up the paths and de-duplicate unique CVEs per integration
-          # This ensures that if both find the same CVE in the same binary, we only count it once
+          # Strategy:
+          #   - Pre-sort so CVE lines come before GHSA lines
+          #   - Dedup exact ID matches (CVE or GHSA) via id_key
+          #   - Dedup GHSA aliases of CVEs via fix_key (comp+pkg+sev+fix)
+          #     but never skip CVE-vs-CVE: multiple CVEs can share the same fix version
           sed -i 's|var/db/newrelic-infra/newrelic-integrations/bin/||g' combined-raw.txt
-          sort -u combined-raw.txt -o raw-report.txt
+          grep " CVE-" combined-raw.txt > combined-sorted.txt 2>/dev/null || true
+          grep -v " CVE-" combined-raw.txt >> combined-sorted.txt 2>/dev/null || true
+          awk -F'|' '
+          NF >= 4 {
+            comp = $1; gsub(/.*\//, "", comp); gsub(/ /, "", comp)
+            pkg  = $2; gsub(/ /, "", pkg)
+            id   = $3; gsub(/ /, "", id)
+            sev  = $4; gsub(/ /, "", sev)
+            fix  = $5; gsub(/ /, "", fix)
+            id_key  = tolower(comp) "|" tolower(pkg) "|" tolower(id)
+            fix_key = tolower(comp) "|" tolower(pkg) "|" tolower(sev) "|" tolower(fix)
+            if (seen_id[id_key]) next
+            if (id !~ /^CVE-/ && fix != "" && fix != "n/a" && seen_cve_fix[fix_key]) next
+            seen_id[id_key] = 1
+            if (id ~ /^CVE-/ && fix != "" && fix != "n/a") seen_cve_fix[fix_key] = 1
+            print
+          }' combined-sorted.txt | sort > raw-report.txt
 
       - name: Format Slack Message
         id: format_message
@@ -180,7 +201,7 @@ jobs:
                    else if (med[i] > 0) icon = "🟡";
                    else icon = "🔵";
                    row_tot = (crit[i]+0) + (high[i]+0) + (med[i]+0) + (low[i]+0);
-                   printf "%s %-12s | %2d | %2d | %2d | %2d | %3d\n", icon, substr(i,1,12), crit[i], high[i], med[i], low[i], row_tot
+                   printf "%s %-40s | %2d | %2d | %2d | %2d | %3d\n", icon, i, crit[i], high[i], med[i], low[i], row_tot
                 }
              }' raw-report.txt | sort -r)
 
@@ -188,7 +209,7 @@ jobs:
              {
                echo "SLACK_MESSAGE<<EOF"
                echo -e "*🛡️ SECURITY SCAN REPORT* | \`$(date +'%Y-%m-%d')\`"
-               echo -e "*Multi-Engine:* _Trivy & Grype Combined_"
+               echo -e "_Scanned by Trivy & Grype_"
                echo -e "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
                echo -e "*📊 OVERALL POSTURE*"
                echo -e "• *Total Issues:* \`$TOTAL_CVE_COUNT\` findings across \`$UNIQUE_INT_COUNT\` components"
@@ -197,8 +218,8 @@ jobs:
                echo -e "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
                echo -e "*🔎 FINDINGS BREAKDOWN:*"
                echo -e "\`\`\`"
-               echo -e "ST  INTEGRATION  | CR | HI | ME | LO | TOT"
-               echo -e "--- ------------ | -- | -- | -- | -- | ---"
+               echo -e "ST  $(printf '%-40s' 'INTEGRATION') | CR | HI | ME | LO | TOT"
+               echo -e "--- $(printf '%-40s' '' | tr ' ' '-') | -- | -- | -- | -- | ---"
                echo -e "$AGGREGATED_TABLE"
                echo -e "\`\`\`"
                echo -e "🔗 _Please find the GitHub Actions workflow run for more details:_"
@@ -216,44 +237,26 @@ jobs:
           echo "Multi-Engine: Trivy & Grype Combined"
           echo "=========================================="
           echo ""
-          
-          if [ -s raw-report.txt ]; then
-             # Display overall statistics
-             # Count severity levels first
-             CRIT_T=$(grep -c "CRITICAL" raw-report.txt | head -n 1 | sed 's/[^0-9]//g')
-             HIGH_T=$(grep -c "HIGH" raw-report.txt | head -n 1 | sed 's/[^0-9]//g')
-             MED_T=$(grep -c "MEDIUM" raw-report.txt | head -n 1 | sed 's/[^0-9]//g')
-             LOW_T=$(grep -c "LOW" raw-report.txt | head -n 1 | sed 's/[^0-9]//g')
 
-             # Fallback to 0 if variables are empty
-             CRIT_T=${CRIT_T:-0}
-             HIGH_T=${HIGH_T:-0}
-             MED_T=${MED_T:-0}
-             LOW_T=${LOW_T:-0}
-             
-             # Calculate total as sum of all severities
-             TOTAL_CVE_COUNT=$((CRIT_T + HIGH_T + MED_T + LOW_T))
-             
-             # Count unique components with same normalization as aggregated table
-             UNIQUE_INT_COUNT=$(cut -d'|' -f1 raw-report.txt | sed 's|.*/||;s/ //g' | grep -v '^$' | sort -u | wc -l | sed 's/[^0-9]//g')
-             UNIQUE_INT_COUNT=${UNIQUE_INT_COUNT:-0}
-
-             echo "📊 OVERALL POSTURE:"
-             echo "  • Total Issues: $TOTAL_CVE_COUNT findings across $UNIQUE_INT_COUNT components"
-             echo "  • Critical: $CRIT_T | High: $HIGH_T | Medium: $MED_T | Low: $LOW_T"
-             echo ""
-             echo "=========================================="
-             echo "🔎 DETAILED FINDINGS:"
-             echo "=========================================="
-             echo ""
-             echo "Target | Package | CVE | Severity | Fixed Version"
-             echo "-------|---------|-----|----------|---------------"
-             cat raw-report.txt
-             echo ""
-             echo "=========================================="
-          else
-             echo "✅ No security issues detected!"
-          fi
+          echo "--- Trivy: infrastructure-bundle ---"
+          cat trivy-report.txt 2>/dev/null || echo "(no output)"
+          echo ""
+          echo "--- Grype: infrastructure-bundle ---"
+          cat grype-report.txt 2>/dev/null || echo "(no output)"
+          echo ""
+          echo "--- Trivy: k8s-events-forwarder ---"
+          cat trivy-k8s-events-forwarder.txt 2>/dev/null || echo "(no output)"
+          echo ""
+          echo "--- Grype: k8s-events-forwarder ---"
+          cat grype-k8s-events-forwarder.txt 2>/dev/null || echo "(no output)"
+          echo ""
+          echo "--- Trivy: nri-forwarder ---"
+          cat trivy-nri-forwarder.txt 2>/dev/null || echo "(no output)"
+          echo ""
+          echo "--- Grype: nri-forwarder ---"
+          cat grype-nri-forwarder.txt 2>/dev/null || echo "(no output)"
+          echo ""
+          echo "=========================================="
 
       - name: Send Slack notification
         uses: archive/github-actions-slack@master
