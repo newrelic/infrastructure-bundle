@@ -136,13 +136,15 @@ jobs:
           #     where Trivy and Grype report the same vuln under different IDs
           sed -i 's|var/db/newrelic-infra/newrelic-integrations/bin/||g' combined-raw.txt
           awk -F'|' '
-          NF >= 3 {
+          NF >= 4 {
             comp = $1; gsub(/.*\//, "", comp); gsub(/ /, "", comp)
             pkg  = $2; gsub(/ /, "", pkg)
             cve  = $3; gsub(/ /, "", cve)
+            sev  = $4; gsub(/ /, "", sev)
             fix  = $5; gsub(/ /, "", fix)
             cve_key = tolower(comp) "|" tolower(pkg) "|" tolower(cve)
-            fix_key = tolower(comp) "|" tolower(pkg) "|" tolower(fix)
+            # Include severity so different-severity CVEs with same fix are NOT merged
+            fix_key = tolower(comp) "|" tolower(pkg) "|" tolower(sev) "|" tolower(fix)
             if (seen_cve[cve_key]) next
             if (fix != "" && fix != "n/a" && seen_fix[fix_key]) next
             seen_cve[cve_key] = 1
