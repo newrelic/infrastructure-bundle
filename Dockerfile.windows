@@ -1,7 +1,7 @@
 # escape=`
 
 ARG agent_version=latest
-ARG base_image_name=newrelic/infrastructure-windows
+ARG base_image_name=newrelic/infrastructure
 ARG base_image=${base_image_name}:${agent_version}
 
 FROM ${base_image}

@@ -1,4 +1,4 @@
-# Version of the base agent image to use (`newrelic/infrastructure-windows).
+# Version of the base agent image to use (`newrelic/infrastructure`).
 # This is used by the `docker-build-windows.sh` wrapper if AGENT_VERSION is not set
 agentVersion: 1.72.5
 
