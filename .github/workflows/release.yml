@@ -70,7 +70,7 @@ jobs:
           WINDOWS_VERSION: ltsc2022
           OUTDIR: out-windows
         run: |
-          go run downloader.go -bundle=bundle-windows.yml -outdir=out-windows
+          go run downloader.go -bundle="bundle-windows.yml" -outdir="out-windows"
           bash ./docker-build-windows.sh . --push
           if [ "${{ github.event.release.prerelease }}" = "false" ]; then
             export DOCKER_IMAGE_TAG=latest

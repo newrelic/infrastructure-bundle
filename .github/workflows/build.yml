@@ -53,7 +53,7 @@ jobs:
         with:
           go-version-file: go.mod
       - name: Download integrations
-        run: go run downloader.go -bundle=bundle-windows.yml -outdir=out-windows
+        run: go run downloader.go -bundle="bundle-windows.yml" -outdir="out-windows"
       - name: Build Windows Server 2022 docker image
         run: bash ./docker-build-windows.sh .
   
