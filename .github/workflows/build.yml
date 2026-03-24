@@ -55,7 +55,7 @@ jobs:
       - name: Download integrations
         run: go run downloader.go -bundle="bundle-windows.yml" -outdir="out-windows"
       - name: Build Windows Server 2022 docker image
-        run: bash ./docker-build-windows.sh .
+        run: bash ./docker-build-windows.sh
   
   build-fips:
     name: Build fips and scan image

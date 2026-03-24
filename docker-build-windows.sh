@@ -35,7 +35,7 @@ docker build \
   --build-arg out_dir="$OUTDIR" \
   -t "${FULL_TAG}" \
   -f Dockerfile.windows \
-  "$@" \
-  .
+  . \
+  "$@"
 
 echo "Successfully built: ${FULL_TAG}"
