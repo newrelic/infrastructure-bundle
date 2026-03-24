@@ -209,7 +209,7 @@ jobs:
              {
                echo "SLACK_MESSAGE<<EOF"
                echo -e "*🛡️ SECURITY SCAN REPORT* | \`$(date +'%Y-%m-%d')\`"
-               echo -e "*Multi-Engine:* _Trivy & Grype Combined_"
+               echo -e "_Scanned by Trivy & Grype_"
                echo -e "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
                echo -e "*📊 OVERALL POSTURE*"
                echo -e "• *Total Issues:* \`$TOTAL_CVE_COUNT\` findings across \`$UNIQUE_INT_COUNT\` components"
