@@ -9,7 +9,7 @@ WINDOWS_VERSION=${WINDOWS_VERSION:-ltsc2022}
 DOCKER_IMAGE=${DOCKER_IMAGE:-newrelic/infrastructure-bundle}
 DOCKER_IMAGE_TAG=${DOCKER_IMAGE_TAG:-dev}
 OUTDIR=${OUTDIR:-out-windows}
-BASE_IMAGE_NAME=${BASE_IMAGE_NAME:-newrelic/infrastructure-windows}
+BASE_IMAGE_NAME=${BASE_IMAGE_NAME:-newrelic/infrastructure}
 
 echo "Building Windows image for Windows Server $WINDOWS_VERSION"
 echo "base_image_name: $BASE_IMAGE_NAME"
