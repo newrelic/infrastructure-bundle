@@ -189,7 +189,7 @@ jobs:
                    else if (med[i] > 0) icon = "🟡";
                    else icon = "🔵";
                    row_tot = (crit[i]+0) + (high[i]+0) + (med[i]+0) + (low[i]+0);
-                   printf "%s %-12s | %2d | %2d | %2d | %2d | %3d\n", icon, substr(i,1,12), crit[i], high[i], med[i], low[i], row_tot
+                   printf "%s %-s | %2d | %2d | %2d | %2d | %3d\n", icon, i, crit[i], high[i], med[i], low[i], row_tot
                 }
              }' raw-report.txt | sort -r)
 
@@ -206,8 +206,8 @@ jobs:
                echo -e "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
                echo -e "*🔎 FINDINGS BREAKDOWN:*"
                echo -e "\`\`\`"
-               echo -e "ST  INTEGRATION  | CR | HI | ME | LO | TOT"
-               echo -e "--- ------------ | -- | -- | -- | -- | ---"
+               echo -e "ST  INTEGRATION | CR | HI | ME | LO | TOT"
+               echo -e "--- ----------- | -- | -- | -- | -- | ---"
                echo -e "$AGGREGATED_TABLE"
                echo -e "\`\`\`"
                echo -e "🔗 _Please find the GitHub Actions workflow run for more details:_"
