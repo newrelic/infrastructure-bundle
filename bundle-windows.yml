@@ -25,5 +25,6 @@ testFiles:
 integrations:
   - name: nri-discovery-kubernetes
     version: v1.13.9
+    subpath: var/db/newrelic-infra
     testFiles:
       - /var/db/newrelic-infra/nri-discovery-kubernetes.exe
