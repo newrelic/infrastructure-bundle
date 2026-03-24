@@ -130,27 +130,29 @@ jobs:
           cat trivy-report.txt grype-report.txt trivy-k8s-events-forwarder.txt grype-k8s-events-forwarder.txt trivy-nri-forwarder.txt grype-nri-forwarder.txt > combined-raw.txt
           
           # 3. Clean up the paths and de-duplicate unique CVEs per integration
-          # Deduplicates by two keys:
-          #   - (component, package, CVE/GHSA-ID): catches exact ID matches
-          #   - (component, package, fixed-version): catches CVE vs GHSA aliases
-          #     where Trivy and Grype report the same vuln under different IDs
+          # Strategy:
+          #   - Pre-sort so CVE lines come before GHSA lines
+          #   - Dedup exact ID matches (CVE or GHSA) via id_key
+          #   - Dedup GHSA aliases of CVEs via fix_key (comp+pkg+sev+fix)
+          #     but never skip CVE-vs-CVE: multiple CVEs can share the same fix version
           sed -i 's|var/db/newrelic-infra/newrelic-integrations/bin/||g' combined-raw.txt
+          grep " CVE-" combined-raw.txt > combined-sorted.txt 2>/dev/null || true
+          grep -v " CVE-" combined-raw.txt >> combined-sorted.txt 2>/dev/null || true
           awk -F'|' '
           NF >= 4 {
             comp = $1; gsub(/.*\//, "", comp); gsub(/ /, "", comp)
             pkg  = $2; gsub(/ /, "", pkg)
-            cve  = $3; gsub(/ /, "", cve)
+            id   = $3; gsub(/ /, "", id)
             sev  = $4; gsub(/ /, "", sev)
             fix  = $5; gsub(/ /, "", fix)
-            cve_key = tolower(comp) "|" tolower(pkg) "|" tolower(cve)
-            # Include severity so different-severity CVEs with same fix are NOT merged
+            id_key  = tolower(comp) "|" tolower(pkg) "|" tolower(id)
             fix_key = tolower(comp) "|" tolower(pkg) "|" tolower(sev) "|" tolower(fix)
-            if (seen_cve[cve_key]) next
-            if (fix != "" && fix != "n/a" && seen_fix[fix_key]) next
-            seen_cve[cve_key] = 1
-            if (fix != "" && fix != "n/a") seen_fix[fix_key] = 1
+            if (seen_id[id_key]) next
+            if (id !~ /^CVE-/ && fix != "" && fix != "n/a" && seen_cve_fix[fix_key]) next
+            seen_id[id_key] = 1
+            if (id ~ /^CVE-/ && fix != "" && fix != "n/a") seen_cve_fix[fix_key] = 1
             print
-          }' combined-raw.txt | sort > raw-report.txt
+          }' combined-sorted.txt | sort > raw-report.txt
 
       - name: Format Slack Message
         id: format_message
