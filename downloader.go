@@ -1,10 +1,12 @@
 package main
 
 import (
+	"archive/zip"
 	"bytes"
 	"context"
 	"flag"
 	"fmt"
+	"io"
 	"io/fs"
 	"log"
 	"net/http"
@@ -355,16 +357,87 @@ func (i *integration) download(outdir string) error {
 		}
 
 		log.Printf("Downloading and extracting %s (%s)", i.Name, arch)
-		// Invoke tar externally with pipe (simplifies code).
-		cmd := exec.Command("tar", "-xz")
-		cmd.Dir = destination
-		cmd.Stdin = response.Body
-		cmd.Stdout = os.Stderr
-		cmd.Stderr = os.Stderr
 
-		if err := cmd.Run(); err != nil {
-			return fmt.Errorf("error running tar: %v", err)
+		// Check if it's a zip file (Windows) or tar.gz file (Linux)
+		if strings.HasSuffix(url, ".zip") {
+			// Handle zip extraction for Windows
+			if err := extractZip(response.Body, destination); err != nil {
+				return fmt.Errorf("error extracting zip: %v", err)
+			}
+		} else {
+			// Invoke tar externally with pipe (simplifies code).
+			cmd := exec.Command("tar", "-xz")
+			cmd.Dir = destination
+			cmd.Stdin = response.Body
+			cmd.Stdout = os.Stderr
+			cmd.Stderr = os.Stderr
+
+			if err := cmd.Run(); err != nil {
+				return fmt.Errorf("error running tar: %v", err)
+			}
 		}
+	}
+
+	return nil
+}
+
+// extractZip extracts a zip file from a reader to the destination directory
+func extractZip(reader io.Reader, destination string) error {
+	// Read the entire zip file into memory
+	// This is necessary because zip.Reader requires io.ReaderAt
+	data, err := io.ReadAll(reader)
+	if err != nil {
+		return fmt.Errorf("reading zip data: %w", err)
+	}
+
+	// Create a reader for the zip archive
+	zipReader, err := zip.NewReader(bytes.NewReader(data), int64(len(data)))
+	if err != nil {
+		return fmt.Errorf("creating zip reader: %w", err)
+	}
+
+	// Extract each file from the zip
+	for _, file := range zipReader.File {
+		if err := extractZipFile(file, destination); err != nil {
+			return fmt.Errorf("extracting %s: %w", file.Name, err)
+		}
+	}
+
+	return nil
+}
+
+// extractZipFile extracts a single file from a zip archive
+func extractZipFile(file *zip.File, destination string) error {
+	// Construct the full path
+	filePath := filepath.Join(destination, file.Name)
+
+	// Check for directory
+	if file.FileInfo().IsDir() {
+		return os.MkdirAll(filePath, file.Mode())
+	}
+
+	// Create parent directories if needed
+	if err := os.MkdirAll(filepath.Dir(filePath), 0755); err != nil {
+		return fmt.Errorf("creating parent directories: %w", err)
+	}
+
+	// Open the file in the zip
+	srcFile, err := file.Open()
+	if err != nil {
+		return fmt.Errorf("opening file in zip: %w", err)
+	}
+	defer srcFile.Close()
+
+	// Create the destination file
+	destFile, err := os.OpenFile(filePath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, file.Mode())
+	if err != nil {
+		return fmt.Errorf("creating destination file: %w", err)
+	}
+	defer destFile.Close()
+
+	// Copy the contents
+	if _, err := io.Copy(destFile, srcFile); err != nil {
+		return fmt.Errorf("copying file contents: %w", err)
 	}
 
 	return nil
