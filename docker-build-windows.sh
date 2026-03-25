@@ -29,6 +29,22 @@ echo "Building the image leveraging agent_version=$AGENT_VERSION for Windows Ser
 BASE_IMAGE_TAG="${AGENT_VERSION}-test-windows-${WINDOWS_VERSION}"
 FULL_TAG="${DOCKER_IMAGE}:${DOCKER_IMAGE_TAG}-windows-${WINDOWS_VERSION}"
 
+# Check if --push flag is passed
+PUSH_IMAGE=false
+for arg in "$@"; do
+  if [ "$arg" = "--push" ]; then
+    PUSH_IMAGE=true
+  fi
+done
+
+# Remove --push from arguments as it's not valid for docker build
+FILTERED_ARGS=()
+for arg in "$@"; do
+  if [ "$arg" != "--push" ]; then
+    FILTERED_ARGS+=("$arg")
+  fi
+done
+
 docker build \
   --build-arg agent_version="$BASE_IMAGE_TAG" \
   --build-arg base_image_name="$BASE_IMAGE_NAME" \
@@ -36,6 +52,13 @@ docker build \
   -t "${FULL_TAG}" \
   -f Dockerfile.windows \
   . \
-  "$@"
+  "${FILTERED_ARGS[@]}"
 
 echo "Successfully built: ${FULL_TAG}"
+
+# Push if --push was requested
+if [ "$PUSH_IMAGE" = true ]; then
+  echo "Pushing ${FULL_TAG}..."
+  docker push "${FULL_TAG}"
+  echo "Successfully pushed: ${FULL_TAG}"
+fi
