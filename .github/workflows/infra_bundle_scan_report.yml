@@ -43,7 +43,7 @@ jobs:
           EOF
 
       - name: Run Trivy Scan
-        uses: aquasecurity/trivy-action@master
+        uses: aquasecurity/trivy-action@0.35.0
         with:
           image-ref: ${{ env.DOCKER_IMAGE }}:${{ env.DOCKER_IMAGE_TAG }}
           format: 'template'
@@ -67,7 +67,7 @@ jobs:
           output-format: json # Use JSON for raw data
 
       - name: Run Trivy Scan - k8s-events-forwarder
-        uses: aquasecurity/trivy-action@master
+        uses: aquasecurity/trivy-action@0.35.0
         with:
           image-ref: "docker.io/newrelic/k8s-events-forwarder:latest"
           format: 'template'
@@ -91,7 +91,7 @@ jobs:
           output-format: json
 
       - name: Run Trivy Scan - nri-forwarder
-        uses: aquasecurity/trivy-action@master
+        uses: aquasecurity/trivy-action@0.35.0
         with:
           image-ref: "docker.io/newrelic/nri-forwarder:latest"
           format: 'template'
