@@ -1,0 +1,4 @@
+ARG base_image_tag=latest
+ARG base_image_name=newrelic/infrastructure-windows
+
+FROM ${base_image_name}:${base_image_tag}
