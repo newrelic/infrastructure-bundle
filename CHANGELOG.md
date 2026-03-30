@@ -9,6 +9,29 @@ Unreleased section should follow [Release Toolkit](https://github.com/newrelic/r
 
 ## Unreleased
 
+## v3.3.20 - 2026-03-30
+
+### ⛓️ Dependencies
+- Updated newrelic/nri-rabbitmq to v2.16.0 - [Changelog 🔗](https://github.com/newrelic/nri-rabbitmq/releases/tag/v2.16.0)
+- Updated newrelic/nri-nginx to v3.7.0 - [Changelog 🔗](https://github.com/newrelic/nri-nginx/releases/tag/v3.7.0)
+- Updated newrelic/nri-nagios to v2.12.0 - [Changelog 🔗](https://github.com/newrelic/nri-nagios/releases/tag/v2.12.0)
+- Updated newrelic/nri-redis to v1.13.0 - [Changelog 🔗](https://github.com/newrelic/nri-redis/releases/tag/v1.13.0)
+- Updated newrelic/nrjmx to v2.12.0 - [Changelog 🔗](https://github.com/newrelic/nrjmx/releases/tag/v2.12.0)
+- Updated newrelic/nri-mongodb to v2.12.0 - [Changelog 🔗](https://github.com/newrelic/nri-mongodb/releases/tag/v2.12.0)
+- Updated newrelic/nri-postgresql to v2.26.0 - [Changelog 🔗](https://github.com/newrelic/nri-postgresql/releases/tag/v2.26.0)
+- Updated newrelic/nri-mysql to v1.20.0 - [Changelog 🔗](https://github.com/newrelic/nri-mysql/releases/tag/v1.20.0)
+- Updated newrelic/nri-mssql to v2.28.0 - [Changelog 🔗](https://github.com/newrelic/nri-mssql/releases/tag/v2.28.0)
+- Updated newrelic/nri-f5 to v2.10.0 - [Changelog 🔗](https://github.com/newrelic/nri-f5/releases/tag/v2.10.0)
+- Updated newrelic/nri-apache to v1.16.0 - [Changelog 🔗](https://github.com/newrelic/nri-apache/releases/tag/v1.16.0)
+- Updated newrelic/nri-consul to v2.10.0 - [Changelog 🔗](https://github.com/newrelic/nri-consul/releases/tag/v2.10.0)
+- Updated newrelic/nri-cassandra to v2.18.0 - [Changelog 🔗](https://github.com/newrelic/nri-cassandra/releases/tag/v2.18.0)
+- Updated newrelic/nri-couchbase to v2.9.0 - [Changelog 🔗](https://github.com/newrelic/nri-couchbase/releases/tag/v2.9.0)
+- Updated newrelic/nri-discovery-kubernetes to v1.14.0 - [Changelog 🔗](https://github.com/newrelic/nri-discovery-kubernetes/releases/tag/v1.14.0)
+- Updated newrelic/nri-haproxy to v3.3.0 - [Changelog 🔗](https://github.com/newrelic/nri-haproxy/releases/tag/v3.3.0)
+- Updated newrelic/nri-elasticsearch to v6.1.0 - [Changelog 🔗](https://github.com/newrelic/nri-elasticsearch/releases/tag/v6.1.0)
+- Updated newrelic/nri-memcached to v2.8.0 - [Changelog 🔗](https://github.com/newrelic/nri-memcached/releases/tag/v2.8.0)
+- Updated newrelic/nri-kafka to v3.17.0 - [Changelog 🔗](https://github.com/newrelic/nri-kafka/releases/tag/v3.17.0)
+
 ## v3.3.19 - 2026-03-24
 
 ### ⛓️ Dependencies
