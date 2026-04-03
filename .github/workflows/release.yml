@@ -42,10 +42,37 @@ jobs:
           export DOCKER_IMAGE_TAG=latest
           ./docker-build.sh . --push
         fi
-    
+
     secrets:
       docker_username: ${{ secrets.OHAI_DOCKER_HUB_ID }}
       docker_password: ${{ secrets.OHAI_DOCKER_HUB_PASSWORD }}
       bot_token: ${{ secrets.COREINT_BOT_TOKEN }}
       slack_channel: ${{ secrets.COREINT_SLACK_CHANNEL }}
       slack_token: ${{ secrets.COREINT_SLACK_TOKEN }}
+
+  container-release-windows-2022:
+    name: Release Windows Server 2022
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.OHAI_DOCKER_HUB_ID }}
+          password: ${{ secrets.OHAI_DOCKER_HUB_PASSWORD }}
+      - name: Build and push Windows Server 2022 release
+        env:
+          DOCKER_IMAGE: newrelic/infrastructure-bundle
+          DOCKER_IMAGE_TAG: ${{ github.event.release.tag_name }}
+          WINDOWS_VERSION: ltsc2022
+          OUTDIR: out-windows
+        run: |
+          go run downloader.go -bundle="bundle-windows.yml" -outdir="out-windows"
+          bash ./docker-build-windows.sh --push
+          if [ "${{ github.event.release.prerelease }}" = "false" ]; then
+            export DOCKER_IMAGE_TAG=latest
+            bash ./docker-build-windows.sh . --push
+          fi
