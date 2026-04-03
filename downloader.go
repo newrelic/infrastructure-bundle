@@ -411,6 +411,14 @@ func extractZipFile(file *zip.File, destination string) error {
 	// Construct the full path
 	filePath := filepath.Join(destination, file.Name)
 
+	// Prevent Zip Slip vulnerability by validating the file path
+	// Clean the destination and file path, then verify the file path is within destination
+	cleanDest := filepath.Clean(destination) + string(os.PathSeparator)
+	cleanPath := filepath.Clean(filePath)
+	if !strings.HasPrefix(cleanPath, cleanDest) {
+		return fmt.Errorf("illegal file path: %s (attempting to write outside destination)", file.Name)
+	}
+
 	// Check for directory
 	if file.FileInfo().IsDir() {
 		return os.MkdirAll(filePath, file.Mode())
