@@ -56,7 +56,49 @@ jobs:
         run: go run downloader.go -bundle="bundle-windows.yml" -outdir="out-windows"
       - name: Build Windows Server 2022 docker image
         run: bash ./docker-build-windows.sh
-  
+      - name: Run Trivy vulnerability scanner
+        continue-on-error: true
+        uses: aquasecurity/trivy-action@0.29.0
+        with:
+          image-ref: ${{ env.DOCKER_IMAGE }}:${{ env.DOCKER_IMAGE_TAG }}-${{ env.WINDOWS_VERSION }}
+          format: table
+          exit-code: 1
+          ignore-unfixed: true
+          severity: CRITICAL,HIGH
+        env:
+          TRIVY_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-db
+          TRIVY_JAVA_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-java-db
+
+  build-windows-2019:
+    name: Build Windows Server 2019 image
+    runs-on: windows-x64-8-core
+    env:
+      DOCKER_IMAGE: newrelic/infrastructure-bundle
+      DOCKER_IMAGE_TAG: ci
+      WINDOWS_VERSION: ltsc2019
+      OUTDIR: out-windows
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Download integrations
+        run: go run downloader.go -bundle="bundle-windows.yml" -outdir="out-windows"
+      - name: Build Windows Server 2019 docker image
+        run: bash ./docker-build-windows.sh
+      - name: Run Trivy vulnerability scanner
+        continue-on-error: true
+        uses: aquasecurity/trivy-action@0.29.0
+        with:
+          image-ref: ${{ env.DOCKER_IMAGE }}:${{ env.DOCKER_IMAGE_TAG }}-${{ env.WINDOWS_VERSION }}
+          format: table
+          exit-code: 1
+          ignore-unfixed: true
+          severity: CRITICAL,HIGH
+        env:
+          TRIVY_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-db
+          TRIVY_JAVA_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-java-db
+
   build-fips:
     name: Build fips and scan image
     runs-on: ubuntu-latest
