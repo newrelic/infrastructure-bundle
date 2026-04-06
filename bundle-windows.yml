@@ -24,7 +24,7 @@ testFiles:
 # Individual entries may override any of the values defined above.
 integrations:
   - name: nri-discovery-kubernetes
-    version: v1.13.9
+    version: v1.14.0
     subpath: var/db/newrelic-infra
     testFiles:
       - /var/db/newrelic-infra/nri-discovery-kubernetes.exe
