@@ -264,7 +264,7 @@ jobs:
           channel-id: ${{ secrets.COREINT_SLACK_CHANNEL }}
           payload: |
             {
-              "text": "${{ steps.format_message.outputs.SLACK_MESSAGE }}"
+              "text": ${{ toJSON(steps.format_message.outputs.SLACK_MESSAGE) }}
             }
         env:
           SLACK_BOT_TOKEN: ${{ secrets.COREINT_SLACK_TOKEN }}
