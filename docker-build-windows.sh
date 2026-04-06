@@ -26,8 +26,8 @@ fi
 echo "Building the image leveraging agent_version=$AGENT_VERSION for Windows Server $WINDOWS_VERSION"
 
 # Construct the base image tag to include Windows version
-BASE_IMAGE_TAG="${AGENT_VERSION}-test-windows-${WINDOWS_VERSION}"
-FULL_TAG="${DOCKER_IMAGE}:${DOCKER_IMAGE_TAG}-windows-${WINDOWS_VERSION}"
+BASE_IMAGE_TAG="${AGENT_VERSION}-${WINDOWS_VERSION}"
+FULL_TAG="${DOCKER_IMAGE}:${DOCKER_IMAGE_TAG}-${WINDOWS_VERSION}"
 
 # Check if --push flag is passed
 PUSH_IMAGE=false

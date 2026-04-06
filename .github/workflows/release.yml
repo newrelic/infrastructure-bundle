@@ -66,13 +66,16 @@ jobs:
       - name: Build and push Windows Server 2022 release
         env:
           DOCKER_IMAGE: newrelic/infrastructure-bundle
-          DOCKER_IMAGE_TAG: ${{ github.event.release.tag_name }}
           WINDOWS_VERSION: ltsc2022
           OUTDIR: out-windows
         run: |
+          # Strip 'v' prefix from release tag (e.g., v3.3.20 -> 3.3.20)
+          TAG="${{ github.event.release.tag_name }}"
+          export DOCKER_IMAGE_TAG="${TAG#v}"
+
           go run downloader.go -bundle="bundle-windows.yml" -outdir="out-windows"
           bash ./docker-build-windows.sh --push
           if [ "${{ github.event.release.prerelease }}" = "false" ]; then
             export DOCKER_IMAGE_TAG=latest
-            bash ./docker-build-windows.sh . --push
+            bash ./docker-build-windows.sh --push
           fi
