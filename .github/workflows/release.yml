@@ -42,7 +42,7 @@ jobs:
           export DOCKER_IMAGE_TAG=latest
           ./docker-build.sh . --push
         fi
-    
+
     secrets:
       docker_username: ${{ secrets.OHAI_DOCKER_HUB_ID }}
       docker_password: ${{ secrets.OHAI_DOCKER_HUB_PASSWORD }}

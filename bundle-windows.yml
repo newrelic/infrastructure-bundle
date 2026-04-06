@@ -1,0 +1,30 @@
+# Version of the base agent image to use (`newrelic/infrastructure`).
+# This is used by the `docker-build-windows.sh` wrapper if AGENT_VERSION is not set
+agentVersion: 1.73.0
+
+# url, stagingUrl, and repo fields are compiled as templates. The `trimv` helper function can be used to remove the leading v
+# from a version string.
+
+# Used as defaults for all integrations below, can be overridden. Template.
+url: https://github.com/newrelic/{{.Name}}/releases/download/{{.Version}}/{{.Name}}-{{.Arch}}.{{.Version | trimv}}.zip
+# stagingUrl will be used if the download is invoked with -staging. Template.
+stagingUrl: https://github.com/newrelic/{{.Name}}/releases/download/{{.Version}}/{{.Name}}-{{.Arch}}.{{.Version | trimv}}.zip
+
+# List of architectures to fetch.
+archs: [ amd64 ]
+# GitHub repo hosting the integration. Used to fetch the latest available version when using -latest. Template.
+repo: newrelic/{{.Name}}
+
+# List of files to check for existence after integration has been unpacked. Template.
+testFiles:
+  # Test for existence of the main integration binary
+  - /var/db/newrelic-infra/{{.Name}}.exe
+
+# List of integrations to download.
+# Individual entries may override any of the values defined above.
+integrations:
+  - name: nri-discovery-kubernetes
+    version: v1.13.9
+    subpath: var/db/newrelic-infra
+    testFiles:
+      - /var/db/newrelic-infra/nri-discovery-kubernetes.exe
