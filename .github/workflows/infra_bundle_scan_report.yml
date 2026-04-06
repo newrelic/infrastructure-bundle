@@ -259,9 +259,12 @@ jobs:
           echo "=========================================="
 
       - name: Send Slack notification
-        uses: archive/github-actions-slack@master
+        uses: slackapi/slack-github-action@v1.26.0
         with:
-          slack-bot-user-oauth-access-token: ${{ secrets.COREINT_SLACK_TOKEN }}
-          slack-channel: ${{ secrets.COREINT_SLACK_CHANNEL }}
-          slack-text: ${{ steps.format_message.outputs.SLACK_MESSAGE }}
-          slack-optional-parse: full
+          channel-id: ${{ secrets.COREINT_SLACK_CHANNEL }}
+          payload: |
+            {
+              "text": "${{ steps.format_message.outputs.SLACK_MESSAGE }}"
+            }
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.COREINT_SLACK_TOKEN }}
