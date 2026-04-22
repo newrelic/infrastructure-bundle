@@ -38,7 +38,7 @@ integrations:
   - name: nri-apache
     version: v1.16.0
   - name: nri-cassandra
-    version: v2.18.0
+    version: v2.19.0
   - name: nri-consul
     version: v2.10.1
   - name: nri-couchbase
