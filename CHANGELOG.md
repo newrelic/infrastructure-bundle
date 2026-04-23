@@ -9,6 +9,14 @@ Unreleased section should follow [Release Toolkit](https://github.com/newrelic/r
 
 ## Unreleased
 
+## v3.3.23 - 2026-04-23
+
+### ⛓️ Dependencies
+- Updated newrelic/nri-mssql to v2.29.0 - [Changelog 🔗](https://github.com/newrelic/nri-mssql/releases/tag/v2.29.0)
+- Updated newrelic/nri-consul to v2.10.1 - [Changelog 🔗](https://github.com/newrelic/nri-consul/releases/tag/v2.10.1)
+- Updated newrelic/nri-cassandra to v2.19.0 - [Changelog 🔗](https://github.com/newrelic/nri-cassandra/releases/tag/v2.19.0)
+- Updated newrelic/infrastructure to v1.74.1 - [Changelog 🔗](https://github.com/newrelic/infrastructure-agent/releases/tag/1.74.1)
+
 ## v3.3.22 - 2026-04-15
 
 ### ⛓️ Dependencies
