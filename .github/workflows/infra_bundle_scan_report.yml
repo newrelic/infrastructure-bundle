@@ -231,8 +231,8 @@ jobs:
              # --- CONSTRUCT DASHBOARD ---
              {
                echo "SLACK_MESSAGE<<EOF"
-               echo -e "*🛡️ SECURITY SCAN REPORT (TRIVY)* | \`$(date +'%Y-%m-%d')\`"
-               echo -e "_Scanned by Trivy only_"
+               echo -e "*🛡️ SECURITY SCAN REPORT* | \`$(date +'%Y-%m-%d')\`"
+               echo -e "_Scanned by Trivy_"
                echo -e "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
                echo -e "*📊 OVERALL POSTURE*"
                echo -e "• *Total Issues:* \`$TOTAL_CVE_COUNT\` findings across \`$UNIQUE_INT_COUNT\` components"
@@ -307,7 +307,7 @@ jobs:
              # --- CONSTRUCT DASHBOARD ---
              {
                echo "COMBINED_SLACK_MESSAGE<<EOF"
-               echo -e "*🛡️ SECURITY SCAN REPORT (TRIVY & GRYPE)* | \`$(date +'%Y-%m-%d')\`"
+               echo -e "*🛡️ SECURITY SCAN REPORT* | \`$(date +'%Y-%m-%d')\`"
                echo -e "_Scanned by Trivy & Grype_"
                echo -e "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
                echo -e "*📊 OVERALL POSTURE*"
