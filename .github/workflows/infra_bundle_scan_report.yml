@@ -357,10 +357,10 @@ jobs:
           echo ""
           echo "=========================================="
 
-      - name: Send Slack notification (Trivy only)
+      - name: Send Slack notification (Trivy)
         uses: slackapi/slack-github-action@v1.26.0
         with:
-          channel-id: ${{ secrets.TEST_SLACK_CHANNEL }}
+          channel-id: ${{ secrets.COREINT_SLACK_CHANNEL }}
           payload: |
             {
               "text": ${{ toJSON(steps.format_message.outputs.SLACK_MESSAGE) }}
@@ -368,10 +368,10 @@ jobs:
         env:
           SLACK_BOT_TOKEN: ${{ secrets.COREINT_SLACK_TOKEN }}
 
-      - name: Send Slack notification to additional channel (Trivy & Grype)
+      - name: Send Slack notification (Trivy & Grype)
         uses: slackapi/slack-github-action@v1.26.0
         with:
-          channel-id: ${{ secrets.TEST_SLACK_CHANNEL }}
+          channel-id: ${{ secrets.OHAI_SLACK_CHANNEL_ID }}
           payload: |
             {
               "text": ${{ toJSON(steps.format_combined_message.outputs.COMBINED_SLACK_MESSAGE) }}
