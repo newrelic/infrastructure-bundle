@@ -157,7 +157,106 @@ jobs:
       - name: Format Slack Message
         id: format_message
         run: |
-          # 1. Clean the report
+          # 1. Create Trivy report
+          cat trivy-report.txt trivy-k8s-events-forwarder.txt trivy-nri-forwarder.txt > trivy-only-raw.txt
+          
+          # Clean up the paths and de-duplicate
+          sed -i 's|var/db/newrelic-infra/newrelic-integrations/bin/||g' trivy-only-raw.txt
+          grep " CVE-" trivy-only-raw.txt > trivy-only-sorted.txt 2>/dev/null || true
+          grep -v " CVE-" trivy-only-raw.txt >> trivy-only-sorted.txt 2>/dev/null || true
+          awk -F'|' '
+          NF >= 4 {
+            comp = $1; gsub(/.*\//, "", comp); gsub(/ /, "", comp)
+            pkg  = $2; gsub(/ /, "", pkg)
+            id   = $3; gsub(/ /, "", id)
+            sev  = $4; gsub(/ /, "", sev)
+            fix  = $5; gsub(/ /, "", fix)
+            id_key  = tolower(comp) "|" tolower(pkg) "|" tolower(id)
+            fix_key = tolower(comp) "|" tolower(pkg) "|" tolower(sev) "|" tolower(fix)
+            if (seen_id[id_key]) next
+            if (id !~ /^CVE-/ && fix != "" && fix != "n/a" && seen_cve_fix[fix_key]) next
+            seen_id[id_key] = 1
+            if (id ~ /^CVE-/ && fix != "" && fix != "n/a") seen_cve_fix[fix_key] = 1
+            print
+          }' trivy-only-sorted.txt | sort > trivy-only-report.txt
+          
+          # 2. Clean the trivy report
+          sed -i '/^[[:space:]]*$/d' trivy-only-report.txt
+          
+          if [ -s trivy-only-report.txt ]; then
+             # --- LOGIC: GLOBAL COUNTS (Strictly Cleaned) ---
+             # Count severity levels first (Trivy only)
+             CRIT_T=$(grep -c "CRITICAL" trivy-only-report.txt | head -n 1 | sed 's/[^0-9]//g')
+             HIGH_T=$(grep -c "HIGH" trivy-only-report.txt | head -n 1 | sed 's/[^0-9]//g')
+             MED_T=$(grep -c "MEDIUM" trivy-only-report.txt | head -n 1 | sed 's/[^0-9]//g')
+             LOW_T=$(grep -c "LOW" trivy-only-report.txt | head -n 1 | sed 's/[^0-9]//g')
+
+             # Fallback to 0 if variables are empty
+             CRIT_T=${CRIT_T:-0}
+             HIGH_T=${HIGH_T:-0}
+             MED_T=${MED_T:-0}
+             LOW_T=${LOW_T:-0}
+             
+             # Calculate total as sum of all severities
+             TOTAL_CVE_COUNT=$((CRIT_T + HIGH_T + MED_T + LOW_T))
+             
+             # Count unique components with same normalization as aggregated table (Trivy only)
+             UNIQUE_INT_COUNT=$(cut -d'|' -f1 trivy-only-report.txt | sed 's|.*/||;s/ //g' | grep -v '^$' | sort -u | wc -l | sed 's/[^0-9]//g')
+             UNIQUE_INT_COUNT=${UNIQUE_INT_COUNT:-0}
+
+             # --- LOGIC: PER-INTEGRATION AGGREGATION (Trivy only) ---
+             AGGREGATED_TABLE=$(awk -F'|' '
+             {
+                name = $1;
+                gsub(/.*\//, "", name); gsub(/ /, "", name);
+                sev = $4; gsub(/ /, "", sev);
+                
+                ints[name]++;
+                if (sev == "CRITICAL") crit[name]++;
+                else if (sev == "HIGH") high[name]++;
+                else if (sev == "MEDIUM") med[name]++;
+                else if (sev == "LOW") low[name]++;
+             }
+             END {
+                for (i in ints) {
+                   if (crit[i] > 0) icon = "🔴";
+                   else if (high[i] > 0) icon = "🟠";
+                   else if (med[i] > 0) icon = "🟡";
+                   else icon = "🔵";
+                   row_tot = (crit[i]+0) + (high[i]+0) + (med[i]+0) + (low[i]+0);
+                   printf "%s %-40s | %2d | %2d | %2d | %2d | %3d\n", icon, i, crit[i], high[i], med[i], low[i], row_tot
+                }
+             }' trivy-only-report.txt | sort -r)
+
+             # --- CONSTRUCT DASHBOARD ---
+             {
+               echo "SLACK_MESSAGE<<EOF"
+               echo -e "*🛡️ SECURITY SCAN REPORT (TRIVY)* | \`$(date +'%Y-%m-%d')\`"
+               echo -e "_Scanned by Trivy only_"
+               echo -e "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+               echo -e "*📊 OVERALL POSTURE*"
+               echo -e "• *Total Issues:* \`$TOTAL_CVE_COUNT\` findings across \`$UNIQUE_INT_COUNT\` components"
+               echo -e "• *Critical:* 🔴 \`$CRIT_T\`  |  *High:* 🟠 \`$HIGH_T\`"
+               echo -e "• *Medium:* 🟡 \`$MED_T\`  |  *Low:* 🔵 \`$LOW_T\`"
+               echo -e "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+               echo -e "*🔎 FINDINGS BREAKDOWN:*"
+               echo -e "\`\`\`"
+               echo -e "ST  $(printf '%-40s' 'INTEGRATION') | CR | HI | ME | LO | TOT"
+               echo -e "--- $(printf '%-40s' '' | tr ' ' '-') | -- | -- | -- | -- | ---"
+               echo -e "$AGGREGATED_TABLE"
+               echo -e "\`\`\`"
+               echo -e "🔗 _Please find the GitHub Actions workflow run for more details:_"
+               echo -e "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+               echo "EOF"
+             } >> $GITHUB_OUTPUT
+          else
+             echo "SLACK_MESSAGE=*✅ SECURITY SCAN PASSED (TRIVY)* - No issues detected." >> $GITHUB_OUTPUT
+          fi
+
+      - name: Format Combined Message
+        id: format_combined_message
+        run: |
+          # 1. Clean the combined report (original logic)
           sed -i '/^[[:space:]]*$/d' raw-report.txt
           
           if [ -s raw-report.txt ]; then
@@ -207,8 +306,8 @@ jobs:
 
              # --- CONSTRUCT DASHBOARD ---
              {
-               echo "SLACK_MESSAGE<<EOF"
-               echo -e "*🛡️ SECURITY SCAN REPORT* | \`$(date +'%Y-%m-%d')\`"
+               echo "COMBINED_SLACK_MESSAGE<<EOF"
+               echo -e "*🛡️ SECURITY SCAN REPORT (TRIVY & GRYPE)* | \`$(date +'%Y-%m-%d')\`"
                echo -e "_Scanned by Trivy & Grype_"
                echo -e "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
                echo -e "*📊 OVERALL POSTURE*"
@@ -227,7 +326,7 @@ jobs:
                echo "EOF"
              } >> $GITHUB_OUTPUT
           else
-             echo "SLACK_MESSAGE=*✅ SECURITY SCAN PASSED* - No issues detected." >> $GITHUB_OUTPUT
+             echo "COMBINED_SLACK_MESSAGE=*✅ SECURITY SCAN PASSED (TRIVY & GRYPE)* - No issues detected." >> $GITHUB_OUTPUT
           fi
 
       - name: Display Report in Workflow Run
@@ -258,13 +357,24 @@ jobs:
           echo ""
           echo "=========================================="
 
-      - name: Send Slack notification
+      - name: Send Slack notification (Trivy only)
         uses: slackapi/slack-github-action@v1.26.0
         with:
-          channel-id: ${{ secrets.COREINT_SLACK_CHANNEL }}
+          channel-id: ${{ secrets.TEST_SLACK_CHANNEL }}
           payload: |
             {
               "text": ${{ toJSON(steps.format_message.outputs.SLACK_MESSAGE) }}
+            }
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.COREINT_SLACK_TOKEN }}
+
+      - name: Send Slack notification to additional channel (Trivy & Grype)
+        uses: slackapi/slack-github-action@v1.26.0
+        with:
+          channel-id: ${{ secrets.TEST_SLACK_CHANNEL }}
+          payload: |
+            {
+              "text": ${{ toJSON(steps.format_combined_message.outputs.COMBINED_SLACK_MESSAGE) }}
             }
         env:
           SLACK_BOT_TOKEN: ${{ secrets.COREINT_SLACK_TOKEN }}
