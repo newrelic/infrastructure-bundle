@@ -9,6 +9,26 @@ Unreleased section should follow [Release Toolkit](https://github.com/newrelic/r
 
 ## Unreleased
 
+## v3.3.25 - 2026-04-30
+
+### ⛓️ Dependencies
+- Updated newrelic/nri-mongodb to v2.13.0 - [Changelog 🔗](https://github.com/newrelic/nri-mongodb/releases/tag/v2.13.0)
+- Updated newrelic/nri-haproxy to v3.4.0 - [Changelog 🔗](https://github.com/newrelic/nri-haproxy/releases/tag/v3.4.0)
+- Updated newrelic/nri-elasticsearch to v6.2.0 - [Changelog 🔗](https://github.com/newrelic/nri-elasticsearch/releases/tag/v6.2.0)
+- Updated newrelic/nri-couchbase to v2.10.0 - [Changelog 🔗](https://github.com/newrelic/nri-couchbase/releases/tag/v2.10.0)
+- Updated newrelic/nri-discovery-kubernetes to v1.14.2 - [Changelog 🔗](https://github.com/newrelic/nri-discovery-kubernetes/releases/tag/v1.14.2)
+- Updated newrelic/nri-rabbitmq to v2.17.0 - [Changelog 🔗](https://github.com/newrelic/nri-rabbitmq/releases/tag/v2.17.0)
+- Updated newrelic/nri-apache to v1.17.0 - [Changelog 🔗](https://github.com/newrelic/nri-apache/releases/tag/v1.17.0)
+- Updated newrelic/nri-kafka to v3.18.0 - [Changelog 🔗](https://github.com/newrelic/nri-kafka/releases/tag/v3.18.0)
+- Updated newrelic/nri-nginx to v3.8.0 - [Changelog 🔗](https://github.com/newrelic/nri-nginx/releases/tag/v3.8.0)
+- Updated newrelic/nri-consul to v2.11.0 - [Changelog 🔗](https://github.com/newrelic/nri-consul/releases/tag/v2.11.0)
+- Updated newrelic/nri-postgresql to v2.27.0 - [Changelog 🔗](https://github.com/newrelic/nri-postgresql/releases/tag/v2.27.0)
+- Updated newrelic/nri-memcached to v2.9.0 - [Changelog 🔗](https://github.com/newrelic/nri-memcached/releases/tag/v2.9.0)
+- Updated newrelic/nri-nagios to v2.13.0 - [Changelog 🔗](https://github.com/newrelic/nri-nagios/releases/tag/v2.13.0)
+- Updated newrelic/nri-mysql to v1.21.0 - [Changelog 🔗](https://github.com/newrelic/nri-mysql/releases/tag/v1.21.0)
+- Updated newrelic/nri-redis to v1.14.0 - [Changelog 🔗](https://github.com/newrelic/nri-redis/releases/tag/v1.14.0)
+- Updated newrelic/nri-jmx to v3.13.0 - [Changelog 🔗](https://github.com/newrelic/nri-jmx/releases/tag/v3.13.0)
+
 ## v3.3.24 - 2026-04-28
 
 ### ⛓️ Dependencies
