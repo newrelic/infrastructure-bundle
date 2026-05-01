@@ -259,7 +259,7 @@ jobs:
           echo "=========================================="
 
       - name: Send Slack notification
-        uses: slackapi/slack-github-action@v1.26.0
+        uses: slackapi/slack-github-action@v1.27.1
         with:
           channel-id: ${{ secrets.COREINT_SLACK_CHANNEL }}
           payload: |
