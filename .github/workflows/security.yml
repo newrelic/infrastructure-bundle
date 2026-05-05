@@ -7,6 +7,10 @@ on:
   schedule:
     - cron: "14 3 * * *" # Daily at 3:14 AM
 
+
+permissions:
+  contents: read
+
 jobs:
   build:
     name: Build and scan image
