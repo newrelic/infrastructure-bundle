@@ -64,7 +64,7 @@ integrations:
   - name: nri-nagios
     version: v2.13.0
   - name: nri-nginx
-    version: v3.8.0
+    version: v3.8.1
   - name: nri-postgresql
     version: v2.27.0
   - name: nri-rabbitmq
