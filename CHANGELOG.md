@@ -9,6 +9,13 @@ Unreleased section should follow [Release Toolkit](https://github.com/newrelic/r
 
 ## Unreleased
 
+## v3.3.28 - 2026-05-27
+
+### ⛓️ Dependencies
+- Updated newrelic/infrastructure to v1.76.0 - [Changelog 🔗](https://github.com/newrelic/infrastructure-agent/releases/tag/1.76.0)
+- Updated newrelic/nri-mysql to v1.23.0 - [Changelog 🔗](https://github.com/newrelic/nri-mysql/releases/tag/v1.23.0)
+- Updated newrelic/nri-jmx to v3.15.0 - [Changelog 🔗](https://github.com/newrelic/nri-jmx/releases/tag/v3.15.0)
+
 ## v3.3.27 - 2026-05-19
 
 ### ⛓️ Dependencies
