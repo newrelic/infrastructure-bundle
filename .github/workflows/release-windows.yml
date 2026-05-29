@@ -26,6 +26,10 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: go run downloader.go -bundle="bundle-windows.yml" -outdir="out-windows"
+      - name: Strip v prefix from tag
+        shell: bash
+        run: echo "DOCKER_IMAGE_TAG=${DOCKER_IMAGE_TAG#v}" >> $GITHUB_ENV
+
       - name: Build Windows Server 2022 image
         env:
           AGENT_VERSION: ${{ steps.agent-version.outputs.version }}
@@ -60,6 +64,10 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: go run downloader.go -bundle="bundle-windows.yml" -outdir="out-windows"
+      - name: Strip v prefix from tag
+        shell: bash
+        run: echo "DOCKER_IMAGE_TAG=${DOCKER_IMAGE_TAG#v}" >> $GITHUB_ENV
+
       - name: Build Windows Server 2019 image
         env:
           AGENT_VERSION: ${{ steps.agent-version.outputs.version }}
