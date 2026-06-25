@@ -9,6 +9,25 @@ Unreleased section should follow [Release Toolkit](https://github.com/newrelic/r
 
 ## Unreleased
 
+## v3.3.31 - 2026-06-25
+
+### ⛓️ Dependencies
+- Updated newrelic/nri-mssql to v2.33.0 - [Changelog 🔗](https://github.com/newrelic/nri-mssql/releases/tag/v2.33.0)
+- Updated newrelic/infrastructure to v1.77.0 - [Changelog 🔗](https://github.com/newrelic/infrastructure-agent/releases/tag/1.77.0)
+- Updated newrelic/nri-redis to v1.15.0 - [Changelog 🔗](https://github.com/newrelic/nri-redis/releases/tag/v1.15.0)
+- Updated newrelic/nri-consul to v2.11.3 - [Changelog 🔗](https://github.com/newrelic/nri-consul/releases/tag/v2.11.3)
+- Updated newrelic/nri-memcached to v2.9.2 - [Changelog 🔗](https://github.com/newrelic/nri-memcached/releases/tag/v2.9.2)
+- Updated newrelic/nri-elasticsearch to v6.3.1 - [Changelog 🔗](https://github.com/newrelic/nri-elasticsearch/releases/tag/v6.3.1)
+- Updated newrelic/nri-nagios to v2.13.2 - [Changelog 🔗](https://github.com/newrelic/nri-nagios/releases/tag/v2.13.2)
+- Updated newrelic/nri-rabbitmq to v2.17.2 - [Changelog 🔗](https://github.com/newrelic/nri-rabbitmq/releases/tag/v2.17.2)
+- Updated newrelic/nri-discovery-kubernetes to v1.15.0 - [Changelog 🔗](https://github.com/newrelic/nri-discovery-kubernetes/releases/tag/v1.15.0)
+- Updated newrelic/nri-kafka to v3.20.0 - [Changelog 🔗](https://github.com/newrelic/nri-kafka/releases/tag/v3.20.0)
+- Updated newrelic/nri-nginx to v3.8.2 - [Changelog 🔗](https://github.com/newrelic/nri-nginx/releases/tag/v3.8.2)
+- Updated newrelic/nri-cassandra to v2.20.1 - [Changelog 🔗](https://github.com/newrelic/nri-cassandra/releases/tag/v2.20.1)
+- Updated newrelic/nri-couchbase to v2.11.1 - [Changelog 🔗](https://github.com/newrelic/nri-couchbase/releases/tag/v2.11.1)
+- Updated newrelic/nri-mongodb to v2.14.1 - [Changelog 🔗](https://github.com/newrelic/nri-mongodb/releases/tag/v2.14.1)
+- Updated newrelic/nri-mysql to v1.23.1 - [Changelog 🔗](https://github.com/newrelic/nri-mysql/releases/tag/v1.23.1)
+
 ## v3.3.30 - 2026-06-04
 
 ### ⛓️ Dependencies
