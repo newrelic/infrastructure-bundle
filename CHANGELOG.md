@@ -9,6 +9,14 @@ Unreleased section should follow [Release Toolkit](https://github.com/newrelic/r
 
 ## Unreleased
 
+## v3.3.32 - 2026-06-30
+
+### ⛓️ Dependencies
+- Updated newrelic/nri-jmx to v3.15.1 - [Changelog 🔗](https://github.com/newrelic/nri-jmx/releases/tag/v3.15.1)
+- Updated newrelic/nri-f5 to v2.11.2 - [Changelog 🔗](https://github.com/newrelic/nri-f5/releases/tag/v2.11.2)
+- Updated newrelic/nri-postgresql to v2.28.1 - [Changelog 🔗](https://github.com/newrelic/nri-postgresql/releases/tag/v2.28.1)
+- Updated newrelic/nri-haproxy to v3.4.2 - [Changelog 🔗](https://github.com/newrelic/nri-haproxy/releases/tag/v3.4.2)
+
 ## v3.3.31 - 2026-06-25
 
 ### ⛓️ Dependencies
