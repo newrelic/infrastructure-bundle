@@ -11,6 +11,11 @@ ARG TARGETARCH
 ARG jre_version
 ARG out_dir
 
+# Refresh inherited base-image OS packages so transient Alpine CVEs (e.g. curl,
+# libexpat) are patched even when the published base image predates the fix.
+# The base newrelic/infrastructure image runs the same upgrade at build time.
+RUN apk --no-cache upgrade
+
 # required for nri-jmx
 RUN if [ -n "${jre_version}" ]; then apk add --no-cache openjdk8-jre=${jre_version}; else apk add --no-cache openjdk8-jre; fi
 
