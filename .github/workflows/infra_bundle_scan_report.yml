@@ -369,7 +369,7 @@ jobs:
           SLACK_BOT_TOKEN: ${{ secrets.COREINT_SLACK_TOKEN }}
 
       - name: Send Slack notification (Trivy & Grype)
-        uses: slackapi/slack-github-action@v1.26.0
+        uses: slackapi/slack-github-action@v1.27.1
         with:
           channel-id: ${{ secrets.OHAI_SLACK_CHANNEL_ID }}
           payload: |
