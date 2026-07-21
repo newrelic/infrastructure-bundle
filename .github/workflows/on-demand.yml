@@ -5,6 +5,10 @@ on:
       agent_version:
         description: "Agent version"
         required: true
+
+permissions:
+  contents: read
+
 jobs:
   build:
     name: Build and push image
