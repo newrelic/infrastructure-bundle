@@ -48,7 +48,7 @@ integrations:
   - name: nri-f5
     version: v2.11.3
   - name: nri-haproxy
-    version: v3.4.2
+    version: v3.4.3
   - name: nri-jmx
     version: v3.15.1
     testFiles:
