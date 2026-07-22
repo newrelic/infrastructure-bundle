@@ -9,6 +9,23 @@ Unreleased section should follow [Release Toolkit](https://github.com/newrelic/r
 
 ## Unreleased
 
+## v3.3.35 - 2026-07-22
+
+### ⛓️ Dependencies
+- Updated newrelic/nrjmx to v2.13.0 - [Changelog 🔗](https://github.com/newrelic/nrjmx/releases/tag/v2.13.0)
+- Updated newrelic/nri-nginx to v3.8.3 - [Changelog 🔗](https://github.com/newrelic/nri-nginx/releases/tag/v3.8.3)
+- Updated newrelic/nri-f5 to v2.11.3 - [Changelog 🔗](https://github.com/newrelic/nri-f5/releases/tag/v2.11.3)
+- Updated newrelic/nri-mysql to v1.23.2 - [Changelog 🔗](https://github.com/newrelic/nri-mysql/releases/tag/v1.23.2)
+- Updated newrelic/nri-consul to v2.11.4 - [Changelog 🔗](https://github.com/newrelic/nri-consul/releases/tag/v2.11.4)
+- Updated newrelic/nri-memcached to v2.9.3 - [Changelog 🔗](https://github.com/newrelic/nri-memcached/releases/tag/v2.9.3)
+- Updated newrelic/nri-redis to v1.15.2 - [Changelog 🔗](https://github.com/newrelic/nri-redis/releases/tag/v1.15.2)
+- Updated newrelic/nri-postgresql to v2.29.0 - [Changelog 🔗](https://github.com/newrelic/nri-postgresql/releases/tag/v2.29.0)
+- Updated newrelic/nri-elasticsearch to v6.3.2 - [Changelog 🔗](https://github.com/newrelic/nri-elasticsearch/releases/tag/v6.3.2)
+- Updated newrelic/nri-haproxy to v3.4.3 - [Changelog 🔗](https://github.com/newrelic/nri-haproxy/releases/tag/v3.4.3)
+- Updated newrelic/nri-mongodb to v2.14.2 - [Changelog 🔗](https://github.com/newrelic/nri-mongodb/releases/tag/v2.14.2)
+- Updated newrelic/nri-nagios to v2.13.3 - [Changelog 🔗](https://github.com/newrelic/nri-nagios/releases/tag/v2.13.3)
+- Updated newrelic/nri-mssql to v2.34.0 - [Changelog 🔗](https://github.com/newrelic/nri-mssql/releases/tag/v2.34.0)
+
 ## v3.3.34 - 2026-07-16
 
 ### ⛓️ Dependencies
