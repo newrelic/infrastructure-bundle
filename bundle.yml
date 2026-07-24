@@ -50,7 +50,7 @@ integrations:
   - name: nri-haproxy
     version: v3.4.3
   - name: nri-jmx
-    version: v3.15.1
+    version: v3.16.0
     testFiles:
       - /opt/newrelic-infra/newrelic-integrations/bin/nri-jmx
   - name: nri-kafka
