@@ -3,6 +3,10 @@ on:
   release:
     types: [ prereleased, released ]
 
+
+permissions:
+  contents: read
+
 jobs:
   release-windows-2022:
     name: Release Windows Server 2022
