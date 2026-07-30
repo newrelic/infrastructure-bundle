@@ -9,6 +9,13 @@ Unreleased section should follow [Release Toolkit](https://github.com/newrelic/r
 
 ## Unreleased
 
+## v3.3.37 - 2026-07-30
+
+### ⛓️ Dependencies
+- Updated newrelic/nri-apache to v1.17.3 - [Changelog 🔗](https://github.com/newrelic/nri-apache/releases/tag/v1.17.3)
+- Updated newrelic/nri-jmx to v3.16.0 - [Changelog 🔗](https://github.com/newrelic/nri-jmx/releases/tag/v3.16.0)
+- Updated newrelic/nri-discovery-kubernetes to v1.15.1 - [Changelog 🔗](https://github.com/newrelic/nri-discovery-kubernetes/releases/tag/v1.15.1)
+
 ## v3.3.36 - 2026-07-23
 
 ### ⛓️ Dependencies
