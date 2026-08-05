@@ -42,7 +42,7 @@ integrations:
   - name: nri-consul
     version: v2.11.4
   - name: nri-couchbase
-    version: v2.11.1
+    version: v2.11.2
   - name: nri-elasticsearch
     version: v6.3.2
   - name: nri-f5
