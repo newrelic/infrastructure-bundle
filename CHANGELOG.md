@@ -9,6 +9,13 @@ Unreleased section should follow [Release Toolkit](https://github.com/newrelic/r
 
 ## Unreleased
 
+## v3.3.40 - 2026-08-25
+
+### ⛓️ Dependencies
+- Updated newrelic/nri-mongodb to v2.15.0 - [Changelog 🔗](https://github.com/newrelic/nri-mongodb/releases/tag/v2.15.0)
+- Updated newrelic/nri-mssql to v2.37.0 - [Changelog 🔗](https://github.com/newrelic/nri-mssql/releases/tag/v2.37.0)
+- Updated newrelic/nri-cassandra to v2.23.0 - [Changelog 🔗](https://github.com/newrelic/nri-cassandra/releases/tag/v2.23.0)
+
 ## v3.3.39 - 2026-08-13
 
 ### ⛓️ Dependencies
