@@ -40,7 +40,7 @@ integrations:
   - name: nri-cassandra
     version: v2.23.1
   - name: nri-consul
-    version: v2.11.4
+    version: v2.11.5
   - name: nri-couchbase
     version: v2.11.3
   - name: nri-elasticsearch
@@ -60,7 +60,7 @@ integrations:
   - name: nri-mongodb
     version: v2.15.1
   - name: nri-mysql
-    version: v1.24.0
+    version: v1.24.1
   - name: nri-nagios
     version: v2.13.4
   - name: nri-nginx
