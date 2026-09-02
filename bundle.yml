@@ -44,7 +44,7 @@ integrations:
   - name: nri-couchbase
     version: v2.11.3
   - name: nri-elasticsearch
-    version: v6.3.2
+    version: v6.4.0
   - name: nri-f5
     version: v2.11.3
   - name: nri-haproxy
@@ -87,4 +87,4 @@ integrations:
     testFiles:
       - /var/db/newrelic-infra/nri-discovery-kubernetes
   - name: nri-mssql
-    version: v2.37.0
+    version: v2.38.0
