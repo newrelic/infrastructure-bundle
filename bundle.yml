@@ -36,7 +36,7 @@ integrations:
 #    stagingUrl: "" # Defaults to global `stagingUrl`.
 #    repo: "" # Defaults to global `repo`.
   - name: nri-apache
-    version: v1.17.3
+    version: v1.18.0
   - name: nri-cassandra
     version: v2.23.1
   - name: nri-consul
@@ -46,11 +46,11 @@ integrations:
   - name: nri-elasticsearch
     version: v6.4.0
   - name: nri-f5
-    version: v2.11.3
+    version: v2.11.4
   - name: nri-haproxy
     version: v3.5.1
   - name: nri-jmx
-    version: v3.16.0
+    version: v3.17.0
     testFiles:
       - /opt/newrelic-infra/newrelic-integrations/bin/nri-jmx
   - name: nri-kafka
