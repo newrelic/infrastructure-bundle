@@ -445,7 +445,7 @@ jobs:
       - name: Send Slack notification
         uses: slackapi/slack-github-action@v1.27.1
         with:
-          channel-id: ${{ secrets.TEST_SLACK_CHANNEL }}
+          channel-id: ${{ secrets.COREINT_SLACK_CHANNEL }}
           payload: |
             {
               "text": ${{ toJSON(steps.format_message.outputs.SLACK_MESSAGE) }}
@@ -456,7 +456,7 @@ jobs:
       - name: Send Slack notification (Trivy & Grype)
         uses: slackapi/slack-github-action@v1.26.0
         with:
-          channel-id: ${{ secrets.TEST_SLACK_CHANNEL }}
+          channel-id: ${{ secrets.OHAI_SLACK_CHANNEL_ID }}
           payload: |
             {
               "text": ${{ toJSON(steps.format_combined_message.outputs.COMBINED_SLACK_MESSAGE) }}
