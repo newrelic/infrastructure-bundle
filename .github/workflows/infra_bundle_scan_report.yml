@@ -6,7 +6,7 @@ on:
 
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   build:
@@ -18,7 +18,12 @@ jobs:
       TRIVY_DISABLE_VEX_NOTICE: "true"
     steps:
       - uses: actions/checkout@v4
-      
+
+      - name: Fetch Scan State
+        run: |
+          git fetch origin scan-state 2>/dev/null || true
+          git show origin/scan-state:.github/scan-state/first-seen.json > first-seen.json 2>/dev/null || echo '{}' > first-seen.json
+
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
       - name: Set up Docker Buildx
@@ -208,13 +213,84 @@ jobs:
              UNIQUE_INT_COUNT=$(cut -d'|' -f1 trivy-only-report.txt | sed 's|.*/||;s/ //g' | grep -v '^$' | sort -u | wc -l | sed 's/[^0-9]//g')
              UNIQUE_INT_COUNT=${UNIQUE_INT_COUNT:-0}
 
+             # --- LOGIC: FIRST-SEEN TRACKING FOR CRITICAL/HIGH FINDINGS ---
+             # Tracks how many days each CRITICAL/HIGH (fix-available) CVE has been showing up
+             # in our own scans, persisted as .github/scan-state/first-seen.json on the
+             # scan-state branch (see "Fetch Scan State" / "Commit Scan State" steps). Grype has
+             # no bearing here, so this stays Trivy-only, matching the rest of this report.
+             awk -F'|' '
+             {
+                name = $1; gsub(/.*\//, "", name); gsub(/ /, "", name);
+                id   = $3; gsub(/ /, "", id);
+                sev  = $4; gsub(/ /, "", sev);
+                if (sev == "CRITICAL" || sev == "HIGH") {
+                   print name "|" id "|" sev
+                }
+             }' trivy-only-report.txt | sort -u > trivy-current-keys.txt
+
+             python3 <<'PYEOF'
+          import json
+          from datetime import date
+
+          today = date.today().isoformat()
+
+          try:
+              with open("first-seen.json") as f:
+                  tracked = json.load(f)
+          except (FileNotFoundError, json.JSONDecodeError):
+              tracked = {}
+
+          current = []
+          with open("trivy-current-keys.txt") as f:
+              for line in f:
+                  line = line.strip()
+                  if not line:
+                      continue
+                  name, cve, sev = line.split("|")
+                  current.append((name, cve, sev))
+
+          current_keys = {f"{name}|{cve}" for name, cve, sev in current}
+
+          # Drop resolved findings; keep first-seen date for anything still open.
+          tracked = {k: v for k, v in tracked.items() if k in current_keys}
+          for key in current_keys:
+              if key not in tracked:
+                  tracked[key] = today
+
+          with open("first-seen.json", "w") as f:
+              json.dump(tracked, f, indent=2, sort_keys=True)
+              f.write("\n")
+
+          rows = []
+          for name, cve, sev in current:
+              first_seen = tracked[f"{name}|{cve}"]
+              age = (date.today() - date.fromisoformat(first_seen)).days
+              rows.append((age, name, cve, sev))
+          rows.sort(reverse=True)
+
+          with open("trivy-firstseen-report.txt", "w") as f:
+              for age, name, cve, sev in rows:
+                  f.write(f"{name}|{cve}|{sev}|{age}\n")
+          PYEOF
+
              # --- LOGIC: PER-INTEGRATION AGGREGATION (Trivy only) ---
+             # Oldest CRITICAL/HIGH age per integration comes from trivy-firstseen-report.txt
+             # (built above); counts/severity mix still come from trivy-only-report.txt.
              AGGREGATED_TABLE=$(awk -F'|' '
+             NR == FNR {
+                name = $1; sev = $3; age = $4 + 0;
+                if (sev == "CRITICAL") {
+                   if (!(name in crit_age) || age > crit_age[name]) crit_age[name] = age;
+                } else if (sev == "HIGH") {
+                   if (!(name in high_age) || age > high_age[name]) high_age[name] = age;
+                }
+                next
+             }
              {
                 name = $1;
                 gsub(/.*\//, "", name); gsub(/ /, "", name);
                 sev = $4; gsub(/ /, "", sev);
-                
+
                 ints[name]++;
                 if (sev == "CRITICAL") crit[name]++;
                 else if (sev == "HIGH") high[name]++;
@@ -228,9 +304,11 @@ jobs:
                    else if (med[i] > 0) icon = "🟡";
                    else icon = "🔵";
                    row_tot = (crit[i]+0) + (high[i]+0) + (med[i]+0) + (low[i]+0);
-                   printf "%s %-40s | %2d | %2d | %2d | %2d | %3d\n", icon, i, crit[i], high[i], med[i], low[i], row_tot
+                   crit_age_str = (i in crit_age) ? crit_age[i] : "-";
+                   high_age_str = (i in high_age) ? high_age[i] : "-";
+                   printf "%s %-40s | %2d | %2d | %2d | %2d | %3d | %6s | %6s\n", icon, i, crit[i], high[i], med[i], low[i], row_tot, crit_age_str, high_age_str
                 }
-             }' trivy-only-report.txt | sort -r)
+             }' trivy-firstseen-report.txt trivy-only-report.txt | sort -r)
 
              # --- CONSTRUCT DASHBOARD ---
              {
@@ -243,10 +321,10 @@ jobs:
                echo -e "• *Critical:* 🔴 \`$CRIT_T\`  |  *High:* 🟠 \`$HIGH_T\`"
                echo -e "• *Medium:* 🟡 \`$MED_T\`  |  *Low:* 🔵 \`$LOW_T\`"
                echo -e "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
-               echo -e "*🔎 FINDINGS BREAKDOWN:*"
+               echo -e "*🔎 FINDINGS BREAKDOWN:* _(CR-AGE/HI-AGE = oldest days tracked in our scans)_"
                echo -e "\`\`\`"
-               echo -e "ST  $(printf '%-40s' 'INTEGRATION') | CR | HI | ME | LO | TOT"
-               echo -e "--- $(printf '%-40s' '' | tr ' ' '-') | -- | -- | -- | -- | ---"
+               echo -e "ST  $(printf '%-40s' 'INTEGRATION') | CR | HI | ME | LO | TOT | CR-AGE | HI-AGE"
+               echo -e "--- $(printf '%-40s' '' | tr ' ' '-') | -- | -- | -- | -- | --- | ------ | ------"
                echo -e "$AGGREGATED_TABLE"
                echo -e "\`\`\`"
                echo -e "🔗 _Please find the GitHub Actions workflow run for more details:_"
@@ -359,12 +437,15 @@ jobs:
           echo "--- Grype: nri-forwarder ---"
           cat grype-nri-forwarder.txt 2>/dev/null || echo "(no output)"
           echo ""
+          echo "--- Trivy: Aged CRITICAL/HIGH findings (days tracked in our scans) ---"
+          cat trivy-firstseen-report.txt 2>/dev/null || echo "(no output)"
+          echo ""
           echo "=========================================="
 
       - name: Send Slack notification
         uses: slackapi/slack-github-action@v1.27.1
         with:
-          channel-id: ${{ secrets.COREINT_SLACK_CHANNEL }}
+          channel-id: ${{ secrets.TEST_SLACK_CHANNEL }}
           payload: |
             {
               "text": ${{ toJSON(steps.format_message.outputs.SLACK_MESSAGE) }}
@@ -375,10 +456,41 @@ jobs:
       - name: Send Slack notification (Trivy & Grype)
         uses: slackapi/slack-github-action@v1.26.0
         with:
-          channel-id: ${{ secrets.OHAI_SLACK_CHANNEL_ID }}
+          channel-id: ${{ secrets.TEST_SLACK_CHANNEL }}
           payload: |
             {
               "text": ${{ toJSON(steps.format_combined_message.outputs.COMBINED_SLACK_MESSAGE) }}
             }
         env:
           SLACK_BOT_TOKEN: ${{ secrets.COREINT_SLACK_TOKEN }}
+
+      - name: Commit Scan State
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          BASE=$(git rev-parse origin/scan-state 2>/dev/null || echo "")
+          if [ -z "$BASE" ]; then
+            git read-tree --empty
+          else
+            git read-tree "$BASE"
+          fi
+
+          BLOB=$(git hash-object -w first-seen.json)
+          git update-index --add --cacheinfo 100644,$BLOB,.github/scan-state/first-seen.json
+          TREE=$(git write-tree)
+
+          if [ -n "$BASE" ] && [ "$TREE" = "$(git rev-parse "$BASE^{tree}" 2>/dev/null)" ]; then
+            echo "No changes to scan state, skipping commit."
+            exit 0
+          fi
+
+          if [ -z "$BASE" ]; then
+            NEW_COMMIT=$(git commit-tree "$TREE" -m "Update first-seen vulnerability tracking")
+          else
+            NEW_COMMIT=$(git commit-tree "$TREE" -p "$BASE" -m "Update first-seen vulnerability tracking")
+          fi
+
+          git push "https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git" "$NEW_COMMIT:refs/heads/scan-state"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
