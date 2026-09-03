@@ -20,7 +20,7 @@ jobs:
       DOCKER_IMAGE: newrelic/infrastructure-bundle
       DOCKER_IMAGE_TAG: ci
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
       - name: Set up Docker Buildx
@@ -52,7 +52,7 @@ jobs:
       WINDOWS_VERSION: ltsc2022
       OUTDIR: out-windows
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
@@ -70,7 +70,7 @@ jobs:
       WINDOWS_VERSION: ltsc2019
       OUTDIR: out-windows
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
@@ -89,7 +89,7 @@ jobs:
       BASE_IMAGE_NAME: newrelic/infrastructure-fips
       DOCKER_PLATFORMS: linux/amd64,linux/arm64
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
       - name: Set up Docker Buildx
