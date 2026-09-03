@@ -5,21 +5,5 @@
   "newrelic-infra|CVE-2026-84304": "2026-09-03",
   "nri-cassandra|CVE-2026-43871": "2026-09-03",
   "nri-jmx|CVE-2026-43871": "2026-09-03",
-  "nri-kafka|CVE-2026-43871": "2026-09-03",
-  "nri-nginx|CVE-2026-33818": "2026-08-16",
-  "nri-nginx|CVE-2026-39821": "2026-08-16",
-  "nri-nginx|CVE-2026-46600": "2026-08-16",
-  "nri-nginx|CVE-2026-56853": "2026-08-16",
-  "nri-nginx|CVE-2026-56858": "2026-08-16",
-  "nri-nginx|CVE-2026-56859": "2026-08-16",
-  "nri-nginx|CVE-2026-56860": "2026-08-16",
-  "nri-nginx|CVE-2026-56862": "2026-08-16",
-  "nri-postgresql|CVE-2026-33818": "2026-08-16",
-  "nri-postgresql|CVE-2026-39821": "2026-08-16",
-  "nri-postgresql|CVE-2026-46600": "2026-08-16",
-  "nri-postgresql|CVE-2026-56853": "2026-08-16",
-  "nri-postgresql|CVE-2026-56858": "2026-08-16",
-  "nri-postgresql|CVE-2026-56859": "2026-08-16",
-  "nri-postgresql|CVE-2026-56860": "2026-08-16",
-  "nri-postgresql|CVE-2026-56862": "2026-08-16"
+  "nri-kafka|CVE-2026-43871": "2026-09-03"
 }
