@@ -38,7 +38,7 @@ integrations:
   - name: nri-apache
     version: v1.18.0
   - name: nri-cassandra
-    version: v2.23.1
+    version: v2.25.0
   - name: nri-consul
     version: v2.11.5
   - name: nri-couchbase
@@ -50,7 +50,7 @@ integrations:
   - name: nri-haproxy
     version: v3.5.1
   - name: nri-jmx
-    version: v3.17.0
+    version: v3.18.0
     testFiles:
       - /opt/newrelic-infra/newrelic-integrations/bin/nri-jmx
   - name: nri-kafka
