@@ -9,6 +9,9 @@ Unreleased section should follow [Release Toolkit](https://github.com/newrelic/r
 
 ## Unreleased
 
+### security
+- Updated newrelic/nrjmx to v2.15.0
+
 ## v3.3.44 - 2026-09-16
 
 ### ⛓️ Dependencies
