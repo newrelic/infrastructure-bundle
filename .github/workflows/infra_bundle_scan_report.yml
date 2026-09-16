@@ -211,7 +211,12 @@ jobs:
       - name: Run Trivy Scan - additional-integrations
         uses: aquasecurity/trivy-action@v0.36.0
         with:
-          scan-type: 'fs'
+          # NOTE: 'fs' mode is for source/manifest scanning and does not run
+          # the gobinary analyzer, so it finds 0 vulnerabilities against a
+          # directory of compiled binaries like this one. 'rootfs' mode
+          # treats the directory as a root filesystem and does run it,
+          # confirmed locally (finds the same CVEs Grype's dir: scan finds).
+          scan-type: 'rootfs'
           scan-ref: 'additional-integrations'
           format: 'template'
           template: '@scan.tpl'
