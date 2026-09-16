@@ -430,7 +430,7 @@ jobs:
                    row_tot = (crit[i]+0) + (high[i]+0) + (med[i]+0) + (low[i]+0);
                    crit_age_str = (i in crit_age) ? crit_age[i] : "-";
                    high_age_str = (i in high_age) ? high_age[i] : "-";
-                   printf "%s %-40s | %2d | %2d | %2d | %2d | %3d | %6s | %6s\n", icon, i, crit[i], high[i], med[i], low[i], row_tot, crit_age_str, high_age_str
+                   printf "%s %-40s | %2d | %2d | %2d | %2d | %3d | %3s | %3s\n", icon, i, crit[i], high[i], med[i], low[i], row_tot, crit_age_str, high_age_str
                 }
              }' trivy-firstseen-report.txt trivy-only-report.txt | sort -r)
 
@@ -445,10 +445,10 @@ jobs:
                echo -e "• *Critical:* 🔴 \`$CRIT_T\`  |  *High:* 🟠 \`$HIGH_T\`"
                echo -e "• *Medium:* 🟡 \`$MED_T\`  |  *Low:* 🔵 \`$LOW_T\`"
                echo -e "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
-               echo -e "*🔎 FINDINGS BREAKDOWN:* _(CR-AGE/HI-AGE = oldest days tracked in our scans)_"
+               echo -e "*🔎 FINDINGS BREAKDOWN:* _(CRD/HID = oldest days tracked in our scans)_"
                echo -e "\`\`\`"
-               echo -e "ST  $(printf '%-40s' 'INTEGRATION') | CR | HI | ME | LO | TOT | CR-AGE | HI-AGE"
-               echo -e "--- $(printf '%-40s' '' | tr ' ' '-') | -- | -- | -- | -- | --- | ------ | ------"
+               echo -e "ST  $(printf '%-40s' 'INTEGRATION') | CR | HI | ME | LO | TOT | CRD | HID"
+               echo -e "--- $(printf '%-40s' '' | tr ' ' '-') | -- | -- | -- | -- | --- | --- | ---"
                echo -e "$AGGREGATED_TABLE"
                echo -e "\`\`\`"
                echo -e "🔗 _Please find the GitHub Actions workflow run for more details:_"
