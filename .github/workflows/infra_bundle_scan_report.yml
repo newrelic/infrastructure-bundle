@@ -253,6 +253,15 @@ jobs:
           # nri-ecs
           jq -r '.matches[] | "\(.artifact.locations[0].path) | \(.artifact.name) | \(.vulnerability.id) | \(.vulnerability.severity | ascii_upcase) | \(.vulnerability.fix.versions[0] // "n/a")"' ${{ steps.grype-nri-ecs.outputs.json }} > grype-nri-ecs.txt || touch grype-nri-ecs.txt
 
+          # nri-ecs's image is built FROM an old infrastructure-bundle base,
+          # so it embeds copies of every other bundled integration too
+          # (nri-apache, nri-kafka, etc.). Collapse its Target field to a
+          # fixed "nri-ecs" label so those stale embedded copies get their
+          # own row instead of silently merging into the main bundle's
+          # current per-integration rows (which would misattribute nri-ecs's
+          # own vulnerabilities to unrelated integrations).
+          sed -i -E 's/^[^|]*/nri-ecs /' trivy-nri-ecs.txt grype-nri-ecs.txt
+
           # nri-statsd
           jq -r '.matches[] | "\(.artifact.locations[0].path) | \(.artifact.name) | \(.vulnerability.id) | \(.vulnerability.severity | ascii_upcase) | \(.vulnerability.fix.versions[0] // "n/a")"' ${{ steps.grype-nri-statsd.outputs.json }} > grype-nri-statsd.txt || touch grype-nri-statsd.txt
 
