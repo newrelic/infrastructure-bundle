@@ -1,64 +1,61 @@
 {
-  "extends": [
-    "github>newrelic/coreint-automation:renovate-base.json5"
+  extends: [
+    'github>newrelic/coreint-automation:renovate-base.json5',
   ],
-  // Label PRs with `dependencies`.
-  "labels": ["dependencies"],
-  // By default, assign the coreint team as reviewers.
-  // PRs related to the infra agent will be assigned to CAOS as per a packageRule below. 
-  "reviewers": ["team:coreint"],
-  // RegexManagers will match patterns and extract dependencies from bundle.yaml.
-  "regexManagers": [
-    {
-      // Extract base agent image from bundle.yml.
-      "fileMatch": [
-        "^bundle.yml$",
-        "^bundle-fips.yml$",
-        "^bundle-windows.yml$"
-      ],
-      "depNameTemplate": "newrelic/infrastructure", // Defined directly since we only capture the version in the regex.
-      "datasourceTemplate": "docker",
-      "matchStrings": [
-        "agentVersion: (?<currentValue>[0-9.]+)"
-      ]
-    },
-    {
-      // Extract dependency name and version for integrations.
-      "fileMatch": [
-        "^bundle.yml$",
-        "^bundle-fips.yml$",
-        "^bundle-windows.yml$"
-      ],
-      // Dependency name (org/repo format) is created from the `integrationName` named capture group in the regex below.
-      "depNameTemplate": "newrelic/{{{integrationName}}}",
-      "datasourceTemplate": "github-releases", // Version info is fetched from GitHub.
-      "matchStrings": [
-        // Capture integration name (without `newrelic/`) and version from bundle.yaml.
-        " *- name: (?<integrationName>.+)\n *version: (?<currentValue>.+)"
-      ]
-    }
+  labels: [
+    'dependencies',
   ],
-  "packageRules": [
+  reviewers: [
+    'team:coreint',
+  ],
+  customManagers: [
     {
-      // Assign PRs related to the agent to the caos team.
-      "matchPackageNames": [
-        "newrelic/infrastructure"
+      customType: 'regex',
+      managerFilePatterns: [
+        '/^bundle.yml$/',
+        '/^bundle-fips.yml$/',
+        '/^bundle-windows.yml$/',
       ],
-      "reviewers": ["team:caos"]
+      depNameTemplate: 'newrelic/infrastructure',
+      datasourceTemplate: 'docker',
+      matchStrings: [
+        'agentVersion: (?<currentValue>[0-9.]+)',
+      ],
     },
     {
-      // NRJMX 1.6.x is known to be broken, so we skip 1.6.x.
-      "matchPackageNames": [
-        "newrelic/nrjmx"
+      customType: 'regex',
+      managerFilePatterns: [
+        '/^bundle.yml$/',
+        '/^bundle-fips.yml$/',
+        '/^bundle-windows.yml$/',
       ],
-      "allowedVersions": ">=1.7"
+      depNameTemplate: 'newrelic/{{{integrationName}}}',
+      datasourceTemplate: 'github-releases',
+      matchStrings: [
+        ' *- name: (?<integrationName>.+)\n *version: (?<currentValue>.+)',
+      ],
+    },
+  ],
+  packageRules: [
+    {
+      matchPackageNames: [
+        'newrelic/infrastructure',
+      ],
+      reviewers: [
+        'team:caos',
+      ],
     },
     {
-      // nri-ecs moved to newrelic/nri-ecs image since 1.4.0.
-      "matchPackageNames": [
-        "newrelic/nri-ecs"
+      matchPackageNames: [
+        'newrelic/nrjmx',
       ],
-      "allowedVersions": "<=1.3.1"
-    }
-  ]
+      allowedVersions: '>=1.7',
+    },
+    {
+      matchPackageNames: [
+        'newrelic/nri-ecs',
+      ],
+      allowedVersions: '<=1.3.1',
+    },
+  ],
 }
