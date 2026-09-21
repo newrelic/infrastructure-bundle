@@ -276,17 +276,16 @@ jobs:
              # --- LOGIC: PER-INTEGRATION AGGREGATION (Trivy only) ---
              # Oldest CRITICAL/HIGH age per integration comes from trivy-firstseen-report.txt
              # (built above); counts/severity mix still come from trivy-only-report.txt.
+             # NOTE: trivy-only-report.txt (guaranteed non-empty here, guarded by the
+             # outer "if [ -s trivy-only-report.txt ]") must be the FIRST file argument.
+             # awk's "NR == FNR" trick to detect "still reading the first file" breaks
+             # if the first file is empty: NR and FNR then stay equal for every line of
+             # the second file too, so every row gets skipped via `next` and the whole
+             # table silently comes out blank. trivy-firstseen-report.txt legitimately
+             # is empty whenever there are no CRITICAL/HIGH findings, so it must be the
+             # second (order-insensitive) file, not the first.
              AGGREGATED_TABLE=$(awk -F'|' '
              NR == FNR {
-                name = $1; sev = $3; age = $4 + 0;
-                if (sev == "CRITICAL") {
-                   if (!(name in crit_age) || age > crit_age[name]) crit_age[name] = age;
-                } else if (sev == "HIGH") {
-                   if (!(name in high_age) || age > high_age[name]) high_age[name] = age;
-                }
-                next
-             }
-             {
                 name = $1;
                 gsub(/.*\//, "", name); gsub(/ /, "", name);
                 sev = $4; gsub(/ /, "", sev);
@@ -296,6 +295,15 @@ jobs:
                 else if (sev == "HIGH") high[name]++;
                 else if (sev == "MEDIUM") med[name]++;
                 else if (sev == "LOW") low[name]++;
+                next
+             }
+             {
+                name = $1; sev = $3; age = $4 + 0;
+                if (sev == "CRITICAL") {
+                   if (!(name in crit_age) || age > crit_age[name]) crit_age[name] = age;
+                } else if (sev == "HIGH") {
+                   if (!(name in high_age) || age > high_age[name]) high_age[name] = age;
+                }
              }
              END {
                 for (i in ints) {
@@ -308,7 +316,7 @@ jobs:
                    high_age_str = (i in high_age) ? high_age[i] : "-";
                    printf "%s %-40s | %2d | %2d | %2d | %2d | %3d | %6s | %6s\n", icon, i, crit[i], high[i], med[i], low[i], row_tot, crit_age_str, high_age_str
                 }
-             }' trivy-firstseen-report.txt trivy-only-report.txt | sort -r)
+             }' trivy-only-report.txt trivy-firstseen-report.txt | sort -r)
 
              # --- CONSTRUCT DASHBOARD ---
              {
