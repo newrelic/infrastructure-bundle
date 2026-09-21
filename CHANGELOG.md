@@ -9,8 +9,13 @@ Unreleased section should follow [Release Toolkit](https://github.com/newrelic/r
 
 ## Unreleased
 
-### security
+## v3.5.0 - 2026-09-21
+
+### 🛡️ Security notices
 - Updated newrelic/infrastructure-agent to 1.80.4
+
+### ⛓️ Dependencies
+- Updated newrelic/nri-couchbase to v2.11.4 - [Changelog 🔗](https://github.com/newrelic/nri-couchbase/releases/tag/v2.11.4)
 
 ## v3.4.0 - 2026-09-16
 
