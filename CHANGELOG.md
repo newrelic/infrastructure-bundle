@@ -9,6 +9,9 @@ Unreleased section should follow [Release Toolkit](https://github.com/newrelic/r
 
 ## Unreleased
 
+### security
+- Updated newrelic/infrastructure-agent to 1.80.4
+
 ## v3.4.0 - 2026-09-16
 
 ### 🛡️ Security notices
