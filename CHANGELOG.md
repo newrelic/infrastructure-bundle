@@ -9,6 +9,15 @@ Unreleased section should follow [Release Toolkit](https://github.com/newrelic/r
 
 ## Unreleased
 
+## v3.5.1 - 2026-10-01
+
+### ⛓️ Dependencies
+- Updated newrelic/nri-mssql to v2.38.1 - [Changelog 🔗](https://github.com/newrelic/nri-mssql/releases/tag/v2.38.1)
+- Updated newrelic/nri-f5 to v2.11.5 - [Changelog 🔗](https://github.com/newrelic/nri-f5/releases/tag/v2.11.5)
+- Updated newrelic/nri-postgresql to v2.32.0 - [Changelog 🔗](https://github.com/newrelic/nri-postgresql/releases/tag/v2.32.0)
+- Updated newrelic/nri-haproxy to v3.5.2 - [Changelog 🔗](https://github.com/newrelic/nri-haproxy/releases/tag/v3.5.2)
+- Updated newrelic/infrastructure to v1.80.5 - [Changelog 🔗](https://github.com/newrelic/infrastructure-agent/releases/tag/1.80.5)
+
 ## v3.5.0 - 2026-09-21
 
 ### 🛡️ Security notices
