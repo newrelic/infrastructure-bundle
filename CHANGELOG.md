@@ -9,6 +9,17 @@ Unreleased section should follow [Release Toolkit](https://github.com/newrelic/r
 
 ## Unreleased
 
+## v3.5.3 - 2026-10-08
+
+### ⛓️ Dependencies
+- Updated newrelic/nri-mysql to v1.25.0 - [Changelog 🔗](https://github.com/newrelic/nri-mysql/releases/tag/v1.25.0)
+- Updated newrelic/nri-elasticsearch to v6.4.1 - [Changelog 🔗](https://github.com/newrelic/nri-elasticsearch/releases/tag/v6.4.1)
+- Updated newrelic/nri-nagios to v2.13.5 - [Changelog 🔗](https://github.com/newrelic/nri-nagios/releases/tag/v2.13.5)
+- Updated newrelic/nri-kafka to v3.27.0 - [Changelog 🔗](https://github.com/newrelic/nri-kafka/releases/tag/v3.27.0)
+- Updated newrelic/nri-mssql to v2.39.0 - [Changelog 🔗](https://github.com/newrelic/nri-mssql/releases/tag/v2.39.0)
+- Updated newrelic/nri-redis to v1.16.0 - [Changelog 🔗](https://github.com/newrelic/nri-redis/releases/tag/v1.16.0)
+- Updated newrelic/nri-cassandra to v2.26.0 - [Changelog 🔗](https://github.com/newrelic/nri-cassandra/releases/tag/v2.26.0)
+
 ## v3.5.2 - 2026-10-05
 
 ### ⛓️ Dependencies
