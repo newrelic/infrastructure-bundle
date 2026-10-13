@@ -123,6 +123,121 @@ jobs:
           only-fixed: true
           output-format: json
 
+      - name: Run Trivy Scan - nri-ecs
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          image-ref: "docker.io/newrelic/nri-ecs:latest"
+          format: 'template'
+          template: '@scan.tpl'
+          ignore-unfixed: true
+          severity: "CRITICAL,HIGH,MEDIUM,LOW"
+          vuln-type: 'os,library'
+          output: "trivy-nri-ecs.txt"
+        env:
+          TRIVY_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-db
+          TRIVY_JAVA_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-java-db
+
+      - name: Run Grype Scan - nri-ecs
+        uses: anchore/scan-action@main
+        id: grype-nri-ecs
+        with:
+          image: "docker.io/newrelic/nri-ecs:latest"
+          fail-build: false
+          severity-cutoff: low
+          only-fixed: true
+          output-format: json
+
+      - name: Run Trivy Scan - nri-statsd
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          image-ref: "docker.io/newrelic/nri-statsd:latest"
+          format: 'template'
+          template: '@scan.tpl'
+          ignore-unfixed: true
+          severity: "CRITICAL,HIGH,MEDIUM,LOW"
+          vuln-type: 'os,library'
+          output: "trivy-nri-statsd.txt"
+        env:
+          TRIVY_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-db
+          TRIVY_JAVA_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-java-db
+
+      - name: Run Grype Scan - nri-statsd
+        uses: anchore/scan-action@main
+        id: grype-nri-statsd
+        with:
+          image: "docker.io/newrelic/nri-statsd:latest"
+          fail-build: false
+          severity-cutoff: low
+          only-fixed: true
+          output-format: json
+
+      - name: Download Additional Integration Binaries
+        run: |
+          mkdir -p additional-integrations
+
+          AUTH_HEADER=()
+          if [ -n "${GITHUB_TOKEN:-}" ]; then
+            AUTH_HEADER=(-H "Authorization: Bearer ${GITHUB_TOKEN}")
+          fi
+
+          # nri-oracledb, nri-varnish, nri-vsphere: own repos, no Docker image.
+          # Fetch the latest release dynamically and download from the same
+          # download.newrelic.com CDN bundle.yml itself uses.
+          for name in nri-oracledb nri-varnish nri-vsphere; do
+            tag=$(curl -sSL "${AUTH_HEADER[@]}" "https://api.github.com/repos/newrelic/${name}/releases/latest" | jq -r .tag_name)
+            version="${tag#v}"
+            url="https://download.newrelic.com/infrastructure_agent/binaries/linux/amd64/${name}_linux_${version}_amd64.tar.gz"
+            mkdir -p "additional-integrations/${name}"
+            curl -sSL "$url" | tar -xz -C "additional-integrations/${name}"
+          done
+
+          # nri-aerospike, nri-ibmmq, nri-powerdns, nri-mongodb3: from
+          # newrelic-prometheus-exporters-packages, which publishes no Docker
+          # image, only native OS packages via a different pipeline whose S3
+          # path isn't derivable here. Each release also uploads a plain
+          # .tar.gz GitHub Release asset, which we use instead. Release tags
+          # are per-exporter (nri-<name>-<version>), so filter the releases
+          # list rather than using /releases/latest (which is repo-wide).
+          for name in aerospike ibmmq powerdns mongodb3; do
+            tag=$(curl -sSL "${AUTH_HEADER[@]}" "https://api.github.com/repos/newrelic/newrelic-prometheus-exporters-packages/releases" | jq -r --arg prefix "nri-${name}-" '[.[] | select(.tag_name | startswith($prefix))][0].tag_name')
+            version="${tag#nri-${name}-}"
+            url="https://github.com/newrelic/newrelic-prometheus-exporters-packages/releases/download/${tag}/nri-${name}_linux_${version}_amd64.tar.gz"
+            mkdir -p "additional-integrations/nri-${name}"
+            curl -sSL "$url" | tar -xz -C "additional-integrations/nri-${name}"
+          done
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Run Trivy Scan - additional-integrations
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          # NOTE: 'fs' mode is for source/manifest scanning and does not run
+          # the gobinary analyzer, so it finds 0 vulnerabilities against a
+          # directory of compiled binaries like this one. 'rootfs' mode
+          # treats the directory as a root filesystem and does run it,
+          # confirmed locally (finds the same CVEs Grype's dir: scan finds).
+          scan-type: 'rootfs'
+          scan-ref: 'additional-integrations'
+          format: 'template'
+          template: '@scan.tpl'
+          ignore-unfixed: true
+          severity: "CRITICAL,HIGH,MEDIUM,LOW"
+          vuln-type: 'os,library'
+          output: "trivy-additional-integrations.txt"
+        env:
+          TRIVY_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-db
+          TRIVY_JAVA_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-java-db
+
+      - name: Run Grype Scan - additional-integrations
+        uses: anchore/scan-action@main
+        id: grype-additional-integrations
+        with:
+          image: "dir:additional-integrations"
+          fail-build: false
+          severity-cutoff: low
+          only-fixed: true
+          output-format: json
+
       - name: Convert Grype to Table Format & Merge
         run: |
           # 1. Use jq to convert Grype JSON to the same format: Target | Pkg | CVE | Severity | Fixed
@@ -135,8 +250,26 @@ jobs:
           # nri-forwarder
           jq -r '.matches[] | "\(.artifact.locations[0].path) | \(.artifact.name) | \(.vulnerability.id) | \(.vulnerability.severity | ascii_upcase) | \(.vulnerability.fix.versions[0] // "n/a")"' ${{ steps.grype-nri-forwarder.outputs.json }} > grype-nri-forwarder.txt || touch grype-nri-forwarder.txt
 
+          # nri-ecs
+          jq -r '.matches[] | "\(.artifact.locations[0].path) | \(.artifact.name) | \(.vulnerability.id) | \(.vulnerability.severity | ascii_upcase) | \(.vulnerability.fix.versions[0] // "n/a")"' ${{ steps.grype-nri-ecs.outputs.json }} > grype-nri-ecs.txt || touch grype-nri-ecs.txt
+
+          # nri-ecs's image is built FROM an old infrastructure-bundle base,
+          # so it embeds copies of every other bundled integration too
+          # (nri-apache, nri-kafka, etc.). Collapse its Target field to a
+          # fixed "nri-ecs" label so those stale embedded copies get their
+          # own row instead of silently merging into the main bundle's
+          # current per-integration rows (which would misattribute nri-ecs's
+          # own vulnerabilities to unrelated integrations).
+          sed -i -E 's/^[^|]*/nri-ecs /' trivy-nri-ecs.txt grype-nri-ecs.txt
+
+          # nri-statsd
+          jq -r '.matches[] | "\(.artifact.locations[0].path) | \(.artifact.name) | \(.vulnerability.id) | \(.vulnerability.severity | ascii_upcase) | \(.vulnerability.fix.versions[0] // "n/a")"' ${{ steps.grype-nri-statsd.outputs.json }} > grype-nri-statsd.txt || touch grype-nri-statsd.txt
+
+          # additional-integrations (nri-oracledb, nri-varnish, nri-vsphere, nri-aerospike, nri-ibmmq, nri-powerdns, nri-mongodb3)
+          jq -r '.matches[] | "\(.artifact.locations[0].path) | \(.artifact.name) | \(.vulnerability.id) | \(.vulnerability.severity | ascii_upcase) | \(.vulnerability.fix.versions[0] // "n/a")"' ${{ steps.grype-additional-integrations.outputs.json }} > grype-additional-integrations.txt || touch grype-additional-integrations.txt
+
           # 2. Merge all reports
-          cat trivy-report.txt grype-report.txt trivy-k8s-events-forwarder.txt grype-k8s-events-forwarder.txt trivy-nri-forwarder.txt grype-nri-forwarder.txt > combined-raw.txt
+          cat trivy-report.txt grype-report.txt trivy-k8s-events-forwarder.txt grype-k8s-events-forwarder.txt trivy-nri-forwarder.txt grype-nri-forwarder.txt trivy-nri-ecs.txt grype-nri-ecs.txt trivy-nri-statsd.txt grype-nri-statsd.txt trivy-additional-integrations.txt grype-additional-integrations.txt > combined-raw.txt
           
           # 3. Clean up the paths and de-duplicate unique CVEs per integration
           # Strategy:
@@ -167,7 +300,7 @@ jobs:
         id: format_message
         run: |
           # 1. Create Trivy report
-          cat trivy-report.txt trivy-k8s-events-forwarder.txt trivy-nri-forwarder.txt > trivy-only-raw.txt
+          cat trivy-report.txt trivy-k8s-events-forwarder.txt trivy-nri-forwarder.txt trivy-nri-ecs.txt trivy-nri-statsd.txt trivy-additional-integrations.txt > trivy-only-raw.txt
           
           # Clean up the paths and de-duplicate
           sed -i 's|var/db/newrelic-infra/newrelic-integrations/bin/||g' trivy-only-raw.txt
@@ -314,7 +447,7 @@ jobs:
                    row_tot = (crit[i]+0) + (high[i]+0) + (med[i]+0) + (low[i]+0);
                    crit_age_str = (i in crit_age) ? crit_age[i] : "-";
                    high_age_str = (i in high_age) ? high_age[i] : "-";
-                   printf "%s %-40s | %2d | %2d | %2d | %2d | %3d | %6s | %6s\n", icon, i, crit[i], high[i], med[i], low[i], row_tot, crit_age_str, high_age_str
+                   printf "%s %-40s | %2d | %2d | %2d | %2d | %3d | %3s | %3s\n", icon, i, crit[i], high[i], med[i], low[i], row_tot, crit_age_str, high_age_str
                 }
              }' trivy-only-report.txt trivy-firstseen-report.txt | sort -r)
 
@@ -329,10 +462,10 @@ jobs:
                echo -e "• *Critical:* 🔴 \`$CRIT_T\`  |  *High:* 🟠 \`$HIGH_T\`"
                echo -e "• *Medium:* 🟡 \`$MED_T\`  |  *Low:* 🔵 \`$LOW_T\`"
                echo -e "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
-               echo -e "*🔎 FINDINGS BREAKDOWN:* _(CR-AGE/HI-AGE = oldest days tracked in our scans)_"
+               echo -e "*🔎 FINDINGS BREAKDOWN:* _(CRD/HID = oldest days tracked in our scans)_"
                echo -e "\`\`\`"
-               echo -e "ST  $(printf '%-40s' 'INTEGRATION') | CR | HI | ME | LO | TOT | CR-AGE | HI-AGE"
-               echo -e "--- $(printf '%-40s' '' | tr ' ' '-') | -- | -- | -- | -- | --- | ------ | ------"
+               echo -e "ST  $(printf '%-40s' 'INTEGRATION') | CR | HI | ME | LO | TOT | CRD | HID"
+               echo -e "--- $(printf '%-40s' '' | tr ' ' '-') | -- | -- | -- | -- | --- | --- | ---"
                echo -e "$AGGREGATED_TABLE"
                echo -e "\`\`\`"
                echo -e "🔗 _Please find the GitHub Actions workflow run for more details:_"
@@ -445,6 +578,24 @@ jobs:
           echo "--- Grype: nri-forwarder ---"
           cat grype-nri-forwarder.txt 2>/dev/null || echo "(no output)"
           echo ""
+          echo "--- Trivy: nri-ecs ---"
+          cat trivy-nri-ecs.txt 2>/dev/null || echo "(no output)"
+          echo ""
+          echo "--- Grype: nri-ecs ---"
+          cat grype-nri-ecs.txt 2>/dev/null || echo "(no output)"
+          echo ""
+          echo "--- Trivy: nri-statsd ---"
+          cat trivy-nri-statsd.txt 2>/dev/null || echo "(no output)"
+          echo ""
+          echo "--- Grype: nri-statsd ---"
+          cat grype-nri-statsd.txt 2>/dev/null || echo "(no output)"
+          echo ""
+          echo "--- Trivy: additional-integrations (oracledb, varnish, vsphere, aerospike, ibmmq, powerdns, mongodb3) ---"
+          cat trivy-additional-integrations.txt 2>/dev/null || echo "(no output)"
+          echo ""
+          echo "--- Grype: additional-integrations ---"
+          cat grype-additional-integrations.txt 2>/dev/null || echo "(no output)"
+          echo ""
           echo "--- Trivy: Aged CRITICAL/HIGH findings (days tracked in our scans) ---"
           cat trivy-firstseen-report.txt 2>/dev/null || echo "(no output)"
           echo ""
@@ -453,7 +604,7 @@ jobs:
       - name: Send Slack notification
         uses: slackapi/slack-github-action@v1.27.1
         with:
-          channel-id: ${{ secrets.COREINT_SLACK_CHANNEL }}
+          channel-id: ${{ secrets.TEST_SLACK_CHANNEL }}
           payload: |
             {
               "text": ${{ toJSON(steps.format_message.outputs.SLACK_MESSAGE) }}
@@ -464,7 +615,7 @@ jobs:
       - name: Send Slack notification (Trivy & Grype)
         uses: slackapi/slack-github-action@v1.26.0
         with:
-          channel-id: ${{ secrets.OHAI_SLACK_CHANNEL_ID }}
+          channel-id: ${{ secrets.TEST_SLACK_CHANNEL }}
           payload: |
             {
               "text": ${{ toJSON(steps.format_combined_message.outputs.COMBINED_SLACK_MESSAGE) }}
