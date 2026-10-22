@@ -9,6 +9,25 @@ Unreleased section should follow [Release Toolkit](https://github.com/newrelic/r
 
 ## Unreleased
 
+## v3.5.5 - 2026-10-22
+
+### ⛓️ Dependencies
+- Updated newrelic/nrjmx to v2.15.1 - [Changelog 🔗](https://github.com/newrelic/nrjmx/releases/tag/v2.15.1)
+- Updated newrelic/nri-apache to v1.18.2 - [Changelog 🔗](https://github.com/newrelic/nri-apache/releases/tag/v1.18.2)
+- Updated newrelic/nri-consul to v2.11.7 - [Changelog 🔗](https://github.com/newrelic/nri-consul/releases/tag/v2.11.7)
+- Updated newrelic/nri-discovery-kubernetes to v1.15.4 - [Changelog 🔗](https://github.com/newrelic/nri-discovery-kubernetes/releases/tag/v1.15.4)
+- Updated newrelic/nri-haproxy to v3.5.3 - [Changelog 🔗](https://github.com/newrelic/nri-haproxy/releases/tag/v3.5.3)
+- Updated newrelic/nri-redis to v1.16.1 - [Changelog 🔗](https://github.com/newrelic/nri-redis/releases/tag/v1.16.1)
+- Updated newrelic/nri-memcached to v2.9.6 - [Changelog 🔗](https://github.com/newrelic/nri-memcached/releases/tag/v2.9.6)
+- Updated newrelic/nri-nagios to v2.13.6 - [Changelog 🔗](https://github.com/newrelic/nri-nagios/releases/tag/v2.13.6)
+- Updated newrelic/nri-nginx to v3.9.2 - [Changelog 🔗](https://github.com/newrelic/nri-nginx/releases/tag/v3.9.2)
+- Updated newrelic/nri-f5 to v2.11.7 - [Changelog 🔗](https://github.com/newrelic/nri-f5/releases/tag/v2.11.7)
+- Updated newrelic/nri-rabbitmq to v2.17.6 - [Changelog 🔗](https://github.com/newrelic/nri-rabbitmq/releases/tag/v2.17.6)
+- Updated newrelic/nri-kafka to v3.27.1 - [Changelog 🔗](https://github.com/newrelic/nri-kafka/releases/tag/v3.27.1)
+- Updated newrelic/nri-jmx to v3.19.1 - [Changelog 🔗](https://github.com/newrelic/nri-jmx/releases/tag/v3.19.1)
+- Updated newrelic/nri-elasticsearch to v6.4.2 - [Changelog 🔗](https://github.com/newrelic/nri-elasticsearch/releases/tag/v6.4.2)
+- Updated newrelic/infrastructure to v1.80.6 - [Changelog 🔗](https://github.com/newrelic/infrastructure-agent/releases/tag/1.80.6)
+
 ## v3.5.4 - 2026-10-09
 
 ### ⛓️ Dependencies
