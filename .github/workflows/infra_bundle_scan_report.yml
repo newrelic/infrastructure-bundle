@@ -56,7 +56,7 @@ jobs:
         run: echo "date=$(date +'%Y-%m-%d')" >> "$GITHUB_OUTPUT"
 
       - name: Restore Trivy DB Cache
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ${{ github.workspace }}/.cache/trivy
           key: cache-trivy-${{ steps.trivy-cache-date.outputs.date }}
