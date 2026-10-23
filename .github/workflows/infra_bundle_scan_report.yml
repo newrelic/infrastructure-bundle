@@ -51,6 +51,47 @@ jobs:
           {{- end -}}
           EOF
 
+      - name: Get Trivy Cache Date
+        id: trivy-cache-date
+        run: echo "date=$(date +'%Y-%m-%d')" >> "$GITHUB_OUTPUT"
+
+      - name: Restore Trivy DB Cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ github.workspace }}/.cache/trivy
+          key: cache-trivy-${{ steps.trivy-cache-date.outputs.date }}
+          restore-keys: cache-trivy-
+
+      - name: Setup Trivy
+        uses: aquasecurity/setup-trivy@3fb12ec12f41e471780db15c232d5dd185dcb514 # v0.2.6
+        with:
+          version: v0.70.0
+          cache: true
+
+      - name: Update Trivy Vulnerability DB (retry, fallback to cached DB)
+        env:
+          TRIVY_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-db
+          TRIVY_JAVA_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-java-db
+          TRIVY_CACHE_DIR: ${{ github.workspace }}/.cache/trivy
+        run: |
+          mkdir -p "$TRIVY_CACHE_DIR"
+          max_attempts=5
+          success=false
+          for attempt in $(seq 1 "$max_attempts"); do
+            if trivy image --download-db-only && trivy image --download-java-db-only; then
+              success=true
+              break
+            fi
+            if [ "$attempt" -lt "$max_attempts" ]; then
+              wait_seconds=$((attempt * 20))
+              echo "DB download attempt $attempt failed, retrying in ${wait_seconds}s..."
+              sleep "$wait_seconds"
+            fi
+          done
+          if [ "$success" != "true" ]; then
+            echo "::warning::Trivy vulnerability DB update failed after $max_attempts attempts (likely registry rate limiting). Falling back to whatever DB is already cached; today's scan may use a slightly stale DB."
+          fi
+
       - name: Run Trivy Scan
         uses: aquasecurity/trivy-action@v0.36.0
         with:
@@ -61,9 +102,13 @@ jobs:
           severity: "CRITICAL,HIGH,MEDIUM,LOW"
           vuln-type: 'os,library'
           output: "trivy-report.txt"
+          cache: false
+          skip-setup-trivy: true
         env:
           TRIVY_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-db
           TRIVY_JAVA_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-java-db
+          TRIVY_SKIP_DB_UPDATE: 'true'
+          TRIVY_SKIP_JAVA_DB_UPDATE: 'true'
 
       - name: Run Grype Scan
         uses: anchore/scan-action@main
@@ -85,9 +130,13 @@ jobs:
           severity: "CRITICAL,HIGH,MEDIUM,LOW"
           vuln-type: 'os,library'
           output: "trivy-k8s-events-forwarder.txt"
+          cache: false
+          skip-setup-trivy: true
         env:
           TRIVY_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-db
           TRIVY_JAVA_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-java-db
+          TRIVY_SKIP_DB_UPDATE: 'true'
+          TRIVY_SKIP_JAVA_DB_UPDATE: 'true'
 
       - name: Run Grype Scan - k8s-events-forwarder
         uses: anchore/scan-action@main
@@ -109,9 +158,13 @@ jobs:
           severity: "CRITICAL,HIGH,MEDIUM,LOW"
           vuln-type: 'os,library'
           output: "trivy-nri-forwarder.txt"
+          cache: false
+          skip-setup-trivy: true
         env:
           TRIVY_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-db
           TRIVY_JAVA_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-java-db
+          TRIVY_SKIP_DB_UPDATE: 'true'
+          TRIVY_SKIP_JAVA_DB_UPDATE: 'true'
 
       - name: Run Grype Scan - nri-forwarder
         uses: anchore/scan-action@main
