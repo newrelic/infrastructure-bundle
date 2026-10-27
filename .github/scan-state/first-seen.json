@@ -1,10 +1,4 @@
 {
-  "k8s-events-forwarder:latest(alpine3.24.2)|CVE-2026-111497": "2026-10-26",
-  "newrelic-infra-ctl|CVE-2026-111943": "2026-10-26",
-  "newrelic-infra-ctl|CVE-2026-63209": "2026-10-21",
-  "newrelic-infra-service|CVE-2026-111943": "2026-10-26",
-  "newrelic-infra|CVE-2026-111943": "2026-10-26",
-  "newrelic-infra|CVE-2026-63209": "2026-10-21",
   "nri-apache|CVE-2026-111943": "2026-10-26",
   "nri-cassandra|CVE-2026-111943": "2026-10-26",
   "nri-cassandra|CVE-2026-78667": "2026-10-10",
@@ -15,11 +9,8 @@
   "nri-couchbase|CVE-2026-78669": "2026-10-10",
   "nri-couchbase|CVE-2026-97031": "2026-10-10",
   "nri-discovery-kubernetes|CVE-2026-111943": "2026-10-26",
-  "nri-docker|CVE-2026-111943": "2026-10-26",
   "nri-elasticsearch|CVE-2026-111943": "2026-10-26",
   "nri-f5|CVE-2026-111943": "2026-10-26",
-  "nri-flex|CVE-2026-111943": "2026-10-26",
-  "nri-forwarder:latest(alpine3.24.2)|CVE-2026-111497": "2026-10-26",
   "nri-haproxy|CVE-2026-111943": "2026-10-26",
   "nri-jmx|CVE-2026-111943": "2026-10-26",
   "nri-kafka|CVE-2026-111943": "2026-10-26",
@@ -43,7 +34,6 @@
   "nri-postgresql|CVE-2026-78667": "2026-10-10",
   "nri-postgresql|CVE-2026-78669": "2026-10-10",
   "nri-postgresql|CVE-2026-97031": "2026-10-10",
-  "nri-prometheus|CVE-2026-111943": "2026-10-26",
   "nri-rabbitmq|CVE-2026-111943": "2026-10-26",
   "nri-redis|CVE-2026-111943": "2026-10-26"
 }
