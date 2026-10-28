@@ -17,7 +17,13 @@ ARG out_dir
 RUN apk --no-cache upgrade
 
 # required for nri-jmx
-RUN if [ -n "${jre_version}" ]; then apk add --no-cache openjdk8-jre=${jre_version}; else apk add --no-cache openjdk8-jre; fi
+# Alpine only ships openjdk8-jre for 32-bit arm (armv7); newer JREs exist for
+# amd64/arm64 only. Newer JREs also avoid the krb5-libs dependency of openjdk8.
+RUN case "${TARGETARCH}" in \
+      arm) jre_package=openjdk8-jre ;; \
+      *)   jre_package=openjdk17-jre-headless ;; \
+    esac; \
+    if [ -n "${jre_version}" ]; then apk add --no-cache ${jre_package}=${jre_version}; else apk add --no-cache ${jre_package}; fi
 
 # integrations
 COPY ${out_dir}/${TARGETARCH} /
