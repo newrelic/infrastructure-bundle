@@ -9,6 +9,9 @@ Unreleased section should follow [Release Toolkit](https://github.com/newrelic/r
 
 ## Unreleased
 
+### enhancement
+- Replaced `openjdk8-jre` with `openjdk17-jre-headless` for nri-jmx/nrjmx on amd64 and arm64. This drops the transitive `krb5-libs` dependency (affected by CVE-2026-40355 and CVE-2026-40356). The armv7 image keeps `openjdk8-jre`, the only JRE Alpine provides for that architecture.
+
 ## v3.5.5 - 2026-10-22
 
 ### ⛓️ Dependencies
