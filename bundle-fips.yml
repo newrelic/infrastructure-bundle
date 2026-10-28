@@ -38,7 +38,7 @@ integrations:
   - name: nri-apache
     version: v1.18.2
   - name: nri-cassandra
-    version: v2.26.0
+    version: v2.26.1
   - name: nri-consul
     version: v2.11.8
   - name: nri-couchbase
@@ -58,7 +58,7 @@ integrations:
   - name: nri-memcached
     version: v2.9.6
   - name: nri-mongodb
-    version: v2.15.1
+    version: v2.15.2
   - name: nri-mysql
     version: v1.26.0
   - name: nri-nagios
