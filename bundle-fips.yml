@@ -48,13 +48,13 @@ integrations:
   - name: nri-f5
     version: v2.11.8
   - name: nri-haproxy
-    version: v3.5.3
+    version: v3.5.4
   - name: nri-jmx
     version: v3.19.2
     testFiles:
       - /opt/newrelic-infra/newrelic-integrations/bin/nri-jmx
   - name: nri-kafka
-    version: v3.27.1
+    version: v3.28.0
   - name: nri-memcached
     version: v2.9.7
   - name: nri-mongodb
@@ -62,7 +62,7 @@ integrations:
   - name: nri-mysql
     version: v1.26.1
   - name: nri-nagios
-    version: v2.13.6
+    version: v2.13.7
   - name: nri-nginx
     version: v3.9.3
   - name: nri-postgresql
