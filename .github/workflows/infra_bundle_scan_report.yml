@@ -404,21 +404,31 @@ jobs:
           
           if [ -s raw-report.txt ]; then
              # --- LOGIC: GLOBAL COUNTS (Strictly Cleaned) ---
-             # Count severity levels first
-             CRIT_T=$(grep -c "CRITICAL" raw-report.txt | head -n 1 | sed 's/[^0-9]//g')
-             HIGH_T=$(grep -c "HIGH" raw-report.txt | head -n 1 | sed 's/[^0-9]//g')
-             MED_T=$(grep -c "MEDIUM" raw-report.txt | head -n 1 | sed 's/[^0-9]//g')
-             LOW_T=$(grep -c "LOW" raw-report.txt | head -n 1 | sed 's/[^0-9]//g')
+             # Count severity levels from the severity column (exact match, same rule as the
+             # aggregated table below). Grype can also report UNKNOWN / NEGLIGIBLE findings
+             # (only-fixed does not filter by severity); they are counted as OTHER so the
+             # totals and the per-integration rows always agree.
+             read -r CRIT_T HIGH_T MED_T LOW_T OTHER_T < <(awk -F'|' '
+             {
+                sev = $4; gsub(/ /, "", sev);
+                if (sev == "CRITICAL") c++;
+                else if (sev == "HIGH") h++;
+                else if (sev == "MEDIUM") m++;
+                else if (sev == "LOW") l++;
+                else o++;
+             }
+             END { print c+0, h+0, m+0, l+0, o+0 }' raw-report.txt)
 
              # Fallback to 0 if variables are empty
              CRIT_T=${CRIT_T:-0}
              HIGH_T=${HIGH_T:-0}
              MED_T=${MED_T:-0}
              LOW_T=${LOW_T:-0}
-             
+             OTHER_T=${OTHER_T:-0}
+
              # Calculate total as sum of all severities
-             TOTAL_CVE_COUNT=$((CRIT_T + HIGH_T + MED_T + LOW_T))
-             
+             TOTAL_CVE_COUNT=$((CRIT_T + HIGH_T + MED_T + LOW_T + OTHER_T))
+
              # Count unique components with same normalization as aggregated table
              UNIQUE_INT_COUNT=$(cut -d'|' -f1 raw-report.txt | sed 's|.*/||;s/ //g' | grep -v '^$' | sort -u | wc -l | sed 's/[^0-9]//g')
              UNIQUE_INT_COUNT=${UNIQUE_INT_COUNT:-0}
@@ -429,21 +439,23 @@ jobs:
                 name = $1;
                 gsub(/.*\//, "", name); gsub(/ /, "", name);
                 sev = $4; gsub(/ /, "", sev);
-                
+
                 ints[name]++;
                 if (sev == "CRITICAL") crit[name]++;
                 else if (sev == "HIGH") high[name]++;
                 else if (sev == "MEDIUM") med[name]++;
                 else if (sev == "LOW") low[name]++;
+                else other[name]++;
              }
              END {
                 for (i in ints) {
                    if (crit[i] > 0) icon = "🔴";
                    else if (high[i] > 0) icon = "🟠";
                    else if (med[i] > 0) icon = "🟡";
-                   else icon = "🔵";
-                   row_tot = (crit[i]+0) + (high[i]+0) + (med[i]+0) + (low[i]+0);
-                   printf "%s %-40s | %2d | %2d | %2d | %2d | %3d\n", icon, i, crit[i], high[i], med[i], low[i], row_tot
+                   else if (low[i] > 0) icon = "🔵";
+                   else icon = "⚪";
+                   row_tot = (crit[i]+0) + (high[i]+0) + (med[i]+0) + (low[i]+0) + (other[i]+0);
+                   printf "%s %-40s | %2d | %2d | %2d | %2d | %2d | %3d\n", icon, i, crit[i], high[i], med[i], low[i], other[i], row_tot
                 }
              }' raw-report.txt | sort -r)
 
@@ -457,11 +469,12 @@ jobs:
                echo -e "• *Total Issues:* \`$TOTAL_CVE_COUNT\` findings across \`$UNIQUE_INT_COUNT\` components"
                echo -e "• *Critical:* 🔴 \`$CRIT_T\`  |  *High:* 🟠 \`$HIGH_T\`"
                echo -e "• *Medium:* 🟡 \`$MED_T\`  |  *Low:* 🔵 \`$LOW_T\`"
+               echo -e "• *Other (Unknown/Negligible):* ⚪ \`$OTHER_T\`"
                echo -e "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
-               echo -e "*🔎 FINDINGS BREAKDOWN:*"
+               echo -e "*🔎 FINDINGS BREAKDOWN:* _(OT = Unknown/Negligible severity)_"
                echo -e "\`\`\`"
-               echo -e "ST  $(printf '%-40s' 'INTEGRATION') | CR | HI | ME | LO | TOT"
-               echo -e "--- $(printf '%-40s' '' | tr ' ' '-') | -- | -- | -- | -- | ---"
+               echo -e "ST  $(printf '%-40s' 'INTEGRATION') | CR | HI | ME | LO | OT | TOT"
+               echo -e "--- $(printf '%-40s' '' | tr ' ' '-') | -- | -- | -- | -- | -- | ---"
                echo -e "$AGGREGATED_TABLE"
                echo -e "\`\`\`"
                echo -e "🔗 _Please find the GitHub Actions workflow run for more details:_"
