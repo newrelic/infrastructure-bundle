@@ -110,11 +110,21 @@ jobs:
           TRIVY_SKIP_DB_UPDATE: 'true'
           TRIVY_SKIP_JAVA_DB_UPDATE: 'true'
 
+      # Grype scanning an image directly reports a Go advisory only when its vulnerable symbols are in the
+      # binary. Scanning a syft SBOM matches Go modules by version, which is what customer scanners report.
+      - name: Generate SBOM
+        uses: anchore/sbom-action@66cbf4bc1f1c0d2edc94016e65bc221b6bb0ad6c # v0.24.3
+        with:
+          image: "${{ env.DOCKER_IMAGE }}:${{ env.DOCKER_IMAGE_TAG }}"
+          format: syft-json
+          output-file: sbom-bundle.syft.json
+          upload-artifact: false
+
       - name: Run Grype Scan
         uses: anchore/scan-action@main
         id: grype
         with:
-          image: "${{ env.DOCKER_IMAGE }}:${{ env.DOCKER_IMAGE_TAG }}"
+          sbom: sbom-bundle.syft.json
           fail-build: false
           severity-cutoff: low
           only-fixed: true
@@ -138,11 +148,19 @@ jobs:
           TRIVY_SKIP_DB_UPDATE: 'true'
           TRIVY_SKIP_JAVA_DB_UPDATE: 'true'
 
+      - name: Generate SBOM - k8s-events-forwarder
+        uses: anchore/sbom-action@66cbf4bc1f1c0d2edc94016e65bc221b6bb0ad6c # v0.24.3
+        with:
+          image: "docker.io/newrelic/k8s-events-forwarder:latest"
+          format: syft-json
+          output-file: sbom-k8s-events.syft.json
+          upload-artifact: false
+
       - name: Run Grype Scan - k8s-events-forwarder
         uses: anchore/scan-action@main
         id: grype-k8s-events
         with:
-          image: "docker.io/newrelic/k8s-events-forwarder:latest"
+          sbom: sbom-k8s-events.syft.json
           fail-build: false
           severity-cutoff: low
           only-fixed: true
@@ -166,11 +184,19 @@ jobs:
           TRIVY_SKIP_DB_UPDATE: 'true'
           TRIVY_SKIP_JAVA_DB_UPDATE: 'true'
 
+      - name: Generate SBOM - nri-forwarder
+        uses: anchore/sbom-action@66cbf4bc1f1c0d2edc94016e65bc221b6bb0ad6c # v0.24.3
+        with:
+          image: "docker.io/newrelic/nri-forwarder:latest"
+          format: syft-json
+          output-file: sbom-nri-forwarder.syft.json
+          upload-artifact: false
+
       - name: Run Grype Scan - nri-forwarder
         uses: anchore/scan-action@main
         id: grype-nri-forwarder
         with:
-          image: "docker.io/newrelic/nri-forwarder:latest"
+          sbom: sbom-nri-forwarder.syft.json
           fail-build: false
           severity-cutoff: low
           only-fixed: true
