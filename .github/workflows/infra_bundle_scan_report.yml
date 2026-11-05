@@ -110,6 +110,12 @@ jobs:
           TRIVY_SKIP_DB_UPDATE: 'true'
           TRIVY_SKIP_JAVA_DB_UPDATE: 'true'
 
+      - name: Install Grype
+        id: grype-install
+        uses: anchore/scan-action/download-grype@27805bf3b4e84b4a5c980df22ed233c00390a439 # v7.4.2
+        with:
+          cache-db: true
+
       # Grype scanning an image directly reports a Go advisory only when its vulnerable symbols are in the
       # binary. Scanning a syft SBOM matches Go modules by version, which is what customer scanners report.
       - name: Generate SBOM
@@ -121,14 +127,9 @@ jobs:
           upload-artifact: false
 
       - name: Run Grype Scan
-        uses: anchore/scan-action@main
-        id: grype
-        with:
-          sbom: sbom-bundle.syft.json
-          fail-build: false
-          severity-cutoff: low
-          only-fixed: true
-          output-format: json # Use JSON for raw data
+        run: .github/scripts/grype-scan.sh sbom-bundle.syft.json grype-report.txt grype-unfixed-bundle.txt infrastructure-bundle
+        env:
+          GRYPE_CMD: ${{ steps.grype-install.outputs.cmd }}
 
       - name: Run Trivy Scan - k8s-events-forwarder
         uses: aquasecurity/trivy-action@v0.36.0
@@ -157,14 +158,9 @@ jobs:
           upload-artifact: false
 
       - name: Run Grype Scan - k8s-events-forwarder
-        uses: anchore/scan-action@main
-        id: grype-k8s-events
-        with:
-          sbom: sbom-k8s-events.syft.json
-          fail-build: false
-          severity-cutoff: low
-          only-fixed: true
-          output-format: json
+        run: .github/scripts/grype-scan.sh sbom-k8s-events.syft.json grype-k8s-events-forwarder.txt grype-unfixed-k8s-events-forwarder.txt k8s-events-forwarder
+        env:
+          GRYPE_CMD: ${{ steps.grype-install.outputs.cmd }}
 
       - name: Run Trivy Scan - nri-forwarder
         uses: aquasecurity/trivy-action@v0.36.0
@@ -193,31 +189,32 @@ jobs:
           upload-artifact: false
 
       - name: Run Grype Scan - nri-forwarder
-        uses: anchore/scan-action@main
-        id: grype-nri-forwarder
-        with:
-          sbom: sbom-nri-forwarder.syft.json
-          fail-build: false
-          severity-cutoff: low
-          only-fixed: true
-          output-format: json
+        run: .github/scripts/grype-scan.sh sbom-nri-forwarder.syft.json grype-nri-forwarder.txt grype-unfixed-nri-forwarder.txt nri-forwarder
+        env:
+          GRYPE_CMD: ${{ steps.grype-install.outputs.cmd }}
 
-      - name: Convert Grype to Table Format & Merge
+      # Advisories published on a project's own GitHub repo often never reach the feeds Grype and Trivy read.
+      - name: Check GitHub Repo Advisories
+        continue-on-error: true
         run: |
-          # 1. Use jq to convert Grype JSON to the same format: Target | Pkg | CVE | Severity | Fixed
-          # Infrastructure Bundle
-          jq -r '.matches[] | "\(.artifact.locations[0].path) | \(.artifact.name) | \(.vulnerability.id) | \(.vulnerability.severity | ascii_upcase) | \(.vulnerability.fix.versions[0] // "n/a")"' ${{ steps.grype.outputs.json }} > grype-report.txt || touch grype-report.txt
-          
-          # k8s-events-forwarder
-          jq -r '.matches[] | "\(.artifact.locations[0].path) | \(.artifact.name) | \(.vulnerability.id) | \(.vulnerability.severity | ascii_upcase) | \(.vulnerability.fix.versions[0] // "n/a")"' ${{ steps.grype-k8s-events.outputs.json }} > grype-k8s-events-forwarder.txt || touch grype-k8s-events-forwarder.txt
-          
-          # nri-forwarder
-          jq -r '.matches[] | "\(.artifact.locations[0].path) | \(.artifact.name) | \(.vulnerability.id) | \(.vulnerability.severity | ascii_upcase) | \(.vulnerability.fix.versions[0] // "n/a")"' ${{ steps.grype-nri-forwarder.outputs.json }} > grype-nri-forwarder.txt || touch grype-nri-forwarder.txt
+          : > repo-advisories.txt
+          python3 .github/scripts/repo-advisories.py repo-advisories.txt \
+            --sbom sbom-bundle.syft.json sbom-k8s-events.syft.json sbom-nri-forwarder.syft.json \
+            --grype grype-report.json grype-k8s-events-forwarder.json grype-nri-forwarder.json
+        env:
+          GH_TOKEN: ${{ github.token }}
 
-          # 2. Merge all reports
-          cat trivy-report.txt grype-report.txt trivy-k8s-events-forwarder.txt grype-k8s-events-forwarder.txt trivy-nri-forwarder.txt grype-nri-forwarder.txt > combined-raw.txt
+      - name: Merge Reports
+        run: |
+          # Every report uses the format: Target | Pkg | CVE | Severity | Fixed
+          touch repo-advisories.txt
+          cat trivy-report.txt grype-report.txt trivy-k8s-events-forwarder.txt grype-k8s-events-forwarder.txt trivy-nri-forwarder.txt grype-nri-forwarder.txt repo-advisories.txt > combined-raw.txt
+          # Unfixed findings, most severe first
+          cat grype-unfixed-*.txt | sort -u \
+            | awk -F' [|] ' '{ r = ($4 == "CRITICAL") ? 0 : ($4 == "HIGH") ? 1 : ($4 == "MEDIUM") ? 2 : 3; print r "\t" $0 }' \
+            | sort -s -k1,1n | cut -f2- > unfixed-report.txt
           
-          # 3. Clean up the paths and de-duplicate unique CVEs per integration
+          # Clean up the paths and de-duplicate unique CVEs per integration
           # Strategy:
           #   - Pre-sort so CVE lines come before GHSA lines
           #   - Dedup exact ID matches (CVE or GHSA) via id_key
@@ -489,7 +486,7 @@ jobs:
              {
                echo "COMBINED_SLACK_MESSAGE<<EOF"
                echo -e "*🛡️ SECURITY SCAN REPORT* | \`$(date +'%Y-%m-%d')\`"
-               echo -e "_Scanned by Trivy & Grype_"
+               echo -e "_Scanned by Trivy, Grype & GitHub repo advisories_"
                echo -e "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
                echo -e "*📊 OVERALL POSTURE*"
                echo -e "• *Total Issues:* \`$TOTAL_CVE_COUNT\` findings across \`$UNIQUE_INT_COUNT\` components"
@@ -503,12 +500,20 @@ jobs:
                echo -e "--- $(printf '%-40s' '' | tr ' ' '-') | -- | -- | -- | -- | -- | ---"
                echo -e "$AGGREGATED_TABLE"
                echo -e "\`\`\`"
+               if [ -s unfixed-report.txt ]; then
+                 echo -e "*⏳ NO FIX AVAILABLE YET* _(not counted above)_ | Critical: \`$(grep -c '| CRITICAL$' unfixed-report.txt || true)\`  High: \`$(grep -c '| HIGH$' unfixed-report.txt || true)\`  Medium: \`$(grep -c '| MEDIUM$' unfixed-report.txt || true)\`  Low: \`$(grep -c '| LOW$' unfixed-report.txt || true)\`"
+                 echo -e "\`\`\`"
+                 head -n 15 unfixed-report.txt
+                 UNFIXED_TOTAL=$(wc -l < unfixed-report.txt | tr -d ' ')
+                 [ "$UNFIXED_TOTAL" -gt 15 ] && echo "... and $((UNFIXED_TOTAL - 15)) more, see the workflow run"
+                 echo -e "\`\`\`"
+               fi
                echo -e "🔗 _Please find the GitHub Actions workflow run for more details:_"
                echo -e "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
                echo "EOF"
              } >> $GITHUB_OUTPUT
           else
-             echo "COMBINED_SLACK_MESSAGE=*✅ SECURITY SCAN PASSED (TRIVY & GRYPE)* - No issues detected." >> $GITHUB_OUTPUT
+             echo "COMBINED_SLACK_MESSAGE=*✅ SECURITY SCAN PASSED (TRIVY & GRYPE)* - No issues with a fix available. Findings without a fix: $(wc -l < unfixed-report.txt | tr -d ' ')" >> $GITHUB_OUTPUT
           fi
 
       - name: Display Report in Workflow Run
@@ -536,6 +541,12 @@ jobs:
           echo ""
           echo "--- Grype: nri-forwarder ---"
           cat grype-nri-forwarder.txt 2>/dev/null || echo "(no output)"
+          echo ""
+          echo "--- GitHub repo advisories (not in Grype) ---"
+          cat repo-advisories.txt 2>/dev/null || echo "(no output)"
+          echo ""
+          echo "--- Grype: no fix available yet ---"
+          cat unfixed-report.txt 2>/dev/null || echo "(no output)"
           echo ""
           echo "--- Trivy: Aged CRITICAL/HIGH findings (days tracked in our scans) ---"
           cat trivy-firstseen-report.txt 2>/dev/null || echo "(no output)"
