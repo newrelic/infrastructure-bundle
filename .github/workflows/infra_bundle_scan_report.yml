@@ -401,7 +401,14 @@ jobs:
         run: |
           # 1. Clean the combined report (original logic)
           sed -i '/^[[:space:]]*$/d' raw-report.txt
-          
+
+          # trivy-firstseen-report.txt is built in "Format Slack Message" above, but that
+          # step only creates it inside its own "if [ -s trivy-only-report.txt ]" branch,
+          # so it won't exist at all when there are zero Trivy CRITICAL/HIGH findings.
+          # touch is a no-op if it already exists (doesn't truncate), and guarantees the
+          # awk join below always has a file to read.
+          touch trivy-firstseen-report.txt
+
           if [ -s raw-report.txt ]; then
              # --- LOGIC: GLOBAL COUNTS (Strictly Cleaned) ---
              # Count severity levels from the severity column (exact match, same rule as the
@@ -434,8 +441,16 @@ jobs:
              UNIQUE_INT_COUNT=${UNIQUE_INT_COUNT:-0}
 
              # --- LOGIC: PER-INTEGRATION AGGREGATION ---
+             # Oldest CRITICAL/HIGH age per integration comes from trivy-firstseen-report.txt
+             # (Trivy-sourced only; Grype has no bearing on age tracking). counts/severity mix
+             # still come from raw-report.txt (Trivy + Grype combined).
+             # NOTE: raw-report.txt (guaranteed non-empty here, guarded by the outer
+             # "if [ -s raw-report.txt ]") must be the FIRST file argument - awk's "NR == FNR"
+             # trick to detect "still reading the first file" breaks if the first file is
+             # empty, silently discarding every row of the second file too. See the identical
+             # note in "Format Slack Message" above for the full story.
              AGGREGATED_TABLE=$(awk -F'|' '
-             {
+             NR == FNR {
                 name = $1;
                 gsub(/.*\//, "", name); gsub(/ /, "", name);
                 sev = $4; gsub(/ /, "", sev);
@@ -446,6 +461,15 @@ jobs:
                 else if (sev == "MEDIUM") med[name]++;
                 else if (sev == "LOW") low[name]++;
                 else other[name]++;
+                next
+             }
+             {
+                name = $1; sev = $3; age = $4 + 0;
+                if (sev == "CRITICAL") {
+                   if (!(name in crit_age) || age > crit_age[name]) crit_age[name] = age;
+                } else if (sev == "HIGH") {
+                   if (!(name in high_age) || age > high_age[name]) high_age[name] = age;
+                }
              }
              END {
                 for (i in ints) {
@@ -455,9 +479,11 @@ jobs:
                    else if (low[i] > 0) icon = "🔵";
                    else icon = "⚪";
                    row_tot = (crit[i]+0) + (high[i]+0) + (med[i]+0) + (low[i]+0) + (other[i]+0);
-                   printf "%s %-40s | %2d | %2d | %2d | %2d | %2d | %3d\n", icon, i, crit[i], high[i], med[i], low[i], other[i], row_tot
+                   crit_age_str = (i in crit_age) ? crit_age[i] : "-";
+                   high_age_str = (i in high_age) ? high_age[i] : "-";
+                   printf "%s %-40s | %2d | %2d | %2d | %2d | %2d | %3d | %6s | %6s\n", icon, i, crit[i], high[i], med[i], low[i], other[i], row_tot, crit_age_str, high_age_str
                 }
-             }' raw-report.txt | sort -r)
+             }' raw-report.txt trivy-firstseen-report.txt | sort -r)
 
              # --- CONSTRUCT DASHBOARD ---
              {
@@ -471,10 +497,10 @@ jobs:
                echo -e "• *Medium:* 🟡 \`$MED_T\`  |  *Low:* 🔵 \`$LOW_T\`"
                echo -e "• *Other (Unknown/Negligible):* ⚪ \`$OTHER_T\`"
                echo -e "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
-               echo -e "*🔎 FINDINGS BREAKDOWN:* _(OT = Unknown/Negligible severity)_"
+               echo -e "*🔎 FINDINGS BREAKDOWN:* _(OT = Unknown/Negligible severity; CR-AGE/HI-AGE = oldest days tracked in our scans, Trivy-sourced)_"
                echo -e "\`\`\`"
-               echo -e "ST  $(printf '%-40s' 'INTEGRATION') | CR | HI | ME | LO | OT | TOT"
-               echo -e "--- $(printf '%-40s' '' | tr ' ' '-') | -- | -- | -- | -- | -- | ---"
+               echo -e "ST  $(printf '%-40s' 'INTEGRATION') | CR | HI | ME | LO | OT | TOT | CR-AGE | HI-AGE"
+               echo -e "--- $(printf '%-40s' '' | tr ' ' '-') | -- | -- | -- | -- | -- | --- | ------ | ------"
                echo -e "$AGGREGATED_TABLE"
                echo -e "\`\`\`"
                echo -e "🔗 _Please find the GitHub Actions workflow run for more details:_"
@@ -516,21 +542,10 @@ jobs:
           echo ""
           echo "=========================================="
 
-      - name: Send Slack notification
+      - name: Send Slack notification (Trivy, Grype & Age)
         uses: slackapi/slack-github-action@v1.27.1
         with:
           channel-id: ${{ secrets.COREINT_SLACK_CHANNEL }}
-          payload: |
-            {
-              "text": ${{ toJSON(steps.format_message.outputs.SLACK_MESSAGE) }}
-            }
-        env:
-          SLACK_BOT_TOKEN: ${{ secrets.COREINT_SLACK_TOKEN }}
-
-      - name: Send Slack notification (Trivy & Grype)
-        uses: slackapi/slack-github-action@v1.26.0
-        with:
-          channel-id: ${{ secrets.OHAI_SLACK_CHANNEL_ID }}
           payload: |
             {
               "text": ${{ toJSON(steps.format_combined_message.outputs.COMBINED_SLACK_MESSAGE) }}
