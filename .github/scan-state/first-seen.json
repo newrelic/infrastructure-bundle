@@ -1,5 +1,4 @@
 {
-  "nri-discovery-kubernetes|CVE-2026-78661": "2026-11-07",
   "nri-kafka|CVE-2026-78661": "2026-11-07",
   "nri-mssql|CVE-2026-78661": "2026-11-07",
   "nri-prometheus|CVE-2026-78661": "2026-11-07"
