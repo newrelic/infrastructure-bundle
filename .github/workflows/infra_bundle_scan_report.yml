@@ -543,7 +543,7 @@ jobs:
           echo "=========================================="
 
       - name: Send Slack notification (Trivy, Grype & Age)
-        uses: slackapi/slack-github-action@v1.27.1
+        uses: slackapi/slack-github-action@v4.0.0
         with:
           channel-id: ${{ secrets.COREINT_SLACK_CHANNEL }}
           payload: |
