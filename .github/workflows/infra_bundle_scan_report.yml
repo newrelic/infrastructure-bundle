@@ -196,9 +196,9 @@ jobs:
       # Advisories published on a project's own GitHub repo often never reach the feeds Grype and Trivy read.
       - name: Check GitHub Repo Advisories
         continue-on-error: true
+        timeout-minutes: 10
         run: |
-          : > repo-advisories.txt
-          python3 .github/scripts/repo-advisories.py repo-advisories.txt \
+          python3 .github/scripts/repo-advisories.py repo-advisories.txt unfixed-repo-advisories.txt \
             --sbom sbom-bundle.syft.json sbom-k8s-events.syft.json sbom-nri-forwarder.syft.json \
             --grype grype-report.json grype-k8s-events-forwarder.json grype-nri-forwarder.json
         env:
@@ -207,12 +207,10 @@ jobs:
       - name: Merge Reports
         run: |
           # Every report uses the format: Target | Pkg | CVE | Severity | Fixed
-          touch repo-advisories.txt
+          touch repo-advisories.txt unfixed-repo-advisories.txt
           cat trivy-report.txt grype-report.txt trivy-k8s-events-forwarder.txt grype-k8s-events-forwarder.txt trivy-nri-forwarder.txt grype-nri-forwarder.txt repo-advisories.txt > combined-raw.txt
-          # Unfixed findings, most severe first
-          cat grype-unfixed-*.txt | sort -u \
-            | awk -F' [|] ' '{ r = ($4 == "CRITICAL") ? 0 : ($4 == "HIGH") ? 1 : ($4 == "MEDIUM") ? 2 : 3; print r "\t" $0 }' \
-            | sort -s -k1,1n | cut -f2- > unfixed-report.txt
+          # Findings without a fix, kept out of the totals
+          cat grype-unfixed-*.txt unfixed-repo-advisories.txt | sort -u > unfixed-report.txt
           
           # Clean up the paths and de-duplicate unique CVEs per integration
           # Strategy:
@@ -457,30 +455,7 @@ jobs:
              UNIQUE_INT_COUNT=${UNIQUE_INT_COUNT:-0}
 
              # --- LOGIC: PER-INTEGRATION AGGREGATION ---
-             AGGREGATED_TABLE=$(awk -F'|' '
-             {
-                name = $1;
-                gsub(/.*\//, "", name); gsub(/ /, "", name);
-                sev = $4; gsub(/ /, "", sev);
-
-                ints[name]++;
-                if (sev == "CRITICAL") crit[name]++;
-                else if (sev == "HIGH") high[name]++;
-                else if (sev == "MEDIUM") med[name]++;
-                else if (sev == "LOW") low[name]++;
-                else other[name]++;
-             }
-             END {
-                for (i in ints) {
-                   if (crit[i] > 0) icon = "🔴";
-                   else if (high[i] > 0) icon = "🟠";
-                   else if (med[i] > 0) icon = "🟡";
-                   else if (low[i] > 0) icon = "🔵";
-                   else icon = "⚪";
-                   row_tot = (crit[i]+0) + (high[i]+0) + (med[i]+0) + (low[i]+0) + (other[i]+0);
-                   printf "%s %-40s | %2d | %2d | %2d | %2d | %2d | %3d\n", icon, i, crit[i], high[i], med[i], low[i], other[i], row_tot
-                }
-             }' raw-report.txt | sort -r)
+             FINDINGS_TABLE=$(awk -F'|' -v title=INTEGRATION -v col=1 -v basename=1 -f .github/scripts/findings-table.awk raw-report.txt)
 
              # --- CONSTRUCT DASHBOARD ---
              {
@@ -494,18 +469,15 @@ jobs:
                echo -e "• *Medium:* 🟡 \`$MED_T\`  |  *Low:* 🔵 \`$LOW_T\`"
                echo -e "• *Other (Unknown/Negligible):* ⚪ \`$OTHER_T\`"
                echo -e "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
-               echo -e "*🔎 FINDINGS BREAKDOWN:* _(OT = Unknown/Negligible severity)_"
+               echo -e "*🔎 FINDINGS BREAKDOWN:* _(OT = Unknown/Negligible severity, worst first)_"
                echo -e "\`\`\`"
-               echo -e "ST  $(printf '%-40s' 'INTEGRATION') | CR | HI | ME | LO | OT | TOT"
-               echo -e "--- $(printf '%-40s' '' | tr ' ' '-') | -- | -- | -- | -- | -- | ---"
-               echo -e "$AGGREGATED_TABLE"
+               echo "$FINDINGS_TABLE"
                echo -e "\`\`\`"
                if [ -s unfixed-report.txt ]; then
-                 echo -e "*⏳ NO FIX AVAILABLE YET* _(not counted above)_ | Critical: \`$(grep -c '| CRITICAL$' unfixed-report.txt || true)\`  High: \`$(grep -c '| HIGH$' unfixed-report.txt || true)\`  Medium: \`$(grep -c '| MEDIUM$' unfixed-report.txt || true)\`  Low: \`$(grep -c '| LOW$' unfixed-report.txt || true)\`"
+                 echo -e "\n*⏳ NO KNOWN FIX* _(not counted above)_"
+                 echo -e "• *Critical:* 🔴 \`$(grep -c '| CRITICAL$' unfixed-report.txt || true)\`  |  *High:* 🟠 \`$(grep -c '| HIGH$' unfixed-report.txt || true)\`  |  *Medium:* 🟡 \`$(grep -c '| MEDIUM$' unfixed-report.txt || true)\`  |  *Low:* 🔵 \`$(grep -c '| LOW$' unfixed-report.txt || true)\`"
                  echo -e "\`\`\`"
-                 head -n 15 unfixed-report.txt
-                 UNFIXED_TOTAL=$(wc -l < unfixed-report.txt | tr -d ' ')
-                 [ "$UNFIXED_TOTAL" -gt 15 ] && echo "... and $((UNFIXED_TOTAL - 15)) more, see the workflow run"
+                 awk -F'|' -v title=PACKAGE -v col=2 -v heading=1 -v max=15 -f .github/scripts/findings-table.awk unfixed-report.txt
                  echo -e "\`\`\`"
                fi
                echo -e "🔗 _Please find the GitHub Actions workflow run for more details:_"
