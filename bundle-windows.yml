@@ -1,6 +1,6 @@
 # Version of the base agent image to use (`newrelic/infrastructure`).
 # This is used by the `docker-build-windows.sh` wrapper if AGENT_VERSION is not set
-agentVersion: 2.0.1
+agentVersion: 2.0.2
 
 # url, stagingUrl, and repo fields are compiled as templates. The `trimv` helper function can be used to remove the leading v
 # from a version string.
@@ -24,7 +24,7 @@ testFiles:
 # Individual entries may override any of the values defined above.
 integrations:
   - name: nri-discovery-kubernetes
-    version: v1.15.5
+    version: v1.15.6
     subpath: var/db/newrelic-infra
     testFiles:
       - /var/db/newrelic-infra/nri-discovery-kubernetes.exe

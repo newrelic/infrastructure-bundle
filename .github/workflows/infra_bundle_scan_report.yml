@@ -422,7 +422,14 @@ jobs:
         run: |
           # 1. Clean the combined report (original logic)
           sed -i '/^[[:space:]]*$/d' raw-report.txt
-          
+
+          # trivy-firstseen-report.txt is built in "Format Slack Message" above, but that
+          # step only creates it inside its own "if [ -s trivy-only-report.txt ]" branch,
+          # so it won't exist at all when there are zero Trivy CRITICAL/HIGH findings.
+          # touch is a no-op if it already exists (doesn't truncate), and guarantees the
+          # awk join below always has a file to read.
+          touch trivy-firstseen-report.txt
+
           if [ -s raw-report.txt ]; then
              # --- LOGIC: GLOBAL COUNTS (Strictly Cleaned) ---
              # Count severity levels from the severity column (exact match, same rule as the
@@ -455,7 +462,10 @@ jobs:
              UNIQUE_INT_COUNT=${UNIQUE_INT_COUNT:-0}
 
              # --- LOGIC: PER-INTEGRATION AGGREGATION ---
-             FINDINGS_TABLE=$(awk -F'|' -v title=INTEGRATION -v col=1 -v basename=1 -f .github/scripts/findings-table.awk raw-report.txt)
+             # Oldest CRITICAL/HIGH age per integration comes from trivy-firstseen-report.txt
+             # (Trivy-sourced only; Grype has no bearing on age tracking). Counts and severity mix
+             # come from raw-report.txt (Trivy + Grype + repo advisories combined).
+             FINDINGS_TABLE=$(awk -F'|' -v title=INTEGRATION -v col=1 -v basename=1 -v agefile=trivy-firstseen-report.txt -f .github/scripts/findings-table.awk raw-report.txt trivy-firstseen-report.txt)
 
              # --- CONSTRUCT DASHBOARD ---
              {
@@ -469,7 +479,7 @@ jobs:
                echo -e "• *Medium:* 🟡 \`$MED_T\`  |  *Low:* 🔵 \`$LOW_T\`"
                echo -e "• *Other (Unknown/Negligible):* ⚪ \`$OTHER_T\`"
                echo -e "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
-               echo -e "*🔎 FINDINGS BREAKDOWN:* _(OT = Unknown/Negligible severity, worst first)_"
+               echo -e "*🔎 FINDINGS BREAKDOWN:* _(OT = Unknown/Negligible severity; CR-AGE/HI-AGE = oldest days tracked in our scans, Trivy-sourced; worst first)_"
                echo -e "\`\`\`"
                echo "$FINDINGS_TABLE"
                echo -e "\`\`\`"
@@ -525,21 +535,10 @@ jobs:
           echo ""
           echo "=========================================="
 
-      - name: Send Slack notification
+      - name: Send Slack notification (Trivy, Grype & Age)
         uses: slackapi/slack-github-action@v1.27.1
         with:
           channel-id: ${{ secrets.COREINT_SLACK_CHANNEL }}
-          payload: |
-            {
-              "text": ${{ toJSON(steps.format_message.outputs.SLACK_MESSAGE) }}
-            }
-        env:
-          SLACK_BOT_TOKEN: ${{ secrets.COREINT_SLACK_TOKEN }}
-
-      - name: Send Slack notification (Trivy & Grype)
-        uses: slackapi/slack-github-action@v1.26.0
-        with:
-          channel-id: ${{ secrets.OHAI_SLACK_CHANNEL_ID }}
           payload: |
             {
               "text": ${{ toJSON(steps.format_combined_message.outputs.COMBINED_SLACK_MESSAGE) }}

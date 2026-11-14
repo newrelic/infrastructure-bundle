@@ -1,4 +1,4 @@
-# Usage: awk -F'|' -v title=INTEGRATION -v col=1 [-v basename=1] [-v heading=1] [-v max=15] [-v maxids=2] -f findings-table.awk rows.txt
+# Usage: awk -F'|' -v title=INTEGRATION -v col=1 [-v basename=1] [-v heading=1] [-v max=15] [-v maxids=2] [-v agefile=ages.txt] -f findings-table.awk rows.txt [ages.txt]
 # Turns "x | x | id | SEVERITY | ..." rows into a monospace table for Slack: one line per group with its severity
 # counts and its worst finding ids. POSIX awk only (mawk, BSD awk).
 #   col      column that names the group (default 1)
@@ -6,6 +6,8 @@
 #   heading  column printed as a sub-heading above its groups when it has more than one value, 0 for none (default)
 #   max      show only the worst <max> groups and count the rest, 0 for all (default)
 #   maxids   ids listed per group, worst first, then "+N more" (default 2)
+#   agefile  name of a second input with "name|id|SEVERITY|days" rows; adds CR-AGE and HI-AGE columns with the oldest
+#            CRITICAL and HIGH age per group (names there have no spaces, as in trivy-firstseen-report.txt)
 
 function trim(s) { gsub(/^ +| +$/, "", s); return s }
 function rank(sev) { return sev == "CRITICAL" ? 0 : sev == "HIGH" ? 1 : sev == "MEDIUM" ? 2 : sev == "LOW" ? 3 : 4 }
@@ -15,6 +17,13 @@ BEGIN {
     if (!col) col = 1
     if (!maxids) maxids = 2
     if (title == "") title = "NAME"
+}
+
+agefile != "" && FILENAME == agefile {
+    key = trim($1); gsub(/ /, "", key)
+    if (trim($3) == "CRITICAL" && (!(key in crit_age) || $4 + 0 > crit_age[key])) crit_age[key] = $4 + 0
+    if (trim($3) == "HIGH" && (!(key in high_age) || $4 + 0 > high_age[key])) high_age[key] = $4 + 0
+    next
 }
 
 {
@@ -61,14 +70,19 @@ END {
         if (length(cell[g]) > idw) idw = length(cell[g])
     }
 
-    printf "ST  %-" namew "s | CR | HI | ME | LO | OT | TOT | CVEs\n", title
-    print "--- " dashes(namew) " | -- | -- | -- | -- | -- | --- | " dashes(idw)
+    printf "ST  %-" namew "s | CR | HI | ME | LO | OT | TOT%s | CVEs\n", title, agefile != "" ? " | CR-AGE | HI-AGE" : ""
+    print "--- " dashes(namew) " | -- | -- | -- | -- | -- | ---" (agefile != "" ? " | ------ | ------" : "") " | " dashes(idw)
     for (i = 1; i <= shown; i++) {
         g = order[i]
         if (heads > 1 && head_of[g] != last_head) { print "[" head_of[g] "]"; last_head = head_of[g] }
         c0 = sev_count[g, 0] + 0; c1 = sev_count[g, 1] + 0; c2 = sev_count[g, 2] + 0; c3 = sev_count[g, 3] + 0; c4 = sev_count[g, 4] + 0
         icon = c0 ? "🔴" : c1 ? "🟠" : c2 ? "🟡" : c3 ? "🔵" : "⚪"
-        printf "%s  %-" namew "s | %2d | %2d | %2d | %2d | %2d | %3d | %s\n", icon, name_of[g], c0, c1, c2, c3, c4, count_of_group[g], cell[g]
+        ages = ""
+        if (agefile != "") {
+            key = name_of[g]; gsub(/ /, "", key)
+            ages = sprintf(" | %6s | %6s", (key in crit_age) ? crit_age[key] : "-", (key in high_age) ? high_age[key] : "-")
+        }
+        printf "%s  %-" namew "s | %2d | %2d | %2d | %2d | %2d | %3d%s | %s\n", icon, name_of[g], c0, c1, c2, c3, c4, count_of_group[g], ages, cell[g]
     }
     if (shown < n) printf "... and %d more, see the workflow run\n", n - shown
 }
