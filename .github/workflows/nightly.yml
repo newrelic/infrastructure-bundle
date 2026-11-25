@@ -14,7 +14,7 @@ permissions:
 jobs:
   nightly:
     name: Nightly standard build
-    uses: newrelic/coreint-automation/.github/workflows/reusable_nightly.yaml@v3
+    uses: newrelic/coreint-automation/.github/workflows/reusable_nightly.yaml@v4
     secrets:
       docker_username: ${{ secrets.OHAI_DOCKER_HUB_ID }}
       docker_password: ${{ secrets.OHAI_DOCKER_HUB_PASSWORD }}
@@ -37,7 +37,7 @@ jobs:
   
   nightly-fips:
     name: Nightly FIPS build
-    uses: newrelic/coreint-automation/.github/workflows/reusable_nightly.yaml@v3
+    uses: newrelic/coreint-automation/.github/workflows/reusable_nightly.yaml@v4
     secrets:
       docker_username: ${{ secrets.OHAI_DOCKER_HUB_ID }}
       docker_password: ${{ secrets.OHAI_DOCKER_HUB_PASSWORD }}
